@@ -27,15 +27,31 @@ class Api extends REST_Controller
 		parent::__construct();
 		
 		$this->__getExposedObjs();
-			
+		
+		$this->loadSparks();
+		
 		$this->__getMyMethods();
 	}
 
-	protected function __getExposedObjs()
+	public function __getExposedObjs()
 	{
 		$exposedObjects = $this->config->item('exposeObj');
 		
 		if(!empty($exposedObjects)) $this->exposedObjects = $exposedObjects;
+	}
+	
+	private function loadSparks()
+	{
+		if(!empty($this->exposedObjects))
+		{
+			foreach ($this->exposedObjects as $item => $value) {
+				if(preg_match('/\//i', $value))
+				{
+					$this->load->spark($value);
+				}
+			}
+			
+		}
 	}
 	
 	/**
@@ -49,7 +65,7 @@ class Api extends REST_Controller
 		{
 			$obj = $this;
 		} else {
-			if($this->remoteObject($object, array()))
+			if($this->remoteObject($object))
 			{
 				$obj = $this->$object;
 			} else {
@@ -128,7 +144,7 @@ class Api extends REST_Controller
 		} else {
 			$this->builtInMethods[$object] = $builtInMethods;
 		}
-		$a = '1';
+		
 		return true;
 	}
 
@@ -160,10 +176,13 @@ class Api extends REST_Controller
 		//let's document the given Object methods
 		if(!empty($input['object']))
 		{
+			//make the analysis
 			$this->__getMyMethods($input['object']);
+						
+			//return the methods
+			$this->response($this->builtInMethods, 200);
 		}
 		
-		$this->response($this->builtInMethods, 200); // 200 being the HTTP response code
 	}
 
 	/**
@@ -180,6 +199,7 @@ class Api extends REST_Controller
 			return preg_replace("[^A-Za-z0-9]", "", $string);
 		}
 	}
+	
 	
 	/**
 	 * 
@@ -215,40 +235,50 @@ class Api extends REST_Controller
 			return;
 		}
 
-		// => it's required to expose an object
+		// => it's required to expose the object
 		$model = $this->__cleanString($this->uri->segment(3,false));
 		$calledMethod = $this->__cleanString($this->uri->segment(4,false));
 		$format = $this->__cleanString($this->uri->segment(6,'xml'));  //default is xml
 		
 		if($model and $calledMethod) $this->remoteObject($model, $calledMethod, $this->getInput());
 	}
-
+	
 	/**
 	 * 
-	 * This is the core of RestIgniter. Takes the object and via reflection exposes its method over REST
+	 * Discovers and load the object to expose over REST
+	 * @param string $model The name of the object class
+	 * @return boolean
+	 */
+	private function loadObject($model)
+	{
+		//looks like there is no better way to check if a model exists. Check this:
+		//http://stackoverflow.com/questions/7017810/php-and-codeigniter-how-do-you-check-if-a-model-exists-and-or-not-throw-an-error
+		if(isset($this->exposedObjects[$model]) & file_exists(APPPATH."models/$model.php"))	
+		{
+			$this->load->model($model);
+			return true;
+		}
+
+		//it might be an object contained in a spark but then it should be already loaded by the autoload file. Let's check
+		return is_object($this->$model) ? true : false; 
+	}
+	
+	/**
+	 * 
+	 * This is the core of RestIgniter. 
+	 * Loads the requested object and via reflection exposes the requested method over REST.
+	 * If the method doesn't exist for the object return an error
+	 * If the method is not specified returns true
+	 * 
 	 * @param string $model
 	 * @param string $calledMethod
 	 * @param array $input
 	 */
-	private function remoteObject($model,$calledMethod,$input=array())
+	private function remoteObject($model, $calledMethod, $input=array())
 	{
 		if(!empty($model) and is_array($model)) return false;
 		
-		//looks like there is no better way to check if a model exists. Check this:
-		//http://stackoverflow.com/questions/7017810/php-and-codeigniter-how-do-you-check-if-a-model-exists-and-or-not-throw-an-erro
-		if(file_exists(APPPATH."models/$model.php"))
-		{
-			if(isset($this->exposedObjects[$model])) $this->load->model($model);
-		}
-		else{
-			//let's see if it's a spark
-			if(isset($this->exposedObjects[$model]))
-			{
-				$this->load->spark($this->exposedObjects[$model]);
-			} else {
-				return false; //no model found
-			}
-		}			
+		if(!$this->loadObject($model)) return false; // TODO maybe this might be more meaninful than just false
 			
 		//Using reflection to get the class methods
 		$reflection = new ReflectionClass($this->$model);
@@ -256,10 +286,11 @@ class Api extends REST_Controller
 		//get all methods
 		$methods = $reflection->getMethods();
 
-		//get properties for each method
+		//call the object method and return via REST
 		if(!empty($methods))
 		{
-			foreach ($methods as $method) {
+			foreach ($methods as $method) 
+			{
 				if(!empty($method->name))
 				{
 					$methodProp = new ReflectionMethod($this->$model, $method->name);
@@ -269,31 +300,35 @@ class Api extends REST_Controller
 						// passes the input to the called method of the exposed object
 						if(!preg_match('/^_/', $method->name, $matches))
 						{
-							if($method->name == $calledMethod)
+							$method_short_name = strstr($method->name, '_',true); //remove _get _post _delete _update if present
+							$method_name = $method->name;
+							if($method_short_name == $calledMethod)
 							{							
 								$data = array();
 		
-								$data = $this->$model->$calledMethod($input);
+								$data = $this->$model->$method_name($input);
 														
 								if($data)
 								{
 									if(!is_array($data)) $data = (array) $data;
 									$this->response($data, 200);
-									return TRUE;
+									return;
 								} else {
 									// TODO this can be done much better and be more meaningful
 									$this->response(array('error' => 'Something went wrong'), 400);
-									return FALSE;
+									return;
 								}
 							}
 						}
-					}
-					if(!empty($calledMethod))
-					{
-						$this->response(array('error' => 'The object '.$model.' has no public method called '.$calledMethod), 404);
-					}			
+					}		
 				}
 			}
+			
+			//if we are still here than a wrong method has been passed
+			if(!empty($calledMethod))
+			{
+				$this->response(array('error' => 'The object '.$model.' has no public method called '.$calledMethod), 404);
+			}			
 		}
 		return true;
 	}
