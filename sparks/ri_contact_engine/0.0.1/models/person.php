@@ -8,7 +8,7 @@ class Person extends ObjectCommon
 		parent::__construct();
 		
 		// Person configuration
-		$this->load->config('person');
+		//$this->load->config('person');
 		$this->conf = $this->config->item('person');
 		$this->baseDn = $this->conf['baseDn'];
 
@@ -19,7 +19,12 @@ class Person extends ObjectCommon
 	}
 
 	public function __destruct() {
-		parent::__construct();
+		parent::__destruct();
+	}
+	
+	public function delme()
+	{
+		return 'ciao';
 	}
 	
 	// ================================= CRUD ================================

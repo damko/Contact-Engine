@@ -263,7 +263,7 @@ $config['rest_ajax_only'] = FALSE;
  |--------------------------------------------------------------------------
  |
  */
-$config['rest_server']	= 'http://restigniter/index.php/api/';
+$config['rest_server']	= 'http://ce_github/index.php/api/';
 //$config['rest_server']	= site_url('api').'/';   //don't forget the trailing slash
 
 

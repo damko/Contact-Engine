@@ -1,3 +1,7 @@
-RestIgniter
+Contact Engine
 
-Rest Igniter is Code Igniter (stable version 2.0.3) plus Sparks and Rest support. In addiction, its aim is to allow an easy share of php objects over REST. 
+It's a RESTful application based on RestIgniter meant to handle info about People, Organizations, Locations and the relationships between the three objects.
+
+The backend is LDAP and natively supports master-slave infrastructure.
+
+The properties of the 3 objects are automatically set by parsing the ldap schema, so adding a new attribute to the schema gives a new attribute to the object.  

@@ -86,9 +86,7 @@ This is the code contained in the controller file <?php echo $filename;?>:
 <?php $filename = 'application/controllers/ex_rest_client2.php'; ?>
 This is the code contained in the controller file <?php echo $filename;?>:
 <p>
-<?php 
-	highlight_file($filename);
-?>
+<?php highlight_file($filename); ?>
 </p>
 
 

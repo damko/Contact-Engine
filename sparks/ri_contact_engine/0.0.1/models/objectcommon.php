@@ -11,6 +11,10 @@ class ObjectCommon extends CI_Model
 		parent::__construct();
 	}
 	
+	public function __destruct() {
+		parent::__destruct();
+	}
+		
 	protected function loadAttrs($object_class) {
 		$period = NULL;
 		if(!empty($this->conf['refreshPeriod'])) $period = $this->conf['refreshPeriod'];

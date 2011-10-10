@@ -16,7 +16,7 @@ class Ldap extends CI_Model {
 		parent::__construct();
 		
 		//loading the configuration about the LDAP servers
-		$this->load->config('ldap');
+		//$this->load->config('ldap');
 		
 		log_message('debug', 'Ldap class has been loaded');
 	}
