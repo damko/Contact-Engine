@@ -605,45 +605,39 @@ class Make_Tests extends CI_Controller {
 	
 	public function testDelete($loadview = true, $getInfo = false)
 	{		
+		//just to be sure that we have some records to delete
+		$this->testCreate_A(false,false);
+		
 		$data = array();
 		$data['testname'] = __FUNCTION__;
 		$data['object'] = 'Person';
-		$data['testdesc'] = 'Deletes all the persons matching the filter';
+		$data['testdesc'] = 'Deletes all the persons matching the filter with CI2 Rest_Client. Output: boolean';
 		
 		//first of all I get the uid array for the matching contacts
-		$data['url'] = site_url('/api/exposeObj/person/read/format/serialize');
+		$url = 'exposeObj/person/read';
+		$data['url'] = site_url($url);
 		$data['filter'] = '(givenName=*illy*)';
 		$data['attributes'] = array('uid');
 		
 		if($getInfo) return $data;
-		
-		$request = new HTTP_Request2($data['url']);
-		$request->setMethod(HTTP_Request2::METHOD_POST)
-		    ->addPostParameter('filter', $data['filter'])
-		    ->addPostParameter('emptyfields', false)
-		    ->addPostParameter('attributes', $data['attributes']);
-		    
-		$response = $request->send();
-		$data['response'] = unserialize($response->getBody());				
-		
+	
+		$data['response'] = $this->rest->post($url, $data, 'serialize');		
+		//if(isset())
 		
 		//now I delete the returned uids
-		$data['url'] = site_url('/api/exposeObj/person/delete/format/serialize');
+		$url = 'exposeObj/person/delete';
+		$data['url'] = site_url($url);
 		foreach ($data['response'] as $item => $value) {
 				if(isset($value['uid']['0'])) $uid = $value['uid']['0'];
-				if(isset($value['0'])) $uid = $value['0'];
-				$request = new HTTP_Request2($data['url']);
-				$request->setMethod(HTTP_Request2::METHOD_POST)
-					->addPostParameter('uid', $uid);	
+				$input = array('uid' => $uid);
+				$response = $this->rest->post($url, $input, 'serialize');
 				
-				$response = $request->send();
-				$data['response'] = unserialize($response->getBody());
 		}
 		
 		if($loadview) $this->load->view('tests_view',$data);
 						
 		//passed or failed
-		return empty($data['response']['error']) ? true: false;
+		empty($response['error'])? true : false; 
 	}			
 	
 	
@@ -907,46 +901,39 @@ class Make_Tests extends CI_Controller {
 	
 	public function testOrgDelete($loadview = true, $getInfo = false)
 	{		
+		$this->testOrgCreate(false,false);
+		
 		$data = array();
 		$data['testname'] = __FUNCTION__;
 		$data['object'] = 'Organization';
 		$data['testdesc'] = 'Deletes all the organizations matching the filter';		
 		
 		//first of all I get the oid array for the matching contacts
-		$data['url'] = site_url('/api/exposeObj/organization/read/format/serialize');
+		$url = 'exposeObj/organization/read';
+		$data['url'] = site_url($url);
 		$data['filter'] = '(o=ACME*)';
 		$data['attributes'] = array('oid');
-		
+				
 		if($getInfo) return $data;
 		
-		$request = new HTTP_Request2($data['url']);
-		$request->setMethod(HTTP_Request2::METHOD_POST)
-		    ->addPostParameter('filter', $data['filter'])
-		    ->addPostParameter('emptyfields', false)
-		    ->addPostParameter('attributes', $data['attributes']);
-		    
-		$response = $request->send();
-		$data['response'] = unserialize($response->getBody());				
-		
+		$data['response'] = $this->rest->post($url, $data, 'serialize');
+		//if(isset())
 		
 		//now I delete the returned oids
-		$data['url'] = site_url('/api/exposeObj/organization/delete/format/serialize');
+		$url = 'exposeObj/organization/delete';
+		$data['url'] = site_url($url);
 		foreach ($data['response'] as $item => $value) {
-				if(isset($value['oid'])) $oid = (string) $value['oid'];
-				//if(isset($value['0'])) $oid = $value['0'];
-				$request = new HTTP_Request2($data['url']);
-				$request->setMethod(HTTP_Request2::METHOD_POST)
-					->addPostParameter('oid', $oid);	
-				
-				$response = $request->send();
-				$data['response'] = unserialize($response->getBody());
+			if(isset($value['oid']['0'])) $oid = $value['oid']['0'];
+			$input = array('oid' => $oid);
+			$response = $this->rest->post($url, $input, 'serialize');
+		
 		}
 		
 		if($loadview) $this->load->view('tests_view',$data);
-										
+		
 		//passed or failed
-		return empty($data['response']['error']) ? true: false;
-	}				
+		empty($response['error'])? true : false;		
+	}			
 	
 	// ================ LOCATION TESTS ============================================================
 	
@@ -1229,44 +1216,44 @@ class Make_Tests extends CI_Controller {
 	
 	public function testLocDelete($loadview = true, $getInfo = false)
 	{		
+		$this->testLocCreate(false,false);
+		
 		$data = array();
 		$data['testname'] = __FUNCTION__;
 		$data['object'] = 'Location';
 		$data['testdesc'] = 'Deletes all the locations matching the filter';		
 		
 		//I get the locId array for the matching contacts
-		$data['url'] = site_url('/api/exposeObj/location/read/format/serialize');
+		$url = 'exposeObj/location/read';
+		$data['url'] = site_url($url);
 		$data['filter'] = '(locDescription=MyDescription*)';
 		$data['attributes'] = array('locId');
-		
+				
 		if($getInfo) return $data;
 		
-		$request = new HTTP_Request2($data['url']);
-		$request->setMethod(HTTP_Request2::METHOD_POST)
-		    ->addPostParameter('filter', $data['filter'])
-		    ->addPostParameter('emptyfields', false)
-		    ->addPostParameter('attributes', $data['attributes']);
-		    
-		$response = $request->send();
-		$data['response'] = unserialize($response->getBody());				
+		$data['response'] = $this->rest->post($url, $data, 'serialize');
 		
 		//now I delete the returned locIds
-		$data['url'] = site_url('/api/exposeObj/location/delete/format/serialize');
+		$url = 'exposeObj/location/delete';
+		$data['url'] = site_url($url);
 		foreach ($data['response'] as $item => $value) {
-				if(isset($value['locId']['0'])) $locId = (string) $value['locId']['0'];
-				//if(isset($value['0'])) $locId = $value['0'];
-				$request = new HTTP_Request2($data['url']);
-				$request->setMethod(HTTP_Request2::METHOD_POST)
-					->addPostParameter('locId', $locId);	
-				
-				$response = $request->send();
-				$data['response'] = unserialize($response->getBody());
+			if(isset($value['locId']['0'])) $locId = $value['locId']['0'];
+			$input = array('locId' => $locId);
+			$response = $this->rest->post($url, $input, 'serialize');
+		
 		}
 		
 		if($loadview) $this->load->view('tests_view',$data);
-												
+		
 		//passed or failed
-		return empty($data['response']['error']) ? true: false;
+//		empty($response['error'])? true : false;
+		if(empty($response['error']))
+		{
+			return true;		
+		} else {
+			return false;
+		}
+		 
 	}			
 	
 	// ================ RELATIONSHIP TESTS ============================================================	
