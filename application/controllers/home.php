@@ -17,19 +17,10 @@ class Home extends Dokumentor {
 
 	public function documentation()
 	{
- 		//load the rest client
-		$this->load->spark('restclient/2.0.0');
+		$data['methods_list'] = $this->displayAPI(array('person','organization','location'));	
 		
-		//set the server page in the client properties
-		$this->rest->initialize(array('server' => $this->config->item('rest_server')));
-
-		//perform the request
-		$methods_list['api'] = $this->rest->get('methods');
-		
-		$data['methods_list'] = methods_HTML($methods_list, 'api');
-		
-		$this->load->view('documentation',$data);	
+		$this->load->view('ce-documentation',$data);
 	}	
 }
 
-/* End of restigniter.php */
+/* End of home.php */

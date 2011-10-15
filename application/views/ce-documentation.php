@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>Contact Engine Tests</title>
+<title>Contact Engine Documentation</title>
 
 <style type="text/css">
 body {
@@ -40,6 +40,11 @@ code {
 	padding: 12px 10px 12px 10px;
 }
 
+dl {
+	margin-left: 30px;
+	background-color: #eee;
+}
+
 dt {
 	font-weight: bold;
 }
@@ -52,42 +57,35 @@ pre {
 	font-style: italic;
 	margin-left: 10px;
 	color: black;
-	background-color: #CCC;
+	background-color: #999;
 	padding: 6px;
-	font-size: 10px;
 }
 </style>
 </head>
 <body>
 
+<h1>Contact Engine documentation</h1>
 [<a href="<?php echo site_url(''); ?>">Home</a>]
-<h1>TEST PAGE</h1>
-<h2><?php echo(ucwords($testname)); ?></h2>
-<?php echo($testdesc); ?><br/><br/>
-Test made:<br/>
--> calling url: <?php echo($url); ?> <br/>
 
-<?php 
-	if(isset($filter)) { 
-		echo '-> sending filter: <b>'; 
-		print_r($filter);
-		if(isset($method)) echo '</b> via method: <b>'.$method.'</b>'; 
-		echo '<br/>'; 
-	} 
-?>
-<h3>Test result</h3>
-<?php 	
-    if(isset($attributes)) { 
-    	echo '-> Returned attributes: <b>'; 
-    	print_r($attributes); 
-    	echo'</b></br/>';
-    }
-    
-	if(isset($benchmark)) echo '<br/>Benchmark time: '.$benchmark; 
-	?>
+<h3>API public methods</h3>
+<p>This is a self generated list of the API public methods available at this URL: <a href="<?php echo site_url('api'); ?>" target="_blank"><?php echo site_url('api'); ?></a></p>
+<?php echo !empty($methods_list) ? $methods_list : 'No public methods available'; ?>
+You can see all the available methods for the REST server at this <a href="<?php echo site_url('api/methods')?>">URL</a>
+<hr />
+
+<h3>How to install</h3>
+<p>
+This will download the code to your /var/www/contactengine folder</p>
 <pre>
-	<?php print_r($response); ?>
-</pre><br/>
+cd /var/www/
+git clone https://damko@github.com/damko/Contact-Engine.git contactengine
+</pre>
+<p>
+Edit application/config/rest.php and edit the $config['rest_server'] changing the hostname accordingly to your needs.
+</p>
+
+
+<hr />
 [<a href="<?php echo site_url(''); ?>">Home</a>]
 </body>
 </html>

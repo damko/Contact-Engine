@@ -8,7 +8,7 @@ class Make_Tests extends CI_Controller {
 		require_once 'HTTP/Request2.php';
 		
 		// Load the configuration file
-		$this->load->config('rest');
+		//$this->load->config('rest');
 
 		// Load the rest client
 		$this->load->spark('restclient/2.0.0');

@@ -120,7 +120,7 @@ It's something like the opposite of an ORM. You can play with the 3 objects as y
 </div>
 <p>
 <b>Project mantra:</b> <i>One contact, one record.</i><br/>
-<b>Project mission:</b> <i>To make contacts unique data accessible from every application.</i>
+<b>Project mission:</b> <i>To make contacts data accessible from every application.</i>
 </p>
  
 </body>
