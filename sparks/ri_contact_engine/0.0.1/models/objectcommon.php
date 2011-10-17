@@ -58,8 +58,40 @@ class ObjectCommon extends CI_Model
 		return $output;
 	}
 	
-	private function unsetProperties()
-	{
+	public function read(array $input, $filter, $wanted_attributes, $sort_by,  $flow_order, $wanted_page, $items_page) {
+		
+		//checks
+		if(empty($filter)) return false;
+				
+		//perform the search
+		$ldap_result = $this->ri_ldap->CEsearch($this->baseDn, $filter, $wanted_attributes, 0, null, $sort_by,  $flow_order, $wanted_page, $items_page);
+		
+		//saving and removing info about the ldap query
+		//$info = array_pop($ldap_result);
+		if(!empty($ldap_result['RestStatus']))
+		{
+			$rest_status = $ldap_result['RestStatus'];
+			unset($ldap_result['RestStatus']);
+		} 
+		
+		//removing the count item
+		unset($ldap_result['count']);
+		
+		$output = array();
+		foreach ($ldap_result as $ldap_item) {
+			//TODO probably it would be wiser to return the whole result without parsing everysingle entry. Don't know yet
+			$this->bindLdapValuesWithClassProperties($ldap_item);
+			$output[] = $this->toRest($empty_fields);
+		}
+		
+		//adding saved info about the ldap query
+		//if(count($output)>0) $output[] = $info;
+		if(isset($rest_status)) $output['RestStatus'] = $rest_status;
+			
+		return $output;		
+	}	
+	
+	private function unsetProperties() {
 		foreach ($this->properties as $property => $value) {
 			unset($this->$property);
 		}

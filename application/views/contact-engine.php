@@ -112,6 +112,7 @@ It's something like the opposite of an ORM. You can play with the 3 objects as y
     		<!--  <li><a href="<?php echo site_url('rest_client'); ?>">Documentation</a></li>  -->
     		<li><a href="<?php echo site_url('home/documentation'); ?>">Documentation</a></li>
     		<li><a href="<?php echo site_url('make_tests'); ?>">Tests Page</a></li>
+    		<li><a href="<?php echo site_url('ce_tests'); ?>">Tests Page New</a></li>
     		<li><a href="https://github.com/damko/Contact-Engine/wiki/How-to-install" target="_blank">How to install</a></li>
     	</ul>
     	
