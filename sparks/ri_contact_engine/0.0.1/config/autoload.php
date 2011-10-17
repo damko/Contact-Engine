@@ -6,4 +6,4 @@ $autoload['config'] = array('person', 'organization', 'location');
 $autoload['libraries'] = array('ce');
 
 # Load a contact-engine model
-$autoload['model'] = array('objectcommon', 'person', 'organization', 'location');
+$autoload['model'] = array('objectcommon', 'person', 'organization', 'location', 'contact');

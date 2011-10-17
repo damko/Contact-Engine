@@ -11,6 +11,7 @@ class Person extends ObjectCommon
 		//$this->load->config('person');
 		$this->conf = $this->config->item('person');
 		$this->baseDn = $this->conf['baseDn'];
+		$this->obj = 'person';
 
 		// Get the class Person properties reading them from the LDAP schema
 		$this->loadAttrs($this->conf['objectClass']);

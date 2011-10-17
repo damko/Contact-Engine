@@ -11,7 +11,8 @@ class Organization extends ObjectCommon
 		$this->load->config('organization');
 		$this->conf = $this->config->item('organization');
 		$this->baseDn = $this->conf['baseDn'];
-
+		$this->obj = 'organization';
+		
 		// Get the class Organization properties reading them from the LDAP schema
 		$this->loadAttrs($this->conf['objectClass']);
 				
@@ -19,7 +20,7 @@ class Organization extends ObjectCommon
 	}
 
 	public function __destruct() {
-		parent::__construct();
+		parent::__destruct();
 	}
 
 	

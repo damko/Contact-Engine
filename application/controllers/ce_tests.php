@@ -10,7 +10,7 @@ class Ce_Tests extends Test_Controller {
 		parent::__construct();
 		
 		//false = no rest output printed
-		$this->show_rest_return = true;
+		$this->show_rest_return = false;
 		
 /* 		//set up a new template for the tests output
 		$this->unit->set_test_items(array('test_name', 'result'));
@@ -291,6 +291,35 @@ class Ce_Tests extends Test_Controller {
 		
 		//check status code == 400
 		$this->check400($method, $rest_return);
+		
+		$this->printReturn($rest_return);		
+		
+		
+		
+		//--------------------------------------------------------
+		// CONTACT
+		//--------------------------------------------------------
+		$this->rest->initialize(array('server' => $this->config->item('rest_server').'/exposeObj/contact/'));
+		
+		//########################################
+		// READ
+		//########################################
+		//calling the methon READ for object contact with a filter
+		$this->testTitle('Testing CONTACT: get a contact using this filter: (|(givenName=Willy*)(o=A*))');
+		$method = 'read';
+		$input = array();
+		$input['filter'] = '(|(givenName=Willy*)(o=A*))';
+		
+		$rest_return = $this->rest->get($method, $input, 'serialize');
+		
+		//check to get an array as a return
+		$this->arrayReturn($method, $rest_return);
+		
+		//the filter has not been specified then it should return an error
+		$this->checkNoRestError($method, $rest_return);
+		
+		//check status code == 200
+		$this->check200($method, $rest_return);
 		
 		$this->printReturn($rest_return);		
 	}

@@ -19,7 +19,7 @@ class Location extends ObjectCommon
 	}
 
 	public function __destruct() {
-		parent::__construct();
+		parent::__destruct();
 	}
 
 	
