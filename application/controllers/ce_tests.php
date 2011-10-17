@@ -83,6 +83,7 @@ class Ce_Tests extends Test_Controller {
 		$this->printReturn($rest_return);
 		
 		//----------------------
+		
 		//calling the methon READ for object person with a filter
 		$this->testTitle('Test: read person entries','Sending a request with "filter". I expect to get all persons in the storage');
 		$method = 'read';
@@ -99,6 +100,27 @@ class Ce_Tests extends Test_Controller {
 		$this->check200($method, $rest_return);
 		
 		$this->printReturn($rest_return);
+
+		//----------------------
+		
+		//delete a non-existant person
+		$this->testTitle('Test: read a non-existant person');
+		$method = 'read';
+		$input = array();
+		$input['filter'] = '(uid=1293813238g9238479832)';
+		
+		$rest_return = $this->rest->get($method, $input, 'serialize');
+		
+		//check to get an array as a return
+		$this->arrayReturn($method, $rest_return);
+		
+		//the filter has not been specified then it should return an error
+		$this->checkRestError($method, $rest_return);
+		
+		//check status code == 400
+		$this->check400($method, $rest_return);
+		
+		$this->printReturn($rest_return);		
 
 		//########################################
 		// CREATE
@@ -267,7 +289,7 @@ class Ce_Tests extends Test_Controller {
 		//the filter has not been specified then it should return an error
 		$this->checkRestError($method, $rest_return);
 		
-		//check status code == 200
+		//check status code == 400
 		$this->check400($method, $rest_return);
 		
 		$this->printReturn($rest_return);		
