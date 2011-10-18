@@ -1,6 +1,9 @@
 <?php  if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 // Created on Aug 26, 2011 by Damiano Venturin @ Squadra Informatica
 
+//THIS FILE IS HERE ONLY AS DOCUMENTATION - no more in use
+return;
+
 class Make_Tests extends CI_Controller {
 	public function __construct()
 	{

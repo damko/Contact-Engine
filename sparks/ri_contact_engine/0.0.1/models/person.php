@@ -171,8 +171,17 @@ class Person extends ObjectCommon
 	}
 	
 	public function associate(array $input) {
-		if(empty($input['to'])) return false;
-		if(empty($input['uid'])) return false;
+		if(empty($input['to'])) 
+		{
+			$data = array();
+			$data['error'] = 'Missing input "to". Possible values: organization, location';
+		}
+		
+		if(empty($input['uid'])) 
+		{
+			$data = array();
+			$data['error'] = 'Missing input "uid".';
+		}
 		
 		//we need to get a precise person not a set of people
 		unset($input['filter']);

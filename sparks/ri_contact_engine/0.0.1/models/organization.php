@@ -22,7 +22,6 @@ class Organization extends ObjectCommon
 	public function __destruct() {
 		parent::__destruct();
 	}
-
 	
 	// ================================= CRUD ================================
 	
@@ -93,34 +92,7 @@ class Organization extends ObjectCommon
 		
 		if(empty($filter)) return false;
 		
-		//perform the search
-		$ldap_result = $this->ri_ldap->CEsearch($this->baseDn,$filter,$wanted_attributes);
-		
-		//TODO refactoring needed here: person, location, organization use the same piece of code.
-		//ready to return the output
-		if($ldap_result['count'] == 1)
-		{
-			$this->bindLdapValuesWithClassProperties($ldap_result['0']);
-			return $this->toRest($empty_fields);
-		} else {
-			//the "dn" is always returned irrespectively of which attributes types are requested, so let's remove the first item in the array
-			unset($ldap_result['0']);
-
-			//saving and removing info about the ldap query
-			$info = array_pop($ldap_result);
-				
-			$output = array();
-			unset($ldap_result['count']);
-			foreach ($ldap_result as $ldap_item) {
-				$this->bindLdapValuesWithClassProperties($ldap_item);
-				$output[] = $this->toRest($empty_fields);
-			}
-			
-			//adding saved info about the ldap query
-			if(count($output)>0) $output[] = $info;
-				
-			return $output;
-		}
+		return parent::read($input, $filter, $wanted_attributes, $sort_by, $flow_order, $wanted_page, $items_page);
 	}
 
 	public function update(array $input)

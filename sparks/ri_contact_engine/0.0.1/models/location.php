@@ -47,6 +47,11 @@ class Location extends ObjectCommon
 		return true;
 	}
 		
+	private function getLocId()
+	{
+		return !empty($this->locId['0']) ? $this->locId['0'] : FALSE;
+	}
+		
 	public function create(array $input)
 	{
 		if(!$this->set_locId()) return false;
@@ -92,33 +97,7 @@ class Location extends ObjectCommon
 		
 		if(empty($filter)) return false;
 		
-		//perform the search
-		$ldap_result = $this->ri_ldap->CEsearch($this->baseDn,$filter,$wanted_attributes);
-		
-		//ready to return the output
-		if($ldap_result['count'] == 1)
-		{
-			$this->bindLdapValuesWithClassProperties($ldap_result['0']);
-			return $this->toRest($empty_fields);
-		} else {
-			//the "dn" is always returned irrespectively of which attributes types are requested, so let's remove the first item in the array
-			unset($ldap_result['0']);
-
-			//saving and removing info about the ldap query
-			$info = array_pop($ldap_result);
-							
-			$output = array();
-			unset($ldap_result['count']);
-			foreach ($ldap_result as $ldap_item) {
-				$this->bindLdapValuesWithClassProperties($ldap_item);
-				$output[] = $this->toRest($empty_fields);
-			}
-			
-			//adding saved info about the ldap query
-			if(count($output)>0) $output[] = $info;
-				
-			return $output;
-		}
+		return parent::read($input, $filter, $wanted_attributes, $sort_by, $flow_order, $wanted_page, $items_page);		
 	}
 
 	public function update(array $input)
@@ -136,7 +115,7 @@ class Location extends ObjectCommon
 		if(empty($this->locLatitude) or empty($this->locLongitude)) $this->getLatitudeLongitude();
 		
 		//save the entry on the LDAP server
-		$dn = 'locId='.$this->locId.','.$this->baseDn;
+		$dn = 'locId='.$this->getLocId().','.$this->baseDn;
 		$entry = $this->toRest(false);
 		unset($entry['locId']); //never mess with the id during an update cause it has to do with dn
 		return $this->ri_ldap->CEupdate($dn,$entry) ? $this->locId : false;
