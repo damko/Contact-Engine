@@ -1,6 +1,9 @@
 <?php  if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 // Created on Sep 9, 2011 by Damiano Venturin @ squadrainformatica.com
 
+$helper = FCPATH.'sparks/ri_contact_engine/0.0.1/helpers/ce_helper'.EXT;
+require_once $helper; //TODO shouldn't be enough the line in the autoload file? Looks like there is a bug in RI
+
 class ObjectCommon extends CI_Model
 {
 	protected $properties;
@@ -18,7 +21,12 @@ class ObjectCommon extends CI_Model
 		
 	protected function loadAttrs($object_class) {
 		$period = NULL;
-		if(!empty($this->conf['refreshPeriod'])) $period = $this->conf['refreshPeriod'];
+		if(!empty($this->conf['refreshPeriod'])) 
+		{
+			$period = $this->conf['refreshPeriod'];
+		} else {
+			$period = 86400; //1 day. after that the xml files will be refreshed
+		}
 		$this->ce->loadClassAttributes($object_class, &$this, '_initialize', $period);
 		log_message('debug', 'Contact class properties have been loaded');
 	}	
@@ -59,11 +67,23 @@ class ObjectCommon extends CI_Model
 		return $output;
 	}
 	
-	public function read(array $input, $filter, $wanted_attributes, $sort_by,  $flow_order, $wanted_page, $items_page) {
+	public function read(array $input) { //, $filter, $wanted_attributes, $sort_by,  $flow_order, $wanted_page, $items_page) {
 		
-		//checks
-		if(empty($filter)) return false;
+		$wanted_attributes = array();
+		
+		$pagination_settings = pagination_setup($input);
+		if(is_array($pagination_settings)) extract($pagination_settings);	
+
+		if(!empty($input['attributes']) and is_array($input['attributes'])) $wanted_attributes = $input['attributes'];
 				
+		//checks
+		if(empty($filter))
+		{
+			//TODO this should be a RI function handling the error
+			$return['error'] = 'Method "'.__FUNCTION__.'" requires a filter in input';
+			return $return;
+		}
+		
 		//perform the search
 		$ldap_result = $this->ri_ldap->CEsearch($this->baseDn, $filter, $wanted_attributes, 0, null, $sort_by,  $flow_order, $wanted_page, $items_page);
 		

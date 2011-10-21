@@ -84,7 +84,7 @@ class Person extends ObjectCommon
 	{	
 		$return = array();
 		
-		extract(&$input,$extract_type = EXTR_OVERWRITE);
+		//extract(&$input,$extract_type = EXTR_OVERWRITE); //FIXME why this doesn't work at all?
 		
 		if(!empty($input['filter'])) 
 		{
@@ -93,31 +93,8 @@ class Person extends ObjectCommon
 			if(!empty($input['uid'])) $filter = '(uid='.$input['uid'].')';
 			if(!empty($input['dbId'])) $filter = '(dbId='.$input['dbId'].')';
 		}
-		
-		//checks
-		if(empty($filter))
-		{
-			$return['error'] = 'Method "'.__FUNCTION__.'" requires a filter in input';
-			return $return;
-		}
-		 		
-		
-		$wanted_attributes = array();
-		if(!empty($input['attributes']) and is_array($input['attributes'])) 
-		{
-			$wanted_attributes = $input['attributes'];
-		} 
-		
-		//defaults
-		//who wants empty_fields in return has to specify it otherwise they will be skipped
-		isset($input['empty_fields']) ? $empty_fields = $input['empty_fields'] : $empty_fields = FALSE;
-		isset($input['sort_by']) ? $sort_by = $input['sort_by'] : $sort_by = NULL; //$sort_by = array('sn');
-		isset($input['flow_order']) ? $flow_order = $input['flow_order'] : $flow_order = 'asc';
-		isset($input['wanted_page']) ? $wanted_page = $input['wanted_page'] : $wanted_page = NULL;
-		isset($input['items_page']) ? $items_page = $input['items_page']  : $items_page = NULL;
-		
 				
-		return parent::read($input, $filter, $wanted_attributes, $sort_by, $flow_order, $wanted_page, $items_page);
+		return parent::read($input); //, $filter, $wanted_attributes, $sort_by, $flow_order, $wanted_page, $items_page);
 	}
 	
 	/**

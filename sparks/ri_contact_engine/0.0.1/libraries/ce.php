@@ -5,9 +5,7 @@ class Ce {
 	private $other_sub_attrs = array('single-value','desc','no-user-modification','max-length');
 	
 	public function __construct() {
-		//$CI =& get_instance();
-		//$CI->load->model('ldap');		
-		//$CI->load->model('ri_ldap');		
+	
 	}
 	
 	public function __destruct() {

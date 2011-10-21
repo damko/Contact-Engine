@@ -11,7 +11,7 @@ class Ce_Tests extends Test_Controller {
 		parent::__construct();
 		
 		//false = no rest output printed
-		$this->show_rest_return = false;
+		$this->show_rest_return = false; //TODO this must be set in the config somewhere
 		
 /* 		//set up a new template for the tests output
 		$this->unit->set_test_items(array('test_name', 'result'));
@@ -50,6 +50,7 @@ class Ce_Tests extends Test_Controller {
 	
 	public function testPerson()
 	{
+		$this->testPersonProperties();
 		$this->testPersonCreate();
 		$this->testPersonRead();
 		$this->testPersonUpdate();
@@ -392,6 +393,7 @@ class Ce_Tests extends Test_Controller {
 		
 	public function testOrganization()
 	{
+		$this->testOrganizationProperties();
 		$this->testOrganizationCreate();
 		$this->testOrganizationRead();
 		$this->testOrganizationUpdate();
@@ -620,6 +622,7 @@ class Ce_Tests extends Test_Controller {
 
 	public function testLocation()
 	{
+		$this->testLocationProperties();
 		$this->testLocationCreate();
 		$this->testLocationRead();
 		$this->testLocationUpdate();

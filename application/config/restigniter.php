@@ -13,7 +13,7 @@
  */
 
 $config['exposeObj'] = array(
-								'chartex' => 'chartex/0.0.1',
+								//'chartex' => 'chartex/0.0.1',
 								'ri_ldap' => 'ri_ldap/0.0.1',
 								'ri_contact_engine' => 'ri_contact_engine/0.0.1',								
 							);

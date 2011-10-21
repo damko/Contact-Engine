@@ -30,7 +30,7 @@ class Contact extends ObjectCommon
 		}
 		
 		$output = array();
-		$output['person'] = $this->person->read($input);
+		$output['person'] = $this->person->read($input); 
 		$output['organization'] =$this->organization->read($input);
 		
 		return $output;

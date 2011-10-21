@@ -2,6 +2,9 @@
 // Load the contact-engine config files when the spark is loaded
 $autoload['config'] = array('person', 'organization', 'location');
 
+# Load a contact-engine helpers
+$autoload['helpers'] = array('ce_helper');
+
 # Load a contact-engine library
 $autoload['libraries'] = array('ce');
 

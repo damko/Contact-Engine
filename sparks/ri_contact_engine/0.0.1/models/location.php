@@ -75,12 +75,13 @@ class Location extends ObjectCommon
 			if(!empty($input['dbId'])) $filter = '(dbId='.$input['dbId'].')';
 		}
 		
-		$wanted_attributes = array();
-		if(!empty($input['attributes']) and is_array($input['attributes'])) 
-		{
-			$wanted_attributes = $input['attributes'];
-		} 
+// 		$wanted_attributes = array();
+// 		if(!empty($input['attributes']) and is_array($input['attributes'])) 
+// 		{
+// 			$wanted_attributes = $input['attributes'];
+// 		} 
 		
+		//TODO why this switch?
 		switch ($input['emptyfields']) {
 			case true:
 				$empty_fields = TRUE;
@@ -95,9 +96,9 @@ class Location extends ObjectCommon
 			break;
 		}		
 		
-		if(empty($filter)) return false;
+		//if(empty($filter)) return false;
 		
-		return parent::read($input, $filter, $wanted_attributes, $sort_by, $flow_order, $wanted_page, $items_page);		
+		return parent::read($input); //, $filter, $wanted_attributes, $sort_by, $flow_order, $wanted_page, $items_page);		
 	}
 
 	public function update(array $input)
