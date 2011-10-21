@@ -70,12 +70,6 @@ class Organization extends ObjectCommon
 			if(!empty($input['dbId'])) $filter = '(dbId='.$input['dbId'].')';
 		}
 		
-// 		$wanted_attributes = array();
-// 		if(!empty($input['attributes']) and is_array($input['attributes'])) 
-// 		{
-// 			$wanted_attributes = $input['attributes'];
-// 		} 
-		
 		//TODO why this switch?
 		switch ($input['emptyfields']) {
 			case true:

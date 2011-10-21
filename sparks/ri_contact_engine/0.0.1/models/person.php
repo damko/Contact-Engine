@@ -8,14 +8,13 @@ class Person extends ObjectCommon
 		parent::__construct();
 		
 		// Person configuration
-		//$this->load->config('person');
 		$this->conf = $this->config->item('person');
 		$this->baseDn = $this->conf['baseDn'];
-		$this->obj = 'person';
 
 		// Get the class Person properties reading them from the LDAP schema
 		$this->loadAttrs($this->conf['objectClass']);
-				
+		$this->obj = 'person';
+		
 		log_message('debug', 'Person class has been loaded');
 	}
 
@@ -93,7 +92,7 @@ class Person extends ObjectCommon
 			if(!empty($input['uid'])) $filter = '(uid='.$input['uid'].')';
 			if(!empty($input['dbId'])) $filter = '(dbId='.$input['dbId'].')';
 		}
-				
+		
 		return parent::read($input); //, $filter, $wanted_attributes, $sort_by, $flow_order, $wanted_page, $items_page);
 	}
 	

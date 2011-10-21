@@ -23,16 +23,27 @@ class Contact extends ObjectCommon
 	
 	public function read($input)
 	{
-		if(!is_array($input) || empty($input))
+		$data = array();
+		if(!is_array($input) || empty($input)) 
 		{
-			$data = array();
-			$data['error'] = 'The input should be a populated array';
+			$data['error'] = 'The input should be a populated array'; 
+		} else {
+			$people = $this->person->read($input);
+			$statuses[] = $people['RestStatus'];
+			unset($people['RestStatus']);
+			
+			$organizations = $this->organization->read($input);
+			$statuses[] = $organizations['RestStatus'];
+			unset($organizations['RestStatus']);
+			
+			$data = array_merge($people,$organizations);
+			foreach ($statuses['0'] as $key => $value) {
+				$statuses['0'][$key] = $value + $statuses['1'][$key];
+			}
+			$data['RestStatus'] = $statuses['0'];
 		}
 		
-		$output = array();
-		$output['person'] = $this->person->read($input); 
-		$output['organization'] =$this->organization->read($input);
 		
-		return $output;
+		return $data;
 	}
 }

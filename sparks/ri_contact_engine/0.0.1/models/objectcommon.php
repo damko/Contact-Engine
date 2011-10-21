@@ -9,7 +9,6 @@ class ObjectCommon extends CI_Model
 	protected $properties;
 	protected $baseDn;
 	public $conf;
-	protected $obj;
 		
 	public function __construct(){
 		parent::__construct();
@@ -21,12 +20,7 @@ class ObjectCommon extends CI_Model
 		
 	protected function loadAttrs($object_class) {
 		$period = NULL;
-		if(!empty($this->conf['refreshPeriod'])) 
-		{
-			$period = $this->conf['refreshPeriod'];
-		} else {
-			$period = 86400; //1 day. after that the xml files will be refreshed
-		}
+		if(!empty($this->conf['refreshPeriod'])) $period = $this->conf['refreshPeriod'];
 		$this->ce->loadClassAttributes($object_class, &$this, '_initialize', $period);
 		log_message('debug', 'Contact class properties have been loaded');
 	}	
@@ -100,13 +94,14 @@ class ObjectCommon extends CI_Model
 		
 		$output = array();
 		foreach ($ldap_result as $ldap_item) {
+			
 			//TODO probably it would be wiser to return the whole result without parsing everysingle entry. Don't know yet
 			$this->bindLdapValuesWithClassProperties($ldap_item);
+			
 			$output[] = $this->toRest($empty_fields);
 		}
 		
 		//adding saved info about the ldap query
-		//if(count($output)>0) $output[] = $info;
 		if(isset($rest_status)) $output['RestStatus'] = $rest_status;
 			
 		return $output;		
