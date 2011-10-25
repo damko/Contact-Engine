@@ -200,50 +200,6 @@ class Person extends ObjectCommon
 		unset($entry['uid']); //never mess with the id during an update cause it has to do with dn		
 		return $this->ri_ldap->CEupdate($dn,$entry) ? $this->getUid() : false;
 	}
-		
-	// ===================== EXAMPLES ===============================
-	
-	/**
-	 * 
-	 * A method meant to be used by the developer to try how it works
-	 * @param array $input
-	 */
-	public function exampleGetInfo(array $input)
-	{
-		if(empty($input['id'])) return FALSE;
-
-		$persons = array();
-		$persons[] = array(
-				'first_name' => 'John',
-				'last_name' => 'Doe',
-				'member_id' => '123435');
-
-		$persons[] = array(
-				'first_name' => 'Robert',
-				'last_name' => 'Doe',
-				'member_id' => '123435');
-
-		if(isset($persons[$input['id']])) return $persons[$input['id']];
-
-		return 'person not found';
-	}	
-	
-	/**
-	 * 
-	 * A method meant to be used by the developer to try how it works
-	 */
-	public function exampleSearchPersons() {
-		$persons[] = array(
-				'first_name' => 'John',
-				'last_name' => 'Doe',
-				'member_id' => '123435');
-
-		$persons[] = array(
-				'first_name' => 'Robert',
-				'last_name' => 'Doe',
-				'member_id' => '123435');
-		return $persons;
-	}	
 }
 
 /* End of person.php */

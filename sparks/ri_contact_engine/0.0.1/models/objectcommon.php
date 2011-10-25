@@ -10,7 +10,7 @@ class ObjectCommon extends CI_Model
 	protected $baseDn;
 	public $conf;
 		
-	public function __construct(){
+	public function __construct() {
 		parent::__construct();
 	}
 	
