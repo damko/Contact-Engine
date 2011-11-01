@@ -150,7 +150,7 @@ class ObjectCommon extends CI_Model
 				{
 					if($this->properties[$key]['required'] == 1) 
 					{
-						return false;
+						return false;   //TODO add something meaninful in the RestStatus
 					}
 				}
 			}
