@@ -38,9 +38,12 @@ class Contact extends ObjectCommon
 			
 			$data = array_merge($people,$organizations);
 			foreach ($statuses['0'] as $key => $value) {
-				$statuses['0'][$key] = $value + $statuses['1'][$key];
+				$statuses['final'][$key] = $value + $statuses['1'][$key];
 			}
-			$data['RestStatus'] = $statuses['0'];
+			!empty($statuses['0']['results_number']) ? $statuses['final']['result_number_people'] = $statuses['0']['results_number'] : $statuses['final']['result_number_people'] = 0;
+			!empty($statuses['1']['results_number']) ? $statuses['final']['result_number_orgs'] = $statuses['1']['results_number'] : $statuses['final']['result_number_orgs'] = 0;
+			
+			$data['RestStatus'] = $statuses['final'];
 		}
 		
 		
