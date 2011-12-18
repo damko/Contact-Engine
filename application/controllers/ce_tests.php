@@ -10,8 +10,13 @@ class Ce_Tests extends Test_Controller {
 	{
 		parent::__construct();
 		
-		//false = no rest output printed
-		$this->show_rest_return = true; //TODO this must be set in the config somewhere
+		$this->show_rest_return = false;
+		
+		if(isset($_GET['verbose']) && ($_GET['verbose'] == 'on'))
+		{
+			$this->show_rest_return = true; 
+		}
+	
 		
 /* 		//set up a new template for the tests output
 		$this->unit->set_test_items(array('test_name', 'result'));
