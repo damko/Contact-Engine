@@ -62,16 +62,18 @@ class Organization extends ObjectCommon
 	
 	public function read(array $input)
 	{	
+		extract(&$input,$extract_type = EXTR_OVERWRITE);
+		
 		if(!empty($input['filter'])) 
 		{
 			$filter = $input['filter'];
 		} else {
 			if(!empty($input['oid'])) $filter = '(oid='.$input['oid'].')';
-			if(!empty($input['dbId'])) $filter = '(dbId='.$input['dbId'].')';
+			if(!empty($input['dbId'])) $filter = '(dbId='.$input['dbId'].')'; //TODO maybe I can remove this
 		}
 		
 		//TODO why this switch?
-		switch ($input['emptyfields']) {
+/* 		switch ($input['emptyfields']) {
 			case true:
 				$empty_fields = TRUE;
 			break;
@@ -83,11 +85,17 @@ class Organization extends ObjectCommon
 			default:
 				$empty_fields = TRUE;
 			break;
-		}		
+		}		 */
 		
-		if(empty($filter)) return false;
+		$output = array();
+		$output['filter'] = $filter;
+		$output['wanted_attributes'] = $wanted_attributes;
+		$output['sort_by'] = $sort_by;
+		$output['flow_order'] = $flow_order;
+		$output['wanted_page'] = $wanted_page;
+		$output['items_page'] = $items_page;
 		
-		return parent::read($input); //, $filter, $wanted_attributes, $sort_by, $flow_order, $wanted_page, $items_page);
+		return parent::read($output);
 	}
 
 	public function update(array $input)
@@ -115,6 +123,55 @@ class Organization extends ObjectCommon
 		$dn = 'oid='.$input['oid'].','.$this->baseDn;
 		return $this->ri_ldap->CEdelete($dn);
 	}
+			
+	public function associate(array $input) {
+		
+		$data = array();
+		 
+		if(empty($input['to'])) $data['error'] = 'Missing input "to". Possible values: organization, location';
+	
+		if(empty($input['oid'])) $data['error'] = 'Missing input "oid".';
+		
+		if($data['error']) return $data;
+	
+		//we need to get a precise organization not a set of people
+		unset($input['filter']);
+	
+		//let's get the get the organization's data
+		$data = $this->read($input);
+	
+		if($data['error']) return $data;
+		
+		//let's add the new location
+		$to = $input['to'];
+		switch ($to) {
+			case location:
+				
+				if(empty($input['locId']) or is_array($input['locId']))
+				{
+					$data['error'] = 'Missing input "locId".';
+					return $data;
+				}
+				
+				if(!in_array($input['locId'], $this->locRDN))
+				{
+					//add location to the previous locations
+					array_push($this->locRDN, $input['locId']);
+					$data['locRDN']	= $this->locRDN;
+				} else {
+					return true; //TODO maybe something more meaningful here
+				}
+				
+			break;
+	
+			default:
+				return false; //association not defined
+			break;
+		}
+		
+		$data['oid'] = $this->oid;
+		return $this->update($data);
+	}	
 }
 
 /* End of organization.php */

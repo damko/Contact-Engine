@@ -61,28 +61,34 @@ class ObjectCommon extends CI_Model
 		return $output;
 	}
 	
-	public function read(array $input) { //, $filter, $wanted_attributes, $sort_by,  $flow_order, $wanted_page, $items_page) {
-		
-		$wanted_attributes = array();
+	public function read($input) { 
+		//input fields: $filter, array $wanted_attributes, $sort_by = null,  $flow_order = null, $wanted_page = null, $items_page = null) {
 		
 		$pagination_settings = pagination_setup($input);
+		
 		if(is_array($pagination_settings)) extract($pagination_settings);	
 
-		if(!empty($input['attributes']) and is_array($input['attributes'])) $wanted_attributes = $input['attributes'];
-				
-		//checks
-		if(empty($filter))
+		if(!empty($input['wanted_attributes']) and is_array($input['wanted_attributes'])) 
+		{
+			$wanted_attributes = $input['wanted_attributes'];
+		} else {
+			$wanted_attributes = array();
+		}
+		
+		if(empty($input['filter']) || is_array($input['filter'])) 
 		{
 			//TODO this should be a RI function handling the error
+			$return = array();
 			$return['error'] = 'Method "'.__FUNCTION__.'" requires a filter in input';
 			return $return;
+		} else {
+			$filter = $input['filter'];
 		}
 		
 		//perform the search
 		$ldap_result = $this->ri_ldap->CEsearch($this->baseDn, $filter, $wanted_attributes, 0, null, $sort_by,  $flow_order, $wanted_page, $items_page);
 		
 		//saving and removing info about the ldap query
-		//$info = array_pop($ldap_result);
 		if(!empty($ldap_result['RestStatus']))
 		{
 			$rest_status = $ldap_result['RestStatus'];
@@ -96,7 +102,7 @@ class ObjectCommon extends CI_Model
 		foreach ($ldap_result as $ldap_item) {
 			
 			//TODO probably it would be wiser to return the whole result without parsing everysingle entry. Don't know yet
-			$this->bindLdapValuesWithClassProperties($ldap_item);
+			$this->bindLdapValuesWithClassProperties($ldap_item,$strict);
 			
 			$output[] = $this->toRest($empty_fields);
 		}

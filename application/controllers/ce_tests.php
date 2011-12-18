@@ -51,6 +51,7 @@ class Ce_Tests extends Test_Controller {
 		$this->testContact();
 		$this->testPersonAssocOrg();
 		$this->testPersonAssocLoc();
+		$this->testOrganizationAssocLoc();		
 	}
 	
 	public function testPerson()
@@ -351,7 +352,7 @@ class Ce_Tests extends Test_Controller {
 		//check to get an array as a return
 		$this->arrayReturn($method, $rest_return);
 	
-		//the filter has not been specified then it should return an error
+		//the filter has not been specified but it shouldn't get an error 'cause CE will filter on the UID
 		$this->checkNoRestError($method, $rest_return);
 	
 		//check status code == 200
@@ -383,7 +384,7 @@ class Ce_Tests extends Test_Controller {
 		//check to get an array as a return
 		$this->arrayReturn($method, $rest_return);
 	
-		//the filter has not been specified then it should return an error
+		//the filter has not been specified but it shouldn't get an error 'cause CE will filter on the UID
 		$this->checkNoRestError($method, $rest_return);
 	
 		//check status code == 200
@@ -625,6 +626,38 @@ class Ce_Tests extends Test_Controller {
 		}
 	}
 
+	public function testOrganizationAssocLoc($loadview = true, $getInfo = false)
+	{
+		$this->rest->initialize(array('server' => $this->config->item('rest_server').'/exposeObj/organization/'));
+	
+		$locId = $this->testLocationCreate();
+		$oid = $this->testOrganizationCreate();
+			
+		$this->testTitle('Testing the association of an organization to a location');
+		$method = 'associate';
+		$input = array();
+		$input['locId'] = $locId;
+		$input['to'] = 'location';
+		$input['oid'] = '93985144';
+	
+		$rest_return = $this->rest->get($method, $input, 'serialize');
+	
+		//check to get an array as a return
+		$this->arrayReturn($method, $rest_return);
+	
+		//the filter has not been specified but it shouldn't get an error 'cause CE will filter on the UID
+		$this->checkNoRestError($method, $rest_return);
+	
+		//check status code == 200
+		$this->check200($method, $rest_return);
+	
+		//check uid is a number
+		$test = $rest_return['data']['0'];
+		echo $this->unit->run($test, 'is_numeric', $method.' - Integer oid', 'Checking if the returned oid is a number');
+	
+		$this->printReturn($rest_return);
+	}
+	
 	public function testLocation()
 	{
 		$this->testLocationProperties();
@@ -868,25 +901,5 @@ class Ce_Tests extends Test_Controller {
 		
 		$this->printReturn($rest_return);
 		
-	}
-	
-
-	public function pd()
-	{
-		$test = 'abcde';
-		var_export($test);
-		echo "\n";
-		
-		$test['aa'] = 'AA';
-		var_export($test);
-		echo "\n";
-		
-		$test['bb'] = 'BB';
-		var_export($test);
-		echo "\n";
-		
-		$test['cde'] = 'XYZ';
-		var_export($test);
-		echo "\n";		
 	}
 }

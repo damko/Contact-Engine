@@ -7,7 +7,7 @@ function pagination_setup($input)
 	
 	$return = array();
 	
-	if(isset($input['filter'])) $return['filter'] = $input['filter'];
+	//if(isset($input['filter'])) $return['filter'] = $input['filter']; //NOT NEEDED
 	
 	//who wants empty_fields in return has to specify it otherwise they will be skipped
 	isset($input['empty_fields']) ? $return['empty_fields'] = $input['empty_fields'] : $return['empty_fields'] = FALSE;

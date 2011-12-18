@@ -80,20 +80,26 @@ class Person extends ObjectCommon
 	 * @return array containing all the entries found
 	 */
 	public function read(array $input)
-	{	
-		$return = array();
-		
-		//extract(&$input,$extract_type = EXTR_OVERWRITE); //FIXME why this doesn't work at all?
+	{			
+		extract(&$input,$extract_type = EXTR_OVERWRITE);
 		
 		if(!empty($input['filter'])) 
 		{
 			$filter = $input['filter'];
 		} else {
 			if(!empty($input['uid'])) $filter = '(uid='.$input['uid'].')';
-			if(!empty($input['dbId'])) $filter = '(dbId='.$input['dbId'].')';
+			if(!empty($input['dbId'])) $filter = '(dbId='.$input['dbId'].')'; //TODO maybe I can remove this
 		}
 		
-		return parent::read($input); //, $filter, $wanted_attributes, $sort_by, $flow_order, $wanted_page, $items_page);
+		$output = array();
+		$output['filter'] = $filter; 
+		$output['wanted_attributes'] = $wanted_attributes; 
+		$output['sort_by'] = $sort_by;
+		$output['flow_order'] = $flow_order; 
+		$output['wanted_page'] = $wanted_page; 
+		$output['items_page'] = $items_page;
+		
+		return parent::read($output);
 	}
 	
 	/**
@@ -147,44 +153,53 @@ class Person extends ObjectCommon
 	}
 	
 	public function associate(array $input) {
-		if(empty($input['to'])) 
-		{
-			$data = array();
-			$data['error'] = 'Missing input "to". Possible values: organization, location';
-		}
 		
-		if(empty($input['uid'])) 
-		{
-			$data = array();
-			$data['error'] = 'Missing input "uid".';
-		}
+		$data = array();
+		
+		if(empty($input['to'])) $data['error'] = 'Missing input "to". Possible values: organization, location';
+		
+		if(empty($input['uid'])) $data['error'] = 'Missing input "uid".';
+		
+		if($data['error']) return $data;
 		
 		//we need to get a precise person not a set of people
 		unset($input['filter']);
 		
 		//let's get the get the person's data
-		$this->read($input);
+		$data = $this->read($input);
 		
-		if(empty($this->cn)) return false; //person not found
+		if($data['error']) return $data;
 		
 		//let's add the new location
 		$to = $input['to'];
 		switch ($to) {
 			case location:
-				if(empty($input['locId']) or is_array($input['locId'])) return false;
+				
+				if(empty($input['locId']) or is_array($input['locId']))
+				{
+					$data['error'] = 'Missing input "locId".';
+					return $data;
+				}
+				
 				if(!in_array($input['locId'], $this->locRDN)) 
 				{
-					$entry= array('locRDN' => $input['locId']);
+					//add location to the previous locations
+					array_push($this->locRDN, $input['locId']);
+					$data['locRDN']	= $this->locRDN;					
 				} else {
 					return true; //TODO maybe something more meaningful here
 				}
+				
 			break;
 			
 			case organization:
 				if(empty($input['oid']) or is_array($input['oid'])) return false;
 				if(!in_array($input['oid'], $this->oRDN))
 				{
-					$entry= array('oRDN' => $input['oid']);
+					//add organization to the previous locations
+					array_push($this->oRDN, $input['oid']);
+					$data['oRDN']	= $this->oRDN;
+						
 				} else {
 					return true; //TODO maybe something more meaningful here
 				}
@@ -196,9 +211,13 @@ class Person extends ObjectCommon
 			break;
 		}
 		
-		$dn = 'uid='.$this->getUid().','.$this->baseDn;
-		unset($entry['uid']); //never mess with the id during an update cause it has to do with dn		
-		return $this->ri_ldap->CEupdate($dn,$entry) ? $this->getUid() : false;
+// 		$dn = 'uid='.$this->getUid().','.$this->baseDn;
+// 		unset($entry['uid']); //never mess with the id during an update cause it has to do with dn		
+// 		return $this->ri_ldap->CEupdate($dn,$entry) ? $this->getUid() : false;
+
+		$data['uid'] = $this->uid;
+		return $this->update($data);
+		
 	}
 }
 
