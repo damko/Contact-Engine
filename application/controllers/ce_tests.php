@@ -638,7 +638,7 @@ class Ce_Tests extends Test_Controller {
 		$input = array();
 		$input['locId'] = $locId;
 		$input['to'] = 'location';
-		$input['oid'] = '93985144';
+		$input['oid'] = $oid;
 	
 		$rest_return = $this->rest->get($method, $input, 'serialize');
 	
