@@ -2,8 +2,20 @@
 // Created on Sep 8, 2011 by Damiano Venturin @ squadrainformatica.com
 
 class Ce {
-	private $other_sub_attrs = array('single-value','desc','no-user-modification','max-length');
+	//TODO probably this should go into a config file
+	private $other_sub_attrs = array('syntax', 'single-value', 'desc', 'no-user-modification', 'max-length');
 	
+	//here there is the syntax list for the inetOrgPerson attributes http://www.alvestrand.no/objectid/1.3.6.1.4.1.1466.115.121.1.html 
+	private $binary_syntaxes = array(
+										'1.3.6.1.4.1.1466.115.121.1.5', //binary
+										'1.3.6.1.4.1.1466.115.121.1.23', //fax - tif
+										'1.3.6.1.4.1.1466.115.121.1.28', //jpeg
+									);
+	
+	private $boolean_syntaxes = array('1.3.6.1.4.1.1466.115.121.1.7'); 
+
+	private $integer_syntaxes = array('1.3.6.1.4.1.1466.115.121.1.27');
+		
 	public function __construct() {
 	
 	}
@@ -93,7 +105,15 @@ class Ce {
 			$attribute_node = $xml_class->appendChild($xml_attribute);
 
 			//add sub-attributes to the attribute node
+			//required
 			in_array($attribute, $object_class_attributes_required) ? $attribute_node->setAttribute("required",1) : $attribute_node->setAttribute("required",0);
+			//binary
+			in_array($attribute, $this->binary_syntaxes) ? $attribute_node->setAttribute("binary",1) : $attribute_node->setAttribute("binary",0);
+			//boolean
+			in_array($attribute, $this->boolean_syntaxes) ? $attribute_node->setAttribute("boolean",1) : $attribute_node->setAttribute("boolean",0);
+			//integer
+			in_array($attribute, $this->integer_syntaxes) ? $attribute_node->setAttribute("integer",1) : $attribute_node->setAttribute("integer",0);
+			//additional sub attributes specified in the $this->other_sub_attrs array 
 			foreach ($this->other_sub_attrs as $sub_attr) {
 				$attribute_node->setAttribute($sub_attr,$attribute_types[$attribute][$sub_attr]);
 			}
