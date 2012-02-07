@@ -108,11 +108,11 @@ class Ce {
 			//required
 			in_array($attribute, $object_class_attributes_required) ? $attribute_node->setAttribute("required",1) : $attribute_node->setAttribute("required",0);
 			//binary
-			in_array($attribute, $this->binary_syntaxes) ? $attribute_node->setAttribute("binary",1) : $attribute_node->setAttribute("binary",0);
+			in_array($attribute_types[$attribute][syntax], $this->binary_syntaxes) ? $attribute_node->setAttribute("binary",1) : $attribute_node->setAttribute("binary",0);
 			//boolean
-			in_array($attribute, $this->boolean_syntaxes) ? $attribute_node->setAttribute("boolean",1) : $attribute_node->setAttribute("boolean",0);
+			in_array($attribute_types[$attribute][syntax], $this->boolean_syntaxes) ? $attribute_node->setAttribute("boolean",1) : $attribute_node->setAttribute("boolean",0);
 			//integer
-			in_array($attribute, $this->integer_syntaxes) ? $attribute_node->setAttribute("integer",1) : $attribute_node->setAttribute("integer",0);
+			in_array($attribute_types[$attribute][syntax], $this->integer_syntaxes) ? $attribute_node->setAttribute("integer",1) : $attribute_node->setAttribute("integer",0);
 			//additional sub attributes specified in the $this->other_sub_attrs array 
 			foreach ($this->other_sub_attrs as $sub_attr) {
 				$attribute_node->setAttribute($sub_attr,$attribute_types[$attribute][$sub_attr]);
