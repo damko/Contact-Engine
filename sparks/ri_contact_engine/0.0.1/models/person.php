@@ -8,12 +8,13 @@ class Person extends ObjectCommon
 		parent::__construct();
 		
 		// Person configuration
+		$this->load->config('person');
 		$this->conf = $this->config->item('person');
 		$this->baseDn = $this->conf['baseDn'];
-
+		$this->objName = 'person';
+		
 		// Get the class Person properties reading them from the LDAP schema
 		$this->loadAttrs($this->conf['objectClass']);
-		$this->obj = 'person';
 		
 		log_message('debug', 'Person class has been loaded');
 	}
@@ -81,7 +82,7 @@ class Person extends ObjectCommon
 	 */
 	public function read(array $input)
 	{			
-		extract(&$input,$extract_type = EXTR_OVERWRITE);
+		extract($input,$extract_type = EXTR_OVERWRITE);
 		
 		if(!empty($input['filter'])) 
 		{
@@ -92,12 +93,12 @@ class Person extends ObjectCommon
 		}
 		
 		$output = array();
-		$output['filter'] = $filter; 
-		$output['wanted_attributes'] = $wanted_attributes; 
-		$output['sort_by'] = $sort_by;
-		$output['flow_order'] = $flow_order; 
-		$output['wanted_page'] = $wanted_page; 
-		$output['items_page'] = $items_page;
+		if(isset($filter)) $output['filter'] = $filter; 
+		if(isset($wanted_attributes)) $output['wanted_attributes'] = $wanted_attributes; 
+		if(isset($sort_by)) $output['sort_by'] = $sort_by;
+		if(isset($flow_order)) $output['flow_order'] = $flow_order; 
+		if(isset($wanted_page)) $output['wanted_page'] = $wanted_page; 
+		if(isset($items_page)) $output['items_page'] = $items_page;
 		
 		return parent::read($output);
 	}
@@ -117,14 +118,29 @@ class Person extends ObjectCommon
 		//TODO Should I perform a search over the given uid to be sure the contact exists?
 		//unset($input['filter']);
 		//$this->read($input);
+		//$search = array('uid' => $input['uid']);
 		
 		if(!$this->bindLdapValuesWithClassProperties($input, false, true)) return false;
+		
+		$this->validate();
 		
 		//save the entry on the LDAP server
 		$dn = 'uid='.$this->getUid().','.$this->baseDn;
 		$entry = $this->toRest(false);
-		unset($entry['uid']); //never mess with the id during an update cause it has to do with dn		
-		return $this->ri_ldap->CEupdate($dn,$entry) ? $this->getUid() : false;
+		unset($entry['uid']); //never mess with the id during an update cause it has to do with dn	
+
+		//$return = $this->ri_ldap->CEupdate($dn,$entry);
+		$return = $this->checkReturn($this->ri_ldap->CEupdate($dn,$entry));
+		
+		if($return === true) 
+		{
+			$uid = $this->getUid();
+			if($uid) return $uid;
+		} else {
+			return $return;
+		}
+
+		//return $this->getUid();
 	}
 
 	/**
@@ -151,6 +167,15 @@ class Person extends ObjectCommon
 	{
 		return !empty($this->uid['0']) ? $this->uid['0'] : FALSE;
 	}
+	
+/* 	private function getReallyUpdatedValues($input)
+	{
+		$this->read($input);
+		foreach ($this->properties as $property)
+		{
+			
+		}
+	} */	
 	
 	public function associate(array $input) {
 		

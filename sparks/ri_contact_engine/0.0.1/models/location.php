@@ -11,6 +11,8 @@ class Location extends ObjectCommon
 		$this->load->config('location');
 		$this->conf = $this->config->item('location');
 		$this->baseDn = $this->conf['baseDn'];
+		$this->objName = 'location';
+		
 
 		// Get the class Location properties reading them from the LDAP schema
 		$this->loadAttrs($this->conf['objectClass']);

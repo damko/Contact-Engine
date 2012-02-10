@@ -11,7 +11,7 @@ class Organization extends ObjectCommon
 		$this->load->config('organization');
 		$this->conf = $this->config->item('organization');
 		$this->baseDn = $this->conf['baseDn'];
-		$this->obj = 'organization';
+		$this->objName = 'organization';
 		
 		// Get the class Organization properties reading them from the LDAP schema
 		$this->loadAttrs($this->conf['objectClass']);
@@ -62,7 +62,7 @@ class Organization extends ObjectCommon
 	
 	public function read(array $input)
 	{	
-		extract(&$input,$extract_type = EXTR_OVERWRITE);
+		extract($input,$extract_type = EXTR_OVERWRITE);
 		
 		if(!empty($input['filter'])) 
 		{

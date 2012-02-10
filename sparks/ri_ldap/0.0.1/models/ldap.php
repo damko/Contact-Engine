@@ -5,6 +5,7 @@
 class Ldap extends CI_Model {
 	protected $connected;
 	public $connection;
+	public $dn;
 	protected $connection_error;
 	protected $results_number;
 	protected $results_got_number;
@@ -15,15 +16,16 @@ class Ldap extends CI_Model {
 		
 		parent::__construct();
 		
-		//loading the configuration about the LDAP servers
-		//$this->load->config('ldap');
+		$old_error_handler = set_error_handler("LdapErrorHandler");
 		
 		log_message('debug', 'Ldap class has been loaded');
+		
 	}
 	
 	public function __destruct()
 	{
-		$this->disconnect();	
+		$this->disconnect(); //TODO is this correct?
+		restore_error_handler();
 	}
 	
 	/**
@@ -193,7 +195,7 @@ class Ldap extends CI_Model {
 	* @param integer entries per page
 	* @return string[]
 	*/
-	private function sort_paginate($result, array $sFields, $sOrder = "asc", $iPage = null, $iPerPage = null )
+	private function sort_paginate($result, array $sFields = null, $sOrder = "asc", $iPage = null, $iPerPage = null )
 	{				
 		if(is_null($sFields)) $sFields = array();
 		
@@ -250,31 +252,144 @@ class Ldap extends CI_Model {
 	}	
 	
 	public function create($dn, array $entry) {
-		//validation
-		if(!$this->connection) return false;
+
+/* 		if(!$this->connection) return false;
 		if(empty($dn) or is_array($dn)) return false;
 		if(empty($entry)) return false;
-		if(!$this->valideEntry($entry)) return false;
+		if(!$this->valideEntry($entry)) return false; */
+		
+		//validation
+		if(is_object($return = $this->commonValidationsSet($entry))) return $return;
+		
+		//return ldap_add($this->connection,$dn,$entry);
 
-		//return $data;
-		return ldap_add($this->connection,$dn,$entry);		
+		$params = array(
+						'command' => 'ldap_add',
+						'entry' => $entry,
+		);
+		try {
+			$this->run($params);
+		} catch (OutOfRangeException $e) {
+			return $e;
+		}
+		
+		return true;
+		
 	}
 	
-	public function update($dn, array $entry) {
+	public function update(array $entry) {
 		//validation
-		if(!$this->connection) return false;
-		if(empty($dn) or is_array($dn)) return false;
-		if(empty($entry)) return false;
-		if(!$this->valideEntry($entry)) return false;
+		if(is_object($return = $this->commonValidationsSet($entry))) return $return;
+		
+		$params = array(
+						'command' => 'ldap_modify',
+						'entry' => $entry,
+						);
+		try {
+			$this->run($params);
+		} catch (OutOfRangeException $e) {
+			return $e;
+		}
 
-		return ldap_modify($this->connection,$dn,$entry);
+		return true;
 	}
 	
 	public function delete($dn)
 	{
-		if(empty($dn) or is_array($dn)) return false;
-		return ldap_delete($this->connection, $dn);
+		if(empty($dn) or is_array($dn)) return $this->report('dn','');
+		
+		$params = array(
+						'command' => 'ldap_delete',
+						'entry' => $entry,
+		);
+		try {
+			$this->run($params);
+		} catch (OutOfRangeException $e) {
+			return $e;
+		}
+		
+		return true;		
 	}
+	
+	private function run(array $params)
+	{
+		extract($params);
+		if(!isset($message)) unset($message);
+	
+		switch ($command) {
+			case 'ldap_add':
+				if(!ldap_modify(ldap_add($this->connection, $this->dn, $entry)))
+				{
+					$message = ldap_errno($this->connection).' - '.ldap_error($this->connection).' method: ';
+				}
+			break;
+						
+			case 'ldap_modify':
+				if(!ldap_modify($this->connection, $this->dn, $entry))
+				{
+					$message = ldap_errno($this->connection).' - '.ldap_error($this->connection).' method: ';
+				}
+			break;
+
+			case 'ldap_delete':
+				if(!ldap_delete($this->connection, $this->dn))
+				{
+					$message = ldap_errno($this->connection).' - '.ldap_error($this->connection).' method: ';
+				}
+			break;			
+						
+			default:
+				;
+			break;
+		}
+		if(isset($message)) $this->report('exception', $message);
+	}	
+	
+	private function commonValidationsSet($entry)
+	{
+		if(!$this->connection) return $this->report('connection', null);
+		if(empty($this->dn) or is_array($this->dn)) return $this->report('dn', null);
+		if(empty($entry)) return $this->report('entry', null);
+		if(!$this->valideEntry($entry)) return $this->report('validate', null);		
+	}	
+	
+ 	private function report($type, $message)
+	{
+		switch ($type) {
+			case 'exception':
+				throw new OutOfRangeException('LDAP error: code:'.$message, 0);
+			break;
+
+			case 'dn':
+				return $this->report('trigger','No valid uid or dn was provided.');
+			break;
+			
+			case 'entry':
+				return $this->report('trigger','No attributes were provided for update.');
+			break;
+
+			case 'entry':
+				return $this->report('trigger','The attributes provided are not validated.');
+			break;			
+
+			case 'connection':
+				return $this->report('trigger','I can not connect to a valid LDAP server.');
+			break;			
+			
+			default:
+			case 'trigger':
+				try {
+					if(true)
+					{
+						throw new Exception($message);
+					}
+				} catch (Exception $e) {
+					return $e;
+				} 
+			break;
+		}
+	} 
+	
 }
 
 

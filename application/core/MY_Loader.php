@@ -116,6 +116,7 @@ class MY_Loader extends CI_Loader
 
 		$this->add_package_path($spark_path);
 
+		//TODO DAM this is interesting: I think I didn't use load->spark in the best way
 		foreach($autoload as $type => $read)
 		{
 			if($type == 'library')

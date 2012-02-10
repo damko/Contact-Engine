@@ -23,7 +23,7 @@ function methods_HTML($methods,$object)
 
 function dimensions($input)
 {
-	if(!is_array($input)) return 0;
+	if(!is_array($input)) return null;
 	
 	foreach ($input as $key => $value) {
 		return is_array($value) ? 2 : 1;

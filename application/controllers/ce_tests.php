@@ -16,7 +16,12 @@ class Ce_Tests extends Test_Controller {
 		{
 			$this->show_rest_return = true; 
 		}
-	
+
+		if(ENVIRONMENT != 'production') {
+			echo '<h2>please set the constant ENVIROMENT in index.php to "production" !</h2>';
+			die();
+		}
+		
 		
 /* 		//set up a new template for the tests output
 		$this->unit->set_test_items(array('test_name', 'result'));
@@ -31,7 +36,6 @@ class Ce_Tests extends Test_Controller {
 		</table>';
 		
 		$this->unit->set_template($str); */
-				
 	}	
  
 	private function testTitle($text,$subtext = null)
@@ -194,11 +198,15 @@ class Ce_Tests extends Test_Controller {
 	{	
 		$this->rest->initialize(array('server' => $this->config->item('rest_server').'/exposeObj/person/'));
 
+		
+		
+	
+		
 		//calling the methon READ for object person with a filter
-		$this->testTitle('Test: update 1 person taken randomly but starting with Willy*');
+		$this->testTitle('Test: get the list of person with givenName starting with Willy8');
 		$method = 'read';
 		$input = array();
-		$input['filter'] = '(givenName=Willy*)';
+		$input['filter'] = '(givenName=Willy8*)';
 		
 		$rest_return = $this->rest->get($method, $input, 'serialize');
 		
@@ -213,46 +221,184 @@ class Ce_Tests extends Test_Controller {
 		
 		$this->printReturn($rest_return);
 		
+		
+		
+		
+		
+		
+		//pick uid
+		$this->testTitle('Test: pick a random uid from the list');
+		$method = 'read';
 		if(is_array($rest_return) and !empty($rest_return['data']))
 		{
-			$person = $rest_return['data'][array_rand($rest_return['data'])];
-			$person['displayName'] = 'Willy Test';
-			$method = 'update';
-			$rest_return = $this->rest->get($method, $person, 'serialize');
-		
-			//check to get an array as a return
-			$this->arrayReturn($method, $rest_return);
-				
-			//the filter has not been specified then it should return an error
-			$this->checkNoRestError($method, $rest_return);
-				
-			//check status code == 200
-			$this->check200($method, $rest_return);
-				
-			//check uid is a number
-			$uid = $test = $rest_return['data']['0'];
-			echo $this->unit->run($test, 'is_numeric', $method.' - Integer uid', 'Checking if the returned uid is a number');
-		
-			$this->printReturn($rest_return);
-				
-			//gets the person updated
-			$method = 'read';
-			$input = array();
-			$input['filter'] = '(uid='.$uid.')';
-				
-			$rest_return = $this->rest->get($method, $input, 'serialize');
-				
-			//check to get an array as a return
-			$this->arrayReturn($method, $rest_return);
-				
-			//the filter has not been specified then it should return an error
-			$this->checkNoRestError($method, $rest_return);
-				
-			//check status code == 200
-			$this->check200($method, $rest_return);
-				
-			$this->printReturn($rest_return);
+			$uids = array();
+			
+		 	foreach ($rest_return['data'] as $key => $entry) {
+		 		$uids[] = $entry['uid']['0'];
+		 	}		
+		 	
+		 	$uid = $uids[array_rand($uids,1)];
+		 	$this->unit->run($uid,'is_int');
+		 	echo $this->unit->run($uid, 'is_numeric', $method.' - Integer uid', 'Checking if the returned uid is a number');
+		 	
+		 	if(!$uid) return false;
 		}
+		
+		
+		
+		
+
+		
+		//check that the chosen entry exists
+		$this->testTitle('Test: check that the chosen uid is a real entry (uid='.$uid.')');
+		$method = 'read';
+		$input = array();
+		$input['filter'] = '(uid='.$uid.')';
+		
+		$rest_return = $this->rest->get($method, $input, 'serialize');
+		
+		//check to get an array as a return
+		$this->arrayReturn($method, $rest_return);
+		
+		//the filter has been specified then it should not return an error
+		$this->checkNoRestError($method, $rest_return);
+		
+		//check status code == 200
+		$this->check200($method, $rest_return);
+		
+		$this->printReturn($rest_return);
+			
+		
+		
+		
+		
+		
+		//update person 
+		$method = 'update';
+		$input = array();
+		$input['uid'] = $uid;
+		$input['displayName'] = 'Willy Test'.rand(100, 999);
+		$new_displayName = $input['displayName'];
+		$this->testTitle('Test: update person with uid='.$uid.' : setting the displayName='.$input['displayName']);
+		
+		$rest_return = $this->rest->get($method, $input, 'serialize');
+		
+		//check to get an array as a return
+		$this->arrayReturn($method, $rest_return);
+
+		//the filter has been specified then it should not return an error
+		$this->checkNoRestError($method, $rest_return);
+
+		//check status code == 200
+		$this->check200($method, $rest_return);
+		
+		//check uid is a number
+ 		$uid = $test = $rest_return['data']['0'];
+		echo $this->unit->run($test, 'is_numeric', $method.' - Integer uid', 'Checking if the returned uid is a number');
+ 
+		$this->printReturn($rest_return);
+		
+		
+		
+		
+		
+		//show the updated entry
+		$this->testTitle('Test: show the updated entry (uid='.$uid.')');
+		$method = 'read';
+		$input = array();
+		$input['filter'] = '(uid='.$uid.')';
+		
+		$rest_return = $this->rest->get($method, $input, 'serialize');
+		
+		//check to get an array as a return
+		$this->arrayReturn($method, $rest_return);
+		
+		//the filter has been specified then it should not return an error
+		$this->checkNoRestError($method, $rest_return);
+		
+		//check status code == 200
+		$this->check200($method, $rest_return);
+		
+		//chech that displayName has been modified correctly
+		$displayName = $test = $rest_return['data']['0']['displayName'];
+		$test = false;
+		if($displayName == $new_displayName) $test = true;
+		echo $this->unit->run($test, 'is_true', $method.' - correct result', 'The attribute displayName was successfully modified');
+		
+		$this->printReturn($rest_return);
+
+		
+
+		
+		
+
+		//update person with wrong filter
+		$this->testTitle('Test: update the same person sending an input array without any field but uid)');
+			
+		$method = 'update';
+		$input = array( 'uid' => $uid);
+			
+		$rest_return = $this->rest->get($method, $input, 'serialize');
+			
+		//check to get an array as a return
+		$this->arrayReturn($method, $rest_return);
+			
+		$this->checkRestError($method, $rest_return);
+			
+		//check status code == 400
+		$this->check400($method, $rest_return);
+			
+		$this->printReturn($rest_return);
+				
+		
+		
+		
+		
+		
+		
+		//update person with wrong filter
+		$this->testTitle('Test: update the same person sending an input array with a wrong field)');
+			
+		$method = 'update';
+		$input = array( 'uid' => $uid,
+						'blablabla' => 'blablabla');
+					
+		$rest_return = $this->rest->get($method, $input, 'serialize');
+					
+		//check to get an array as a return
+		$this->arrayReturn($method, $rest_return);
+			
+		$this->checkRestError($method, $rest_return);
+			
+		//check status code == 400
+		$this->check400($method, $rest_return);
+			
+		$this->printReturn($rest_return);
+				
+		
+		
+		
+		
+		//update person without the filter
+		$this->testTitle('Test: try to update a person without setting up the filter uid');
+		//$input = $rest_return['data'][array_rand($rest_return['data'])];
+		$input=array();
+		$input['displayName'] = 'Willy Test';
+		$method = 'update';
+		$rest_return = $this->rest->get($method, $input, 'serialize');
+		
+		//check to get an array as a return
+		$this->arrayReturn($method, $rest_return);
+		
+		//the filter has not been specified then it should return an error
+		$this->checkRestError($method, $rest_return);
+		
+		//check status code == 400
+		$this->check400($method, $rest_return);
+				
+		$this->printReturn($rest_return);
+		
+	
 	}
 	
 	public function testPersonDelete()

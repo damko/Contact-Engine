@@ -21,7 +21,7 @@ class Contact extends ObjectCommon
 		parent::__destruct();
 	}
 	
-	public function read($input)
+	public function read(array $input)
 	{
 		$data = array();
 		if(!is_array($input) || empty($input)) 
@@ -49,4 +49,5 @@ class Contact extends ObjectCommon
 		
 		return $data;
 	}
+	
 }

@@ -29,11 +29,11 @@ class Ce {
 		$xml_file = APPPATH.'xml/'.$object_class.'.xml';
 		if(file_exists($xml_file))
 		{
-			$this->parseXml($object_class, $xml_file, &$class, $callback, $period);
+			$this->parseXml($object_class, $xml_file, $class, $callback, $period);
 		} else {
 			if($this->readSchemaWriteXml($object_class))
 			{
-				$this->loadClassAttributes($object_class, &$class, $callback, $period);
+				$this->loadClassAttributes($object_class, $class, $callback, $period);
 				return true;
 			} else {
 				log_message('debug', 'The xml file can not be written on the filesystem. Please check folder permissions.');

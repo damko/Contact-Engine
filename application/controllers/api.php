@@ -57,6 +57,13 @@ class Api extends REST_Controller
 			foreach ($this->exposedObjects as $item => $value) {
 				if(preg_match('/\//i', $value))
 				{
+					/* if($value == 'ri_ldap/0.0.1')
+					{
+						$opts = array('library' => 'ldap_exception');
+						$this->load->spark($value,$opts); //FIXME
+					} else {
+						$this->load->spark($value);
+					} */
 					$this->load->spark($value);
 				}
 			}
@@ -321,7 +328,6 @@ class Api extends REST_Controller
 							{							
 								$data = array();
 								
-								
 								$data = $this->$model->$method_name($input);	
 								$this->output($data);
 							}
@@ -353,6 +359,8 @@ class Api extends REST_Controller
 	{
 		$return = array();
 		
+		
+		 
 		if(!$data)
 		{
 			if(empty($this->status_code) or empty($this->error_message))
@@ -376,6 +384,7 @@ class Api extends REST_Controller
 					
  			$dimension = dimensions($data);
 			switch ($dimension) {
+				case null:
 				case '0':
 					$return['data'] = (array) $data;
 				break;
@@ -391,8 +400,9 @@ class Api extends REST_Controller
 		if(!empty($this->duration)) $return['status']['duration'] = $this->duration;
 		if(!empty($this->status_code)) $return['status']['status_code'] = $this->status_code;
 		if(!empty($this->error_message)) $return['status']['error_message'] = $this->error_message;
-				
+
 		$this->response($return, $this->status_code);
-		return;		
+		return true;		
 	}
+
 }

@@ -1,11 +1,22 @@
 <?php  if ( ! defined('BASEPATH')) exit('No direct script access allowed');
-// Created on Sep 9, 2011 by Damiano Venturin @ squadrainformatica.com
 
 $helper = FCPATH.'sparks/ri_contact_engine/0.0.1/helpers/ce_helper'.EXT;
 require_once $helper; //TODO shouldn't be enough the line in the autoload file? Looks like there is a bug in RI
 
+/**
+ * This is the parent object for the obj Person, Organization and Location. Contains all the common methods between the 3 objs
+ * 
+ * @author 		Damiano Venturin
+ * @copyright 	2V S.r.l.
+ * @license		GPL
+ * @link		http://www.squadrainformatica.com/en/development
+ * @since		Sep 9, 2011
+ * 
+ * @todo		
+ */ 
 class ObjectCommon extends CI_Model
 {
+	protected $objName;
 	protected $properties;
 	protected $baseDn;
 	public $conf;
@@ -21,7 +32,7 @@ class ObjectCommon extends CI_Model
 	protected function loadAttrs($object_class) {
 		$period = NULL;
 		if(!empty($this->conf['refreshPeriod'])) $period = $this->conf['refreshPeriod'];
-		$this->ce->loadClassAttributes($object_class, &$this, '_initialize', $period);
+		$this->ce->loadClassAttributes($object_class, $this, '_initialize', $period);
 		log_message('debug', 'Contact class properties have been loaded');
 	}	
 	
@@ -61,7 +72,7 @@ class ObjectCommon extends CI_Model
 		return $output;
 	}
 	
-	public function read($input) { 
+	public function read(array $input) { 
 		//input fields: $filter, array $wanted_attributes, $sort_by = null,  $flow_order = null, $wanted_page = null, $items_page = null) {
 		
 		$pagination_settings = pagination_setup($input);
@@ -99,6 +110,7 @@ class ObjectCommon extends CI_Model
 		unset($ldap_result['count']);
 		
 		$output = array();
+		if(!isset($strict)) $strict = false;
 		foreach ($ldap_result as $ldap_item) {
 			
 			//TODO probably it would be wiser to return the whole result without parsing everysingle entry. Don't know yet
@@ -188,6 +200,77 @@ class ObjectCommon extends CI_Model
 		$found = $this->read($search);
 		return count($found)== 0 ? TRUE : FALSE;
 	}
+	
+	protected function validate()
+	{
+		/*
+		 * SYNTAXES FOR INETORG PERSON
+		1.3.6.1.4.1.1466.115.121.1.3 - Attribute Type Description
+		1.3.6.1.4.1.1466.115.121.1.5 - Binary syntax
+		1.3.6.1.4.1.1466.115.121.1.6 - Bit string syntax
+		1.3.6.1.4.1.1466.115.121.1.7 - Boolean syntax
+		1.3.6.1.4.1.1466.115.121.1.8 - Certificate syntax
+		1.3.6.1.4.1.1466.115.121.1.9 - Certificate List syntax
+		1.3.6.1.4.1.1466.115.121.1.10 - Certificate Pair syntax
+		1.3.6.1.4.1.1466.115.121.1.11 - Country String syntax
+		1.3.6.1.4.1.1466.115.121.1.12 - Distinguished Name syntax
+		1.3.6.1.4.1.1466.115.121.1.14 - Delivery Method
+		1.3.6.1.4.1.1466.115.121.1.15 - Directory String syntax
+		1.3.6.1.4.1.1466.115.121.1.16 - DIT Content Rule syntax
+		1.3.6.1.4.1.1466.115.121.1.17 - DIT Structure Rule Description syntax
+		1.3.6.1.4.1.1466.115.121.1.21 - Enhanced Guide
+		1.3.6.1.4.1.1466.115.121.1.22 - Facsimile Telephone Number syntax
+		1.3.6.1.4.1.1466.115.121.1.23 - Fax image syntax
+		1.3.6.1.4.1.1466.115.121.1.24 - Generalized Time syntax
+		1.3.6.1.4.1.1466.115.121.1.26 - IA5 String syntax
+		1.3.6.1.4.1.1466.115.121.1.27 - Integer syntax
+		1.3.6.1.4.1.1466.115.121.1.28 - JPeg Image syntax
+		1.3.6.1.4.1.1466.115.121.1.30 - Matching Rule Description syntax
+		1.3.6.1.4.1.1466.115.121.1.31 - Matching Rule Use Description syntax
+		1.3.6.1.4.1.1466.115.121.1.33 - MHS OR Address syntax
+		1.3.6.1.4.1.1466.115.121.1.34 - Name and Optional UID syntax
+		1.3.6.1.4.1.1466.115.121.1.35 - Name Form syntax
+		1.3.6.1.4.1.1466.115.121.1.36 - Numeric String syntax
+		1.3.6.1.4.1.1466.115.121.1.37 - Object Class Description syntax
+		1.3.6.1.4.1.1466.115.121.1.38 - OID syntax
+		1.3.6.1.4.1.1466.115.121.1.39 - Other Mailbox syntax
+		1.3.6.1.4.1.1466.115.121.1.40 - Octet String
+		1.3.6.1.4.1.1466.115.121.1.41 - Postal Address syntax
+		1.3.6.1.4.1.1466.115.121.1.43 - Presentation Address syntax
+		1.3.6.1.4.1.1466.115.121.1.44 - Printable string syntax
+		1.3.6.1.4.1.1466.115.121.1.49 - Supported Algorithm
+		1.3.6.1.4.1.1466.115.121.1.50 - Telephone number syntax
+		1.3.6.1.4.1.1466.115.121.1.51 - Teletex Terminal Identifier
+		1.3.6.1.4.1.1466.115.121.1.52 - Telex Number
+		1.3.6.1.4.1.1466.115.121.1.53 - UTCTime syntax
+		1.3.6.1.4.1.1466.115.121.1.54 - LDAP Syntax Description syntax
+		*/
+		
+/* 		foreach ($this->properties as $property => $features) {
+			if($features['single'])
+			{
+				if(is_array($this->$property))
+				{
+					//do something
+					$a = 'a';
+				}
+			}
+		} */
+		
+		return;
+	}
+	
+	protected function checkReturn($return){
+		if(is_object($return))
+		{
+			//it's an exception for sure
+			$data = array();
+			$data['error'] = $return->getMessage();
+			return $data;
+		}
+		if(is_bool($return) and $return === true) return true;
+	}
+
 }
 
 /* End of objectcommon.php */

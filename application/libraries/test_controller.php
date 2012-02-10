@@ -50,7 +50,13 @@ class Test_Controller extends CI_Controller {
 	{
 		$expected_result = '200';
 		$test = (array) $rest_return['status'];
-		$test = $test['status_code'];
+		if(isset($test['status_code'])) 
+		{
+			$test = $test['status_code'];
+		} else {
+			$test = 'UNKNOWN ???';
+			$note = 'UNKNOWN ???';
+		}
 		if(empty($note)) $note = 'I expect a 200';
 		echo $this->unit->run($test, $expected_result, $method.'- status code == 200 ?', $note);
 	}
@@ -59,7 +65,13 @@ class Test_Controller extends CI_Controller {
 	{
 		$expected_result = '400';
 		$test = (array) $rest_return['status'];
-		$test = $test['status_code'];
+		if(isset($test['status_code'])) 
+		{
+			$test = $test['status_code'];
+		} else {
+			$test = 'UNKNOWN ???';
+			$note = 'UNKNOWN ???';
+		}
 		if(empty($note)) $note = 'I expect a 400';
 		echo $this->unit->run($test, $expected_result, $method.'- status code == 400 ?', $note);
 	}
@@ -68,7 +80,15 @@ class Test_Controller extends CI_Controller {
 	{
 		$expected_result = '404';
 		$test = (array) $rest_return['status'];
-		$test = $test['status_code'];
+		
+		//TODO refactory
+		if(isset($test['status_code'])) 
+		{
+			$test = $test['status_code'];
+		} else {
+			$test = 'UNKNOWN ???';
+			$note = 'UNKNOWN ???';
+		}
 		if(empty($note)) $note = 'I expect a 404';
 		echo $this->unit->run($test, $expected_result, $method.'- status code == 404 ?', $note);
 	}

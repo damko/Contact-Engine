@@ -105,8 +105,9 @@ class Ri_Ldap extends Ldap {
 	}
 	
 	public function CEupdate($dn, array $entry) {
+		$this->dn = $dn;
 		$this->connection = $this->WrConnection;
-		return $this->update($dn, $entry);
+		return $this->update($entry);
 	}
 	
 	public function CEdelete($dn) {
