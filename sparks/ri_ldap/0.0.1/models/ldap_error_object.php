@@ -12,8 +12,11 @@
  * @todo	Improve object description		
  */
 class Ldap_Error_Object extends CI_Model {
-	var $type;
+	var $http_status_code; //this is for REST response.
+	var $http_status_message; //this is for REST response.
 	var $message;
+	var $php_errno;
+	var $php_errtype;
 	var $file;
 	var $line;
 	
@@ -22,7 +25,7 @@ class Ldap_Error_Object extends CI_Model {
 	}
 	
 	public function __destruct(){
-		parent::__destruct();
+	
 	}
 	
 	public function __set($attribute, $value) {
@@ -33,7 +36,30 @@ class Ldap_Error_Object extends CI_Model {
 		return $this->$attribute;
 	}
 	
-	public function addError($type, $message, $file = null, $line = null) {
+	public function addError($php_errno, $message, $file, $line, $http_status_code) {
 		
+		$http_status_codes = get_HTTP_status_codes();
+		$php_error_codes = get_PHP_error_codes();
+				
+		if(!in_array($http_status_code, array_keys($http_status_codes['all_errors']))) 
+		{
+			$this->http_status_code = '500';
+		} else {
+			$this->http_status_code = $http_status_code;
+		}
+		
+		$this->http_status_message = $http_status_codes['all_errors'][$this->http_status_code];
+		
+ 		if(!in_array($php_errno,array_keys($php_error_codes)))
+ 		{
+ 			$this->php_errno = '8';
+ 		} else {
+ 			$this->php_errno = $php_errno;
+ 		}
+ 		
+ 		$this->php_errtype = $php_error_codes[$php_errno];
+ 		$this->message = $message;
+ 		$this->file = $file;
+ 		$this->line = $line;
 	}
 }
