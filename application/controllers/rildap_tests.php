@@ -165,6 +165,38 @@ class Rildap_Tests extends Test_Controller {
 		
 
 		
+
+		
+		$this->subTestTitle('Performing a search which returns only one attribute');
+		$this->getCodeOrigin();
+		$this->rildap = new Ri_Ldap();
+		$baseDn = 'ou=users,o=2v,dc=2v,dc=ntw';
+		$filter = '(uid=10000000)';
+		$attributes = array('uid');
+		$test = $this->rildap->CEsearch($baseDn, $filter, $attributes);
+		echo $this->run($test, 'is_true', 'Do I get true back as exit status when I search for something meaningful ?', '');
+		
+		
+		
+		$this->getCodeOrigin();
+		$this->checkLdapReturnObject($this->rildap->result);
+		
+		
+		
+		$this->getCodeOrigin();
+		$this->checkLdapReturnObjectHasNoError($this->rildap->result);
+		
+		
+		
+		$this->getCodeOrigin();
+		$this->checkLdapReturnObjectHasData($this->rildap->result);
+		$this->printLdapResult($this->rildap->result);		
+		
+		
+		
+		
+		
+		
 		
 		$this->subTestTitle('Performing a bad search with wronge BaseDN');
 		$this->getCodeOrigin();

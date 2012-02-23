@@ -243,36 +243,28 @@ class Test_Controller extends CI_Controller {
 			echo $this->run($test, 'Ldap_Error_Object', 'Is LdapReturnObject->data['.$key.'] a Ldap_Error_Object ?', '');
 		}		
 
-		$test = true;
-		foreach ($lro->errors as $key => $error) {
-			if(!isset($error->http_status_code)) $test = false;
-			if(!isset($error->http_status_message)) $test = false;
-			if(!isset($error->message)) $test = false;
-			if(!isset($error->php_errno)) $test = false;
-			if(!isset($error->file)) $test = false;
-			if(!isset($error->line)) $test = false;
-		}
-		echo $this->run($test, 'is_true', 'Are the LdapReturnObject->error attributes all set ?', '');
 		
-		$test = true;
 		foreach ($lro->errors as $key => $error) {
+			$test = true;
 			if(!isset($error->http_status_code)) $test = false;
 			if(!isset($error->http_status_message)) $test = false;
 			if(!isset($error->message)) $test = false;
 			if(!isset($error->php_errno)) $test = false;
 			if(!isset($error->file)) $test = false;
 			if(!isset($error->line)) $test = false;
+			echo $this->run($test, 'is_true', 'Are the LdapReturnObject->error['.$key.'] attributes all set ?', '');
 		}
-		echo $this->run($test, 'is_true', 'Are the LdapReturnObject->error attributes all set ?', '');
-
-		$test = true;
-		foreach ($lro->errors as $key => $error) {		
+		
+		foreach ($lro->errors as $key => $error) {
+			$test = true;
 			if(empty($error->http_status_code)) $test = false;
 			if(empty($error->http_status_message)) $test = false;
 			if(empty($error->message)) $test = false;
 			if(empty($error->php_errno)) $test = false;
-		}
-		echo $this->run($test, 'is_true', 'Are the main LdapReturnObject->error attributes populated ?', '');		
+			if(empty($error->file)) $test = false;
+			if(empty($error->line)) $test = false;
+			echo $this->run($test, 'is_true', 'Are the main LdapReturnObject->error['.$key.'] attributes populated ?', '');
+		}		
 	}
 
 	protected function checkLdapReturnObjectHasNoError($lro) {	
