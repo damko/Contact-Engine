@@ -282,6 +282,21 @@ class CI_Unit_test {
 		$this->_template = $template;
 	}
 
+	/**
+	* Set the template rows
+	*
+	* This lets us set the template to be used to display results
+	*
+	* @author 	Damiano Venturin
+	* @access	public
+	* @param	string
+	* @return	void
+	*/
+	function set_template_rows($template)
+	{
+		$this->_template_rows = $template;
+	}
+		
 	// --------------------------------------------------------------------
 
 	/**
@@ -316,14 +331,20 @@ class CI_Unit_test {
 	 */
 	function _default_template()
 	{
-		$this->_template = "\n".'<table style="width:100%; font-size:small; margin:10px 0; border-collapse:collapse; border:1px solid #CCC;">';
+		$this->_template = "\n".'<table style="width:100%; font-size:small; margin:10px 0; border-collapse:collapse; border:1px solid #CCC; background-color: #e8e8e8;">';
 		$this->_template .= '{rows}';
 		$this->_template .= "\n".'</table>';
-
+		
+		$this->_default_template_rows();
+	}
+	
+	//dam
+	function _default_template_rows()
+	{
 		$this->_template_rows = "\n\t".'<tr>';
 		$this->_template_rows .= "\n\t\t".'<th style="text-align: left; border-bottom:1px solid #CCC;">{item}</th>';
 		$this->_template_rows .= "\n\t\t".'<td style="border-bottom:1px solid #CCC;">{result}</td>';
-		$this->_template_rows .= "\n\t".'</tr>';
+		$this->_template_rows .= "\n\t".'</tr>';		
 	}
 
 	// --------------------------------------------------------------------
