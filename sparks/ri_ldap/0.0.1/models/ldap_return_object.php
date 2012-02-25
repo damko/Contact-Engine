@@ -44,7 +44,7 @@ class Ldap_Return_Object extends CI_Model {
 	* @author 		Damiano Venturin
 	* @copyright 	2V S.r.l.
 	* @license		GPL
-	* @link		http://www.squadrainformatica.com/en/development#mcbsb  MCB-SB official page
+	\* @link		http://www.contact-engine.info
 	* @since		Feb 23, 2012
 	*
 	* @todo

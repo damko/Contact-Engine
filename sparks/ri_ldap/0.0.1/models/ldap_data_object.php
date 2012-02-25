@@ -7,7 +7,7 @@
  * @author 		Damiano Venturin
  * @copyright 	2V S.r.l.
  * @license		GPL
- * @link		http://www.squadrainformatica.com/en/development#mcbsb  MCB-SB official page
+ * @link		http://http://www.contact-engine.info
  * @since		Feb 16, 2012
  * 
  * @todo

@@ -42,7 +42,8 @@ class Rildap_Tests extends Test_Controller {
 		$this->server = 'ldap://ldapmaster0:389';
 		$this->ldapdn = 'cn=admin,dc=2v,dc=ntw';
 		$this->ldappw = 'Wi7Xkcv300z';
-		$this->version = '3';		
+		$this->version = '3';
+		$this->baseDN = 'ou=users,o=ce,dc=2v,dc=ntw';
 	}
 	
 	public function index()
@@ -62,7 +63,9 @@ class Rildap_Tests extends Test_Controller {
 		//runs tests
 		echo '<div id="left">';
 		$this->test_LDAP_Connection();
+		$this->test_Ldap_create();
 		$this->test_Ri_LDAP_Initialize();
+		$this->test_Ri_Ldap_create();
 		$this->test_Ri_Ldap_search();
 		echo '</div>';
 		
@@ -109,10 +112,46 @@ class Rildap_Tests extends Test_Controller {
 		$note = '';
 		$this->server = $old_ldap_server;
 		$test = $this->ldap->connect($this->server,$this->ldapdn,$this->ldappw,$this->version);
-		echo $this->run($test, 'is_true', 'Using '.$this->server.' as ldap connection.', $note);
+		echo $this->run($test, 'is_true', 'Using '.$this->server.' as ldap connection.', $note);	
 		
 	}
 	
+	public function test_Ldap_create()
+	{
+		$this->testTitle('Testing the LDAP Object create() method');
+	
+	
+		$this->subTestTitle('Performing a good creation using all the mandatory attributes');
+		$this->getCodeOrigin();
+		$this->ldap = new Ldap();
+		$this->ldap->connect($this->server,$this->ldapdn,$this->ldappw,$this->version);
+		
+		
+		$random = rand(999,9999);
+		$surname = 'Coyote'.$random;
+		$name = 'Willy'.$random;
+	
+		//entry fields from the LDAP schema MUST attribute
+		$entry = array();
+		$entry['uid'] = $random;
+		$entry['cn'] = $name.' '.$surname;
+		$entry['sn'] = $surname;
+		$entry['givenName'] = $name;
+		$entry['displayName'] = $entry['cn'];
+		$entry['fileAs'] = $entry['cn'];
+		$entry['userPassword'] = 'mypassword';
+		$entry['enabled'] = 'TRUE';
+		$entry['entryCreatedBy'] = 'unit tests';
+		$entry['category'] = 'mycategory';
+		$entry['objectClass'] = 'dueviPerson';		
+		
+		$dn = 'uid='.$entry['uid'].',ou=users,o=ce,dc=2v,dc=ntw';
+		
+		$test = $this->ldap->create($entry, $dn);
+		echo $this->run($test, 'is_true', 'Do I get true back as exit status ?', '');
+		
+	}
+		
 	public function test_Ri_LDAP_Initialize()
 	{
 		$this->testTitle('Testing the Ri_LDAP Object initialize() method');
@@ -132,6 +171,370 @@ class Rildap_Tests extends Test_Controller {
 	}
 	
 	
+	public function test_Ri_Ldap_create()
+	{
+		$this->testTitle('Testing the Ri_LDAP Object create() method');
+	
+	
+		$this->subTestTitle('Performing a good creation using all the mandatory attributes');
+		$this->getCodeOrigin();
+		$this->rildap = new Ri_Ldap();
+	
+		$random = rand(999,9999);
+		$surname = 'Coyote'.$random;
+		$name = 'Willy'.$random;
+	
+		//entry fields from the LDAP schema MUST attribute
+		$entry = array();
+		$entry['uid'] = $random;
+		$entry['cn'] = $name.' '.$surname;
+		$entry['sn'] = $surname;
+		$entry['givenName'] = $name;
+		$entry['displayName'] = $entry['cn'];
+		$entry['fileAs'] = $entry['cn'];
+		$entry['userPassword'] = 'mypassword';
+		$entry['enabled'] = 'TRUE';
+		$entry['entryCreatedBy'] = 'unit tests';
+		$entry['category'] = 'mycategory';
+		$entry['objectClass'] = 'dueviPerson';
+	
+		$dn = 'uid='.$entry['uid'].',ou=users,o=ce,dc=2v,dc=ntw';
+	
+		$test = $this->rildap->CEcreate($entry,$dn);
+		echo $this->run($test, 'is_true', 'Do I get true back as exit status ?', '');
+
+		
+		
+		
+		$this->getCodeOrigin();
+		$this->checkLdapReturnObject($this->rildap->result);
+		
+		
+		
+		$this->getCodeOrigin();
+		$this->checkLdapReturnObjectHasNoError($this->rildap->result);
+		
+		
+		
+		$this->getCodeOrigin();
+		$this->checkLdapReturnObjectHasData($this->rildap->result);
+		$this->printLdapResult($this->rildap->result);
+		
+		
+
+		$this->subTestTitle('Performing a good creation using a wrong DN');
+		$this->getCodeOrigin();
+		$this->rildap = new Ri_Ldap();
+		
+		$random = rand(999,9999);
+		$surname = 'Coyote'.$random;
+		$name = 'Willy'.$random;
+		
+		//entry fields from the LDAP schema MUST attribute
+		$entry = array();
+		$entry['uid'] = $random;
+		$entry['cn'] = $name.' '.$surname;
+		$entry['sn'] = $surname;
+		$entry['givenName'] = $name;
+		$entry['displayName'] = $entry['cn'];
+		$entry['fileAs'] = $entry['cn'];
+		$entry['userPassword'] = 'mypassword';
+		$entry['enabled'] = 'TRUE';
+		$entry['entryCreatedBy'] = 'unit tests';
+		$entry['category'] = 'mycategory';
+		$entry['objectClass'] = 'dueviPerson';
+		
+		$dn = 'ou=fakeDN,o=ce,dc=2v,dc=ntw';
+		
+		$test = $this->rildap->CEcreate($entry,$dn);
+		echo $this->run($test, 'is_false', 'Do I get false back as exit status ?', '');
+		
+		
+		
+		
+		$this->getCodeOrigin();
+		$this->checkLdapReturnObject($this->rildap->result);
+		
+		
+		
+		$this->getCodeOrigin();
+		$this->checkLdapReturnObjectHasError($this->rildap->result);
+		
+		
+		
+		$this->getCodeOrigin();
+		$this->checkLdapReturnObjectHasNoData($this->rildap->result);
+		$this->printLdapResult($this->rildap->result);		
+		
+		
+		
+		
+		$this->subTestTitle('Performing a wrong creation not passing DN');
+		$this->getCodeOrigin();
+		$this->rildap = new Ri_Ldap();
+		
+		$random = rand(999,9999);
+		$surname = 'Coyote'.$random;
+		$name = 'Willy'.$random;
+		
+		//entry fields from the LDAP schema MUST attribute
+		$entry = array();
+		$entry['uid'] = $random;
+		$entry['cn'] = $name.' '.$surname;
+		$entry['sn'] = $surname;
+		$entry['givenName'] = $name;
+		$entry['displayName'] = $entry['cn'];
+		$entry['fileAs'] = $entry['cn'];
+		$entry['userPassword'] = 'mypassword';
+		$entry['enabled'] = 'TRUE';
+		$entry['entryCreatedBy'] = 'unit tests';
+		$entry['category'] = 'mycategory';
+		$entry['objectClass'] = 'dueviPerson';
+
+		$test = $this->rildap->CEcreate($entry);
+		echo $this->run($test, 'is_false', 'Do I get false back as exit status ?', '');
+		
+		
+		
+		
+		$this->getCodeOrigin();
+		$this->checkLdapReturnObject($this->rildap->result);
+		
+		
+		
+		$this->getCodeOrigin();
+		$this->checkLdapReturnObjectHasError($this->rildap->result);
+		
+		
+		
+		$this->getCodeOrigin();
+		$this->checkLdapReturnObjectHasNoData($this->rildap->result);
+		$this->printLdapResult($this->rildap->result);		
+		
+		
+		
+		$this->subTestTitle('Performing a wrong creation passing empty DN');
+		$this->getCodeOrigin();
+		$this->rildap = new Ri_Ldap();
+		
+		$random = rand(999,9999);
+		$surname = 'Coyote'.$random;
+		$name = 'Willy'.$random;
+		
+		//entry fields from the LDAP schema MUST attribute
+		$entry = array();
+		$entry['uid'] = $random;
+		$entry['cn'] = $name.' '.$surname;
+		$entry['sn'] = $surname;
+		$entry['givenName'] = $name;
+		$entry['displayName'] = $entry['cn'];
+		$entry['fileAs'] = $entry['cn'];
+		$entry['userPassword'] = 'mypassword';
+		$entry['enabled'] = 'TRUE';
+		$entry['entryCreatedBy'] = 'unit tests';
+		$entry['category'] = 'mycategory';
+		$entry['objectClass'] = 'dueviPerson';
+		
+		$dn = '';
+		
+		$test = $this->rildap->CEcreate($entry, $dn);
+		echo $this->run($test, 'is_false', 'Do I get false back as exit status ?', '');
+		
+		
+		
+		
+		$this->getCodeOrigin();
+		$this->checkLdapReturnObject($this->rildap->result);
+		
+		
+		
+		$this->getCodeOrigin();
+		$this->checkLdapReturnObjectHasError($this->rildap->result);
+		
+		
+		
+		$this->getCodeOrigin();
+		$this->checkLdapReturnObjectHasNoData($this->rildap->result);
+		$this->printLdapResult($this->rildap->result);		
+		
+		
+		
+		$this->subTestTitle('Performing a wrong creation passing a DN as array');
+		$this->getCodeOrigin();
+		$this->rildap = new Ri_Ldap();
+		
+		$random = rand(999,9999);
+		$surname = 'Coyote'.$random;
+		$name = 'Willy'.$random;
+		
+		//entry fields from the LDAP schema MUST attribute
+		$entry = array();
+		$entry['uid'] = $random;
+		$entry['cn'] = $name.' '.$surname;
+		$entry['sn'] = $surname;
+		$entry['givenName'] = $name;
+		$entry['displayName'] = $entry['cn'];
+		$entry['fileAs'] = $entry['cn'];
+		$entry['userPassword'] = 'mypassword';
+		$entry['enabled'] = 'TRUE';
+		$entry['entryCreatedBy'] = 'unit tests';
+		$entry['category'] = 'mycategory';
+		$entry['objectClass'] = 'dueviPerson';
+		
+		$dn = array('ou=fakeDN,o=ce,dc=2v,dc=ntw');
+		
+		$test = $this->rildap->CEcreate($entry, $dn);
+		echo $this->run($test, 'is_false', 'Do I get false back as exit status ?', '');
+		
+		
+		
+		
+		$this->getCodeOrigin();
+		$this->checkLdapReturnObject($this->rildap->result);
+		
+		
+		
+		$this->getCodeOrigin();
+		$this->checkLdapReturnObjectHasError($this->rildap->result);
+		
+		
+		
+		$this->getCodeOrigin();
+		$this->checkLdapReturnObjectHasNoData($this->rildap->result);
+		$this->printLdapResult($this->rildap->result);		
+		
+		
+		
+		$this->subTestTitle('Performing a wrong creation passing an empty entry');
+		$this->getCodeOrigin();
+		$this->rildap = new Ri_Ldap();
+		
+		$random = rand(999,9999);
+		$surname = 'Coyote'.$random;
+		$name = 'Willy'.$random;
+		
+		//entry fields from the LDAP schema MUST attribute
+		$entry = '';
+		$dn = 'uid=myuid,ou=users,o=ce,dc=2v,dc=ntw';
+		
+		$test = $this->rildap->CEcreate($entry, $dn);
+		echo $this->run($test, 'is_false', 'Do I get false back as exit status ?', '');
+		
+		
+		
+		
+		$this->getCodeOrigin();
+		$this->checkLdapReturnObject($this->rildap->result);
+		
+		
+		
+		$this->getCodeOrigin();
+		$this->checkLdapReturnObjectHasError($this->rildap->result);
+		
+		
+		
+		$this->getCodeOrigin();
+		$this->checkLdapReturnObjectHasNoData($this->rildap->result);
+		$this->printLdapResult($this->rildap->result);	
+
+		
+		
+		
+		
+		
+		$this->subTestTitle('Performing a good creation forgetting the objectClass');
+		$this->getCodeOrigin();
+		$this->rildap = new Ri_Ldap();
+		
+		$random = rand(999,9999);
+		$surname = 'Coyote'.$random;
+		$name = 'Willy'.$random;
+		
+		//entry fields from the LDAP schema MUST attribute
+		$entry = array();
+		$entry['uid'] = $random;
+		$entry['cn'] = $name.' '.$surname;
+		$entry['sn'] = $surname;
+		$entry['givenName'] = $name;
+		$entry['displayName'] = $entry['cn'];
+		$entry['fileAs'] = $entry['cn'];
+		$entry['userPassword'] = 'mypassword';
+		$entry['enabled'] = 'TRUE';
+		$entry['entryCreatedBy'] = 'unit tests';
+		$entry['category'] = 'mycategory';
+		//$entry['objectClass'] = 'dueviPerson';
+		
+		$dn = 'uid='.$entry['uid'].',ou=users,o=ce,dc=2v,dc=ntw';
+		
+		$test = $this->rildap->CEcreate($entry,$dn);
+		echo $this->run($test, 'is_false', 'Do I get false back as exit status ?', '');
+		
+		
+		
+		
+		$this->getCodeOrigin();
+		$this->checkLdapReturnObject($this->rildap->result);
+		
+		
+		
+		$this->getCodeOrigin();
+		$this->checkLdapReturnObjectHasError($this->rildap->result);
+		
+		
+		
+		$this->getCodeOrigin();
+		$this->checkLdapReturnObjectHasNoData($this->rildap->result);
+		$this->printLdapResult($this->rildap->result);		
+		
+		
+		
+
+		
+		$this->subTestTitle('Performing a good creation forgetting the uid');
+		$this->getCodeOrigin();
+		$this->rildap = new Ri_Ldap();
+		
+		$random = rand(999,9999);
+		$surname = 'Coyote'.$random;
+		$name = 'Willy'.$random;
+		
+		//entry fields from the LDAP schema MUST attribute
+		$entry = array();
+		//$entry['uid'] = $random;
+		$entry['cn'] = $name.' '.$surname;
+		$entry['sn'] = $surname;
+		$entry['givenName'] = $name;
+		$entry['displayName'] = $entry['cn'];
+		$entry['fileAs'] = $entry['cn'];
+		$entry['userPassword'] = 'mypassword';
+		$entry['enabled'] = 'TRUE';
+		$entry['entryCreatedBy'] = 'unit tests';
+		$entry['category'] = 'mycategory';
+		$entry['objectClass'] = 'dueviPerson';
+		
+		$dn = 'uid='.$entry['uid'].',ou=users,o=ce,dc=2v,dc=ntw';
+		
+		$test = $this->rildap->CEcreate($entry,$dn);
+		echo $this->run($test, 'is_false', 'Do I get false back as exit status ?', '');
+		
+		
+		
+		
+		$this->getCodeOrigin();
+		$this->checkLdapReturnObject($this->rildap->result);
+		
+		
+		
+		$this->getCodeOrigin();
+		$this->checkLdapReturnObjectHasError($this->rildap->result);
+		
+		
+		
+		$this->getCodeOrigin();
+		$this->checkLdapReturnObjectHasNoData($this->rildap->result);
+		$this->printLdapResult($this->rildap->result);		
+	}
+		
 	public function test_Ri_Ldap_search()
 	{
 		$this->testTitle('Testing the Ri_LDAP Object CEsearch() method');
@@ -140,11 +543,12 @@ class Rildap_Tests extends Test_Controller {
 		$this->subTestTitle('Performing a good search');
 		$this->getCodeOrigin();
 		$this->rildap = new Ri_Ldap();
-		$baseDn = 'ou=users,o=2v,dc=2v,dc=ntw'; 
+		$baseDN = $this->baseDN; 
 		$filter = '(uid=10000000)';
-		$attributes = array('uid','cn','sn','giveName'); 
-		$test = $this->rildap->CEsearch($baseDn, $filter, $attributes);	
-		echo $this->run($test, 'is_true', 'Do I get true back as exit status when I search for something meaningful ?', '');
+		//$attributes = array('uid','cn','sn','giveName');
+		$attributes = array(); 
+		$test = $this->rildap->CEsearch($baseDN, $filter, $attributes);	
+		echo $this->run($test, 'is_true', 'Do I get true back as exit status ?', '');
 		
 		
 		
@@ -170,11 +574,11 @@ class Rildap_Tests extends Test_Controller {
 		$this->subTestTitle('Performing a search which returns only one attribute');
 		$this->getCodeOrigin();
 		$this->rildap = new Ri_Ldap();
-		$baseDn = 'ou=users,o=2v,dc=2v,dc=ntw';
+		$baseDN = $this->baseDN;
 		$filter = '(uid=10000000)';
 		$attributes = array('uid');
-		$test = $this->rildap->CEsearch($baseDn, $filter, $attributes);
-		echo $this->run($test, 'is_true', 'Do I get true back as exit status when I search for something meaningful ?', '');
+		$test = $this->rildap->CEsearch($baseDN, $filter, $attributes);
+		echo $this->run($test, 'is_true', 'Do I get true back as exit status ?', '');
 		
 		
 		
@@ -201,10 +605,10 @@ class Rildap_Tests extends Test_Controller {
 		$this->subTestTitle('Performing a bad search with wronge BaseDN');
 		$this->getCodeOrigin();
 		$this->rildap = new Ri_Ldap();
-		$baseDn = 'ou=user,o=2v,dc=2v,dc=ntw';
+		$baseDN = 'ou=user,o=ce,dc=2v,dc=ntw';
 		$filter = '(uid=10000000)';
 		$attributes = array('uid','cn','sn','giveName');
-		$test = $this->rildap->CEsearch($baseDn, $filter, $attributes);
+		$test = $this->rildap->CEsearch($baseDN, $filter, $attributes);
 		echo $this->run($test, 'is_false', 'Do I get false back as exit status when I search with a wrong baseDN ?', '');
 		
 		
@@ -231,10 +635,10 @@ class Rildap_Tests extends Test_Controller {
 		$this->subTestTitle('Performing a bad search passing a filter as array');
 		$this->getCodeOrigin();
 		$this->rildap = new Ri_Ldap();
-		$baseDn = 'ou=users,o=2v,dc=2v,dc=ntw';
+		$baseDN = $this->baseDN;
 		$filter = array('(uid=10000000)');
 		$attributes = array('uid','cn','sn','giveName');
-		$test = $this->rildap->CEsearch($baseDn, $filter, $attributes);
+		$test = $this->rildap->CEsearch($baseDN, $filter, $attributes);
 		echo $this->run($test, 'is_false', 'Do I get false back as exit status when I search with a wrong filter ?', '');
 		
 		
@@ -260,10 +664,10 @@ class Rildap_Tests extends Test_Controller {
 		$this->subTestTitle('Performing a bad search passing "attributes" as a string');
 		$this->getCodeOrigin();
 		$this->rildap = new Ri_Ldap();
-		$baseDn = 'ou=users,o=2v,dc=2v,dc=ntw';
+		$baseDN = $this->baseDN;
 		$filter = '(uid=10000000)';
 		$attributes = 'uid,cn,sn,giveName';
-		$test = $this->rildap->CEsearch($baseDn, $filter, $attributes);
+		$test = $this->rildap->CEsearch($baseDN, $filter, $attributes);
 		echo $this->run($test, 'is_false', 'Do I get false back as exit status when I search with a wrong filter ?', '');
 		
 		
@@ -288,10 +692,10 @@ class Rildap_Tests extends Test_Controller {
 		$this->subTestTitle('Performing a bad search passing attributesOnly = 3');
 		$this->getCodeOrigin();
 		$this->rildap = new Ri_Ldap();
-		$baseDn = 'ou=users,o=2v,dc=2v,dc=ntw';
+		$baseDN = $this->baseDN;
 		$filter = '(uid=10000000)';
 		$attributes = array('uid','cn','sn','giveName');
-		$test = $this->rildap->CEsearch($baseDn, $filter, $attributes, '3');
+		$test = $this->rildap->CEsearch($baseDN, $filter, $attributes, '3');
 		echo $this->run($test, 'is_false', 'Do I get false back as exit status when I search with a wrong filter ?', '');
 		
 		
@@ -315,10 +719,10 @@ class Rildap_Tests extends Test_Controller {
 		$this->subTestTitle('Performing a good search for a not existent entry');
 		$this->getCodeOrigin();
 		$this->rildap = new Ri_Ldap();
-		$baseDn = 'ou=users,o=2v,dc=2v,dc=ntw';
+		$baseDN = $this->baseDN;
 		$filter = '(uid=100000000000000000000000000000000000000)';
 		$attributes = array('uid','cn','sn','giveName');
-		$test = $this->rildap->CEsearch($baseDn, $filter, $attributes);
+		$test = $this->rildap->CEsearch($baseDN, $filter, $attributes);
 		echo $this->run($test, 'is_true', 'Do I get true back as exit status when I search for an entry that can not be found ?', '');
 		
 		
@@ -345,10 +749,10 @@ class Rildap_Tests extends Test_Controller {
 		echo '<p>I expect to not get the notification about the baseDN because the filter is tested first</p>';
 		$this->getCodeOrigin();
 		$this->rildap = new Ri_Ldap();
-		$baseDn = 'ou=user,o=2v,dc=2v,dc=ntw';
+		$baseDN = 'ou=user,o=ce,dc=2v,dc=ntw';
 		$filter = array('(uid=100000000000000000000000000000000000000)');
 		$attributes = array('uid','cn','sn','giveName');
-		$test = $this->rildap->CEsearch($baseDn, $filter, $attributes);
+		$test = $this->rildap->CEsearch($baseDN, $filter, $attributes);
 		echo $this->run($test, 'is_false', 'Do I get false back as exit status when I search with a wrong baseDN ?', '');
 		
 		
@@ -374,10 +778,10 @@ class Rildap_Tests extends Test_Controller {
 		$this->subTestTitle('Performing a good search with a wildcard filter');
 		$this->getCodeOrigin();
 		$this->rildap = new Ri_Ldap();
-		$baseDn = 'ou=users,o=2v,dc=2v,dc=ntw';
+		$baseDN = $this->baseDN;
 		$filter = '(uid=100*)';
 		$attributes = array('uid','cn','sn','giveName');
-		$test = $this->rildap->CEsearch($baseDn, $filter, $attributes);
+		$test = $this->rildap->CEsearch($baseDN, $filter, $attributes);
 		echo $this->run($test, 'is_true', 'Do I get true back as exit status when I search with a wrong baseDN ?', '');
 		
 		
@@ -433,13 +837,13 @@ class Rildap_Tests extends Test_Controller {
 		$this->subTestTitle('Performing a good search with a wildcard filter and good pagination parameters');
 		$this->getCodeOrigin();
 		$this->rildap = new Ri_Ldap();
-		$baseDn = 'ou=users,o=2v,dc=2v,dc=ntw';
+		$baseDN = $this->baseDN;
 		$filter = '(uid=10*)';
 		$attributes = array('uid','cn','sn','giveName');
 		$sort_by = array('sn','givenName');
 		$wanted_page = 1;
 		$items_per_page = 3;
-		$test = $this->rildap->CEsearch($baseDn, $filter, $attributes, 0, null, $sort_by, 'desc', $wanted_page, $items_per_page);
+		$test = $this->rildap->CEsearch($baseDN, $filter, $attributes, 0, null, $sort_by, 'desc', $wanted_page, $items_per_page);
 		//$attributesOnly = 0, $deref = null, array $sort_by = null, $flow_order = null, $wanted_page = null, $items_page = null
 		echo $this->run($test, 'is_true', 'Do I get true back as exit status ?', '');
 		
@@ -508,14 +912,14 @@ class Rildap_Tests extends Test_Controller {
 		$this->subTestTitle('Performing a good search with a wildcard filter and wrong pagination parameter (order = myorder)');
 		$this->getCodeOrigin();
 		$this->rildap = new Ri_Ldap();
-		$baseDn = 'ou=users,o=2v,dc=2v,dc=ntw';
+		$baseDN = $this->baseDN;
 		$filter = '(uid=10*)';
 		$attributes = array('uid','cn','sn','giveName');
 		$sort_by = array('sn','givenName');
 		$wanted_page = 1;
 		$items_per_page = 3;
 		$order = 'myorder';
-		$test = $this->rildap->CEsearch($baseDn, $filter, $attributes, 0, null, $sort_by, $order, $wanted_page, $items_per_page);
+		$test = $this->rildap->CEsearch($baseDN, $filter, $attributes, 0, null, $sort_by, $order, $wanted_page, $items_per_page);
 		echo $this->run($test, 'is_false', 'Do I get false back as exit status when I search with a wrong baseDN ?', '');
 		
 		
@@ -540,14 +944,14 @@ class Rildap_Tests extends Test_Controller {
 		$this->subTestTitle('Performing a good search with a wildcard filter and wrong pagination parameter (wanted_page not integer)');
 		$this->getCodeOrigin();
 		$this->rildap = new Ri_Ldap();
-		$baseDn = 'ou=users,o=2v,dc=2v,dc=ntw';
+		$baseDN = $this->baseDN;
 		$filter = '(uid=10*)';
 		$attributes = array('uid','cn','sn','giveName');
 		$sort_by = array('sn','givenName');
 		$wanted_page = array('1');
 		$items_per_page = 3;
 		$order = 'asc';
-		$test = $this->rildap->CEsearch($baseDn, $filter, $attributes, 0, null, $sort_by, $order, $wanted_page, $items_per_page);
+		$test = $this->rildap->CEsearch($baseDN, $filter, $attributes, 0, null, $sort_by, $order, $wanted_page, $items_per_page);
 		echo $this->run($test, 'is_false', 'Do I get false back as exit status when I search with a wrong baseDN ?', '');
 		
 		
@@ -572,14 +976,14 @@ class Rildap_Tests extends Test_Controller {
 		$this->subTestTitle('Performing a good search with a wildcard filter and wrong pagination parameter (items per page not integer)');
 		$this->getCodeOrigin();
 		$this->rildap = new Ri_Ldap();
-		$baseDn = 'ou=users,o=2v,dc=2v,dc=ntw';
+		$baseDN = $this->baseDN;
 		$filter = '(uid=10*)';
 		$attributes = array('uid','cn','sn','giveName');
 		$sort_by = array('sn','givenName');
 		$wanted_page = 1;
 		$items_per_page = '3';
 		$order = 'asc';
-		$test = $this->rildap->CEsearch($baseDn, $filter, $attributes, 0, null, $sort_by, $order, $wanted_page, $items_per_page);
+		$test = $this->rildap->CEsearch($baseDN, $filter, $attributes, 0, null, $sort_by, $order, $wanted_page, $items_per_page);
 		echo $this->run($test, 'is_false', 'Do I get false back as exit status when I search with a wrong baseDN ?', '');
 		
 		
