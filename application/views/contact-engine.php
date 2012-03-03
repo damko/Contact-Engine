@@ -117,8 +117,9 @@ the relationships between the three objects.<br/>
 		<li><a href="https://github.com/damko/Contact-Engine/issues" target="_blank">Issues</a></li>
 		<li><a href="https://github.com/damko/Contact-Engine/wiki">Wiki</a></li>
     		<li><a href="<?php echo site_url('home/documentation'); ?>">Documentation</a></li>
-    		<li><a href="<?php echo site_url('ce_tests'); ?>">Unit Tests Page (verbose on)</a></li>
-    		<li><a href="<?php echo site_url('ce_tests?verbose=off'); ?>">Unit Tests Page (verbose off)</a></li>
+    		<li><a href="<?php echo site_url('ce_tests'); ?>">C.E. Unit Tests Page (verbose on)</a></li>
+    		<li><a href="<?php echo site_url('ce_tests?verbose=off'); ?>">C.E. Unit Tests Page (verbose off)</a></li>
+    		<li><a href="<?php echo site_url('rildap_tests'); ?>">Ri-Ldap Unit Tests Page</a></li>
     		<li><a href="https://github.com/damko/Contact-Engine/wiki/How-to-install" target="_blank">How to install</a></li>
     	</ul>
     	

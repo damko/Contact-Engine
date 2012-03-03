@@ -1,55 +1,119 @@
-<?php  if ( ! defined('BASEPATH')) exit('No direct script access allowed');
-// Created on Sep 2, 2011 by dam 
-// d.venturin@squadrainformatica.com
+<?php  if ( ! defined('BASEPATH')) exit('No direct script access allowed'); 
 
+/**
+ * This object interacts directly with a LDAP server and performs on it a full CRUD. 
+ * It connects to a master LDAP server to create, update and delete and to a slave LDAP server performs to read.
+ * It's extented and loaded by Ri_Ldap object. 
+ * 
+ * Every method which interacts with LDAP returns true or false as an exit status, while the LDAP errors or the LDAP results are stored in Ldap->result.
+ * Ldap->result is a LDAP_Return_Object which is composed of other two object LDAP_Error_Object and LDAP_Data_Object.
+ * 
+ * @author 		Damiano Venturin
+ * @copyright 	2V S.r.l.
+ * @license		GPL
+ * @link		http://www.contact-engine.info
+ * @since		Sep 2, 2011
+ * 
+ * @todo		Implement fail over for masters and slave server. Implement a loadbalancing system for slaves.
+ */
 class Ldap extends CI_Model {
-	protected $connected;
-	public $connection;
-	public $dn;
-	protected $connection_error;
-	protected $results_number;
-	protected $results_got_number;
-	protected $results_pages;
-	protected $results_page;
 	
+	protected $connected;
+	public $connection = NULL;	//the connection resource
+	public $data;	//this is where ldap results are stored until the end of the processes and then they are pushed into $this->result by the LDAP_Return_Object->storeData(); 
+	protected $debug = false;
+	public $dn;
+	public $result;
+	protected $service_unavailable = false;
+	
+	/**
+	 * Constructs the object and sets another PHP Error Handler 
+	 * 
+	 * @access		public
+	 * @param		none
+	 * @var			
+	 * @return		nothing
+	 * @example
+	 * @see
+	 * 
+	 * @author 		Damiano Venturin
+	 * @copyright 	2V S.r.l.
+	 * @license		GPL
+	 * @link		http://www.contact-engine.info
+	 * @since		Feb 24, 2012
+	 * 
+	 * @todo		
+	 */
 	public function __construct() {
 		
 		parent::__construct();
 		
-		$old_error_handler = set_error_handler("LdapErrorHandler");
+		set_error_handler(array(&$this, 'LdapErrorHandler'));
+		
+		//this is what will be returned
+		$this->result = new Ldap_Return_Object();
+		$this->data = new Ldap_Data_Object();
 		
 		log_message('debug', 'Ldap class has been loaded');
 		
 	}
-	
+
+	/**
+	* Destroies the object and restores the previous PHP Error Handler
+	*
+	* @access		public
+	* @param		none
+	* @var
+	* @return		nothing
+	* @example
+	* @see
+	*
+	* @author 		Damiano Venturin
+	* @copyright 	2V S.r.l.
+	* @license		GPL
+	* @link		http://www.contact-engine.info
+	* @since		Feb 24, 2012
+	*
+	* @todo
+	*/	
 	public function __destruct()
 	{
-		$this->disconnect(); //TODO is this correct?
 		restore_error_handler();
 	}
 	
 	/**
-	 * 
 	 * Connects to a given ldap server
-	 * 	useful infos:
+	 * 	useful info:
 	 *	openldap error table:http://www.zytrax.com/books/ldap/ch12/
-	 *	about referral: http://www.zytrax.com/books/ldap/ch11/referrals.html
-	 *	about referral: http://www.zytrax.com/books/ldap/ch7/referrals.html
-	 *
-	 * @param text $ldapurl	
-	 * @param text $ldapdn
-	 * @param text $ldappw
-	 * @return boolean
+	 *	about referral: http://www.zytrax.com/books/ldap/ch11/referrals.html - http://www.zytrax.com/books/ldap/ch7/referrals.html 
+	 * 
+	 * @access		public
+	 * @param		$ldapurl	string	The LDAP connection string like "ldap://hostname:port"
+	 * @param		$ldapdn		string	The DN (distinguished name) for the LDAP user like "cn=damin,dc=example,dc=com". Used for LDAP binding.
+	 * @param		$ldappw		string	The password for the specified DN. Used for LDAP binding.
+	 * @param		$version	integer	The LDAP version. Default "3".
+	 * @var			
+	 * @return		boolean		True if it can connect and bind otherwise false.
+	 * @example
+	 * @see
+	 * 
+	 * @author 		Damiano Venturin
+	 * @copyright 	2V S.r.l.
+	 * @license		GPL
+	 * @link		http://www.contact-engine.info
+	 * @since		Feb 24, 2012
+	 * 
+	 * @todo		
 	 */
 	public function connect($ldapurl,$ldapdn,$ldappw,$version = '3') {
 		
 		// Connecting to LDAP
 		$this->connection = ldap_connect($ldapurl);
-		if(!$this->connection)
+		if(!is_resource($this->connection))
 		{
 			$this->connected = false;
-			$this->connection_error = 'Can not connect to the given LDAP server '.$ldapurl.' Check the LDAP url';
-			log_message('debug', $this->connection_error);
+			$this->report('connection_false',$ldapurl);
+			return false;
 		} 
 
 		// Ldap_connect doesn't work well. It fails ONLY if the protocol is wrong, let' say lda:// rather than ldap:// otherwise it's always true.
@@ -75,20 +139,32 @@ class Ldap extends CI_Model {
 			return true;
 		} else {
 			$this->connected = false;
-			$this->connection_error = 'Can not bind to the given LDAP server '.$ldapurl.' Check the LDAP url and credentials';
-			log_message('debug', $this->connection_error);
+			$this->report('connection_false',$ldapurl);
 			return false;
 		}
 	}	
 	
+	
 	/**
-	 * 
-	 * Connects another LDAP server as specified in the referral if the given server can not perform the request.
+	 * Connects to another LDAP server as specified in the referral if the given server can not perform the request.
 	 * THIS FUNCTION IS INTENTIONALLY COMMENTED and NOT USED because there is a big deal with referral. If the server
 	 * is down, there is no referral so it's much better to try to connect to another server specified in the config
-	 * file. So this method is here just for documentation purpose in case of need.
-	 * @param unknown_type $connection
-	 * @param unknown_type $referral
+	 * file. So this method is here just for documentation purpose in case of need. 
+	 * 
+	 * @access		private
+	 * @param		
+	 * @var			
+	 * @return		
+	 * @example
+	 * @see
+	 * 
+	 * @author 		Damiano Venturin
+	 * @copyright 	2V S.r.l.
+	 * @license		GPL
+	 * @link		http://www.contact-engine.info
+	 * @since		Feb 24, 2012
+	 * 
+	 * @todo		Needs to be evaluated and, maybe, implemented		
 	 */
 	private function rebind($connection=null,$referral=null) {
 //		//I leave the 2 parameters optionals to avoid php errors but they are both mandatory
@@ -130,266 +206,628 @@ class Ldap extends CI_Model {
 //		 }
 	}	
 	
+	/**
+	 * Unbinds the current connection to LDAP
+	 * 
+	 * @access		public
+	 * @param		none
+	 * @var			
+	 * @return		nothing
+	 * @example
+	 * @see
+	 * 
+	 * @author 		Damiano Venturin
+	 * @copyright 	2V S.r.l.
+	 * @license		GPL
+	 * @link		http://www.contact-engine.info
+	 * @since		Feb 24, 2012
+	 * 
+	 * @todo		
+	 */
 	public function disconnect() {
 		if(is_resource($this->connection)) ldap_unbind($this->connection);
 	}
 	
-	private function valideEntry() {
-		return true;
-	}
-	
-	public function search($baseDN, $filter,array $attributes, $attributesOnly = 0, $sizeLimit = null, $timeLimit = null, $deref = null, array $sort_by = null, $flow_order = null, $wanted_page = null, $items_page = null) {
-		//TODO Note: it's possible to perform a search on multiple DNs. http://www.php.net/manual/en/function.ldap-search.php#94554 This might be useful if I want to perform a search on both
-		//people and organizations in one shot
-		
-		//validation
-		if(!$this->connection) return false;
-		if(!$baseDN) return false;
-		if(!$filter) return false;
-		$attrs = array();
-		if(!empty($attributes)) $attrs = $attributes;
-		if(is_null($sizeLimit)) $sizeLimit = $this->config->item('sizeLimit');
-		if(is_null($timeLimit)) $timeLimit = $this->config->item('timeLimit');
-		if(is_null($deref)) $deref = $this->config->item('defer');
-
-		//$result = ldap_search($this->connection, $baseDN, $filter, $attrs, $attributesOnly, $sizeLimit, $timeLimit, $deref) or die ("Error in search LDAP query");
-		
-		//performing the search
-		//I avoided to use ldap_search because when the results number is > 1 the "dn" is always returned irrespectively of which attributes types are requested
-		//and this gives problems when sorting (the first item goes somewhere else in the array and it's hard to remove it)
-		$result = ldap_list($this->connection, $baseDN, $filter, $attrs, $attributesOnly, $sizeLimit, $timeLimit, $deref) or die ("Error in search LDAP query");
-		
-		//count entries
-		$this->results_number = ldap_count_entries( $this->connection, $result ); //when the result is > 1 the first entry is always the DN. 
-		
-		//retrieve entries: sort and paginate results if necessary
-		$data = $this->sort_paginate($result, $sort_by, $flow_order, $wanted_page, $items_page);
-				
-		return $this->add_info($data);
-	}
-	
-	private function add_info($data)
-	{
-		//adding info about the query results
-		//TODO to be really restfull I should also pass the url to get the next page
-		if(count($data) >= 1)
-		{
-			$data['RestStatus'] = array(
-										'results_number' => $this->results_number,
-										'results_got_number' => $this->results_got_number,
-										'results_pages' => $this->results_pages,
-										'results_page' => $this->results_page,												
-			);
-		}
-		return $data;
-	}
 	
 	/**
-	* Order a search in ascending and descending order.
-	*
-	* @param resource from ldap_connect()
-	* @param resource from ldap_search()
-	* @param string of attribute to order
-	* @param string "asc" or "desc"
-	* @param integer page number, first is 0 zero
-	* @param integer entries per page
-	* @return string[]
-	*/
-	private function sort_paginate($result, array $sFields = null, $sOrder = "asc", $iPage = null, $iPerPage = null )
-	{				
-		if(is_null($sFields)) $sFields = array();
-		
-		if ( $iPage === null || $iPerPage === null )
-		{
-			# fetch all in one page
-			$iStart = 0;
-			$iEnd = $this->results_number - 1;
-		}
-		else
-		{
-			# calculate range of page
-			$iStart = $iPerPage * $iPage;
-			$iEnd = $iStart + $iPerPage - 1;
-			if ( $sOrder === "desc" )
-			{
-				# revert range
-				$iStart = $this->results_number - 1 - $iEnd;
-				$iEnd = $iStart + $iPerPage - 1;
-			}
-		}
-		
-		# fetch entries
-		foreach ($sFields as $sField) {
-			ldap_sort( $this->connection, $result, $sField );
-		}
-		
-		$data = array();
-		for (
-	        	$iCurrent = 0, $rEntry = ldap_first_entry( $this->connection, $result );
-				$iCurrent <= $iEnd && is_resource( $rEntry );
-				$iCurrent++, $rEntry = ldap_next_entry( $this->connection, $rEntry )
-			) {
-			if ( $iCurrent >= $iStart )
-			{
-				array_push( $data, ldap_get_attributes( $this->connection, $rEntry ) );
-			}
-		}
-		
-		//adding RESTinfo
-		$this->results_got_number = count($data);
-		
-		$iPerPage == 0 ? $this->results_pages = 1 : $this->results_pages =  ceil( $this->results_number / $iPerPage );
-		
-		if($this->results_got_number == $this->results_number) 
-		{
-			$this->results_page = 1;
-		} else {
-			$this->results_page = $iPage;
-		}
-		
-		# if order is desc revert page's entries
-		return $sOrder === "desc" ? array_reverse( $data ) : $data;
-	}	
+	 * Creates a LDAP entry
+	 * 
+	 * @access		public
+	 * @param		$entry	array	Mandatory. The array containing the data for the entry.
+	 * @param		$dn		string	The DN of the new entry.
+	 * @var			
+	 * @return		boolean
+	 * @example
+	 * @see
+	 * 
+	 * @author 		Damiano Venturin
+	 * @copyright 	2V S.r.l.
+	 * @license		GPL
+	 * @link		http://www.contact-engine.info
+	 * @since		Feb 25, 2012
+	 * 
+	 * @todo		
+	 */
+	public function create($entry, $dn = null) {
 	
-	public function create($dn, array $entry) {
-
-/* 		if(!$this->connection) return false;
-		if(empty($dn) or is_array($dn)) return false;
-		if(empty($entry)) return false;
-		if(!$this->valideEntry($entry)) return false; */
+		if(isset($dn)) $this->dn = $dn;
 		
-		//validation
-		if(is_object($return = $this->commonValidationsSet($entry))) return $return;
-		
-		//return ldap_add($this->connection,$dn,$entry);
-
-		$params = array(
-						'command' => 'ldap_add',
-						'entry' => $entry,
-		);
-		try {
-			$this->run($params);
-		} catch (OutOfRangeException $e) {
-			return $e;
-		}
-		
-		return true;
-		
-	}
-	
-	public function update(array $entry) {
-		//validation
-		if(is_object($return = $this->commonValidationsSet($entry))) return $return;
-		
-		$params = array(
-						'command' => 'ldap_modify',
-						'entry' => $entry,
-						);
-		try {
-			$this->run($params);
-		} catch (OutOfRangeException $e) {
-			return $e;
-		}
-
-		return true;
+		$params = get_defined_vars();
+		$params['command'] = 'ldap_add';
+				
+		return $this->run($params) ? true : false;	
 	}
 	
 	public function delete($dn)
 	{
 		if(empty($dn) or is_array($dn)) return $this->report('dn','');
-		
+	
 		$params = array(
-						'command' => 'ldap_delete',
-						'entry' => $entry,
+								'command' => 'ldap_delete',
+								'entry' => $entry,
 		);
 		try {
-			$this->run($params);
+			$result = $this->run($params);
 		} catch (OutOfRangeException $e) {
 			return $e;
 		}
-		
-		return true;		
+	
+		return ($result) ? true : false;
 	}
 	
+	/**
+	 * Performs a LDAP search with "server side pagination". "Server side pagination" means that only a specified subset of the results is returned. 
+	 * It stores the LDAP results in LDAP->data adding useful information about the result itself so that it's easy to make pagination on the client side. 
+	 * 
+	 * @access		public
+	 * @param		$baseDN			string		Search param. Mandatory. The LDAP baseDN like "ou=sales,dc=example,dc=com".
+	 * @param		$filter			string		Search param. Mandatory. The LDAP filter string like "(&(givenName=John)(l=Dallas))".
+	 * @param		$attributes		array		Search param. A simple array containing the LDAP attributes to get in return like "array('uid','cn','givenName');". If it's not set returns all the attributes for the entry.
+	 * @param		$attributesOnly	integer		Search param. It can be '0' or '1'. If it's set to '1' the search returns only the attributes without the values.
+	 * @param		$sizeLimit		integer		Search param. It limits the max amount of items to get from LDAP. If it's not set it will be substituted with the value stored in the config file.
+	 * @param		$timeLimit		integer		Search param. It limits the max amount of time to perform the LDAP search query. If it's not set it will be substituted with the value stored in the config file.
+	 * @param		$deref			integer		Search param. It specifies how aliases should be handled during the search. http://www.php.net/ldap_list
+	 * @param		$sort_by		array		Server side pagination parameter. A simple array containing the LDAP attributes order like "array('sn','givenName');". This will make results ordered by lastname and firstname.
+	 * @param		$flow_order		string		Server side pagination parameter. It could be "asc" or "desc". "asc" -> from A to Z or from smaller numbers to bigger. Viceversa for "desc".
+	 * @param		$wanted_page	integer		Server side pagination parameter. The page number to send back. Let's say that a search with 5 items per pages makes a 13 pages result. With "$wanted_page = 3" I get back items from 10 to 14.
+	 * @param		$items_page		integer		Server side pagination parameter. The number of items for page.
+	 * @var			
+	 * @return		
+	 * @example
+	 * @see
+	 * 
+	 * @author 		Damiano Venturin
+	 * @copyright 	2V S.r.l.
+	 * @license		GPL
+	 * @link		http://www.contact-engine.info
+	 * @since		Feb 24, 2012
+	 * 
+	 * @todo	It's possible to perform a search on multiple DNs. http://www.php.net/manual/en/function.ldap-search.php#94554 This might be useful if I want to perform a search on both people and organizations in one shot	
+	 */
+	public function search($baseDN, $filter, $attributes = null, $attributesOnly = 0, $sizeLimit = null, $timeLimit = null, $deref = null, $sort_by = null, $flow_order = null, $wanted_page = null, $items_page = null) {
+	
+		//I avoided to use ldap_search because when the results number is > 1 the "dn" is always returned irrespectively of which attributes types are requested
+		//and this gives problems when sorting (the first item goes somewhere else in the array and it's hard to remove it)
+		$params = get_defined_vars();
+		$params['command'] = 'ldap_list';
+		$resource = $this->run($params);
+		if($resource === false) return false;
+		
+		//counting results number
+		$params = array(
+						'command' => 'ldap_count_entries',
+						'result' => $resource,
+						);		
+		$result = $this->run($params);
+		if($result === false) {
+			return false;
+		} else {
+			$this->data->results_number = $result;
+		}
+		
+		//retrieving entries: sorting and paginating results if necessary
+		return $this->sort_paginate($resource, $sort_by, $flow_order, $wanted_page, $items_page) ? true : false;
+	}
+	
+	public function update(array $entry, $dn = null) {
+	
+		//validation
+		//if(is_object($return = $this->commonValidationsSet($entry))) return $return;
+	
+		$params = array(
+							'command' => 'ldap_modify',
+							'entry' => $entry,
+		);
+		try {
+			$result = $this->run($params);
+		} catch (OutOfRangeException $e) {
+			return $e;
+		}
+	
+		return ($result) ? true : false;
+	}
+
+	/**
+	 * Performs the validation of LDAP parameters and throws errors if necessary.
+	 * 
+	 * @access		private
+	 * @param		$params		array	Mandatory. It contains the parameters for the LDAP function.
+	 * @var			
+	 * @return		boolean		True if it's validated.
+	 * @example
+	 * @see
+	 * 
+	 * @author 		Damiano Venturin
+	 * @copyright 	2V S.r.l.
+	 * @license		GPL
+	 * @link		http://www.contact-engine.info
+	 * @since		Feb 24, 2012
+	 * 
+	 * @todo		
+	 */
+	private function preRunValidation($command,array $params)
+	{
+		if(count($this->result->errors) >= 1) return false;
+		
+		if($this->service_unavailable) return false;
+		
+		extract($params);
+		
+		if(!$this->connection) {
+			$this->report('connection_false', 'unknown');
+			return false;
+		}
+		
+		if(!is_resource($this->connection)) {
+			$this->report('connection','');
+			return false;
+		}
+		
+		if($command == 'ldap_delete' || $command == 'ldap_modify' || $command == 'ldap_add' ) {
+			if(empty($this->dn) or is_array($this->dn)) {
+				$this->report('dn', null);
+				return false;
+			}
+		}
+
+		if($command == 'ldap_modify' || $command == 'ldap_add' ) {
+			if(!is_array($entry) || count($entry) == 0) {
+				$this->report('entry', null);
+				return false;
+			}
+		}
+
+		if($command == 'ldap_list') {
+			if(!$baseDN) {  //mandatory for ldap_list
+				$this->report('baseDN_false','');
+				return false;
+			}
+			
+			if(!$filter) { //mandatory for ldap_list
+				$this->report('filter_false','');
+				return false;
+			}
+
+			if(is_array($filter)) { //mandatory for ldap_list
+				$this->report('trigger','A filter can not be an array.','415');
+				return false;
+			}
+
+			if(isset($attributes) && !is_array($attributes)) {
+				$this->report('trigger','The parameter "attributes" must be an array.','415');
+				return false;
+			}
+
+			if(isset($attributesOnly) && ($attributesOnly != 0 && $attributesOnly != 1)) {
+				$this->report('trigger','The parameter "attributesOnly" must be 0 or 1.','415');
+				return false;
+			}			
+		}
+		
+		if($command == 'ldap_count_entries') {
+			if(!is_resource($result)){
+				$this->report('trigger','The result_identifier passed to ldap_count_entries is not a valid resource.');
+				return false;
+			}
+		}
+		
+		return true;
+	}
+	
+	/**
+	 * Executes a LDAP command and throws errors if needed.
+	 * 
+	 * @access		public
+	 * @param		$params		array	Mandatory. It contains the parameters for the LDAP function.		
+	 * @var			
+	 * @return		$result		It could be the LDAP result or false if something went wrong.
+	 * @example
+	 * @see
+	 * 
+	 * @author 		Damiano Venturin
+	 * @copyright 	2V S.r.l.
+	 * @license		GPL
+	 * @link		http://www.contact-engine.info
+	 * @since		Feb 24, 2012
+	 * 
+	 * @todo		
+	 */
 	private function run(array $params)
 	{
+		//just to avoid notifications
+		$attributes = null; 
+		$attributesOnly = null; 
+		$sizeLimit = null; 
+		$timeLimit = null; 
+		$deref = null;
+		
 		extract($params);
-		if(!isset($message)) unset($message);
+		
+		//validation
+		if(isset($message)) unset($message); //just in case
+		if(!$this->preRunValidation($command, $params)) return false;
+		
 	
 		switch ($command) {
+			
 			case 'ldap_add':
-				if(!ldap_modify(ldap_add($this->connection, $this->dn, $entry)))
-				{
-					$message = ldap_errno($this->connection).' - '.ldap_error($this->connection).' method: ';
+				if(! $result = ldap_add($this->connection, $this->dn, $entry)) {
+					$ldap_error = $this->getLdapError($command);
+					$message = $ldap_error['message'];
+					
+					//Already exists message
+					if($ldap_error['ldap_errno'] == '68') {
+						$message .= ' or your DN is wrong. It should be the DN of the new entry, not an already existant one.';
+						$http_status_code = '415';
+					}
+					//Object Class Violation
+					if($ldap_error['ldap_errno'] == '65') {
+						$message .= '. Probably a mandatory field for the entry is missing or malformed.';
+						$http_status_code = '415';
+					}										
 				}
 			break;
-						
+	
 			case 'ldap_modify':
-				if(!ldap_modify($this->connection, $this->dn, $entry))
-				{
-					$message = ldap_errno($this->connection).' - '.ldap_error($this->connection).' method: ';
+				if(! $result = ldap_modify($this->connection, $this->dn, $entry)) {
+					$ldap_error = $this->getLdapError($command);
+					$message = $ldap_error['message'];
 				}
 			break;
-
+	
 			case 'ldap_delete':
-				if(!ldap_delete($this->connection, $this->dn))
-				{
-					$message = ldap_errno($this->connection).' - '.ldap_error($this->connection).' method: ';
+				if(! $result = ldap_delete($this->connection, $this->dn)) {
+					$ldap_error = $this->getLdapError($command);
+					$message = $ldap_error['message'];
 				}
-			break;			
-						
+			break;
+					
+			case 'ldap_list'; 
+				//adjusting optional search parameters
+				if(is_null($sizeLimit)) $sizeLimit = $this->conf['sizeLimit'];
+				if(is_null($timeLimit)) $timeLimit = $this->conf['timeLimit'];
+				if(is_null($deref)) $deref = $this->conf['defer'];
+			
+				if(! $result = ldap_list($this->connection, $baseDN, $filter, $attributes, $attributesOnly, $sizeLimit, $timeLimit, $deref)) {
+					$ldap_error = $this->getLdapError($command);
+					$message = $ldap_error['message'];
+					if($ldap_error['ldap_errno'] == '32') {
+						$message .= '. Please check your baseDN.';
+						$http_status_code = '415';
+					}
+					if($ldap_error['ldap_errno'] == '-7') { 
+						$message .= '. Please check your filter.';
+						$http_status_code = '415';
+					}
+				}
+			break;
+			
+			case 'ldap_count_entries':
+				$result = ldap_count_entries($this->connection, $result);
+				if($result === false) {
+					$ldap_error = $this->getLdapError($command);
+					$message = $ldap_error['message'];
+				}
+			break;
+			
 			default:
-				;
+				$this->report('trigger','Ldap command '.$command.' not found.','500');
+				return false;
 			break;
 		}
-		if(isset($message)) $this->report('exception', $message);
+		
+		//throws the Exception
+		if(isset($message)) {
+			if(!isset($http_status_code)) $http_status_code = '500';
+			$this->report('trigger', $message, $http_status_code);
+		}
+		
+		return $result;
 	}	
 	
-	private function commonValidationsSet($entry)
-	{
-		if(!$this->connection) return $this->report('connection', null);
-		if(empty($this->dn) or is_array($this->dn)) return $this->report('dn', null);
-		if(empty($entry)) return $this->report('entry', null);
-		if(!$this->valideEntry($entry)) return $this->report('validate', null);		
+	/**
+	 * Analyses the last LDAP error and retrieves the LDAP error number and the LDAP error message.
+	 * 
+	 * @access		private
+	 * @param		$command	string	The executed LDAP command. It's used to improve the returned error message
+	 * @var			
+	 * @return		$result		array	The array containing the errors. $result['ldap_errno'] contains the LDAP error message. $result['ldap_errstr'] contains the LDAP error message. $result['message'] contains the improved error message that will be really used. 
+	 * @example
+	 * @see
+	 * 
+	 * @author 		Damiano Venturin
+	 * @copyright 	2V S.r.l.
+	 * @license		GPL
+	 * @link		http://www.contact-engine.info
+	 * @since		Feb 24, 2012
+	 * 
+	 * @todo		
+	 */
+	private function getLdapError($command = null){
+		$result = array();
+		$result['ldap_errno'] = ldap_errno($this->connection);
+		$result['ldap_errstr'] = ldap_error($this->connection);
+		
+		if(!is_null($command) && !is_array($command)) $result['message'] = 'LDAP command: '.$command.' - ';
+		
+		$result['message'] .= 'LDAP error: code:'.$result['ldap_errno'].' - '.$result['ldap_errstr'];
+		return $result;
+	}
+	
+	/**
+	* 
+	*
+
+	* @return string[]
+	*/
+	/**
+	 * Sorts a LDAP search in ascending and descending order. It stores the LDAP results in LDAP->data.
+	 * 
+	 * @access		private
+	 * @param 		$resource 		resource	The LDAP resource got from ldap_list()
+	 * @param 		$sort_by		array		A simple array containing the LDAP attributes order like "array('sn','givenName');". This will make results ordered by lastname and firstname.
+	 * @param		$flow_order		string		It could be "asc" or "desc". "asc" -> from A to Z or from smaller numbers to bigger. Viceversa for "desc".
+	 * @param		$wanted_page	integer		The page number to send back. Let's say that a search with 5 items per pages makes a 13 pages result. With "$wanted_page = 3" I get back items from 10 to 14.
+	 * @param		$items_page		integer		The number of items for page.	
+	 * @var			
+	 * @return		boolean
+	 * @example
+	 * @see
+	 * 
+	 * @author 		Damiano Venturin
+	 * @copyright 	2V S.r.l.
+	 * @license		GPL
+	 * @link		http://www.contact-engine.info
+	 * @since		Feb 24, 2012
+	 * 
+	 * @todo		
+	 */
+	private function sort_paginate($resource, array $sort_by = null, $flow_order = "asc", $wanted_page = 0, $items_page = 0 )
+	{				
+		if($resource == 0) {
+			$this->data->content = array();
+			$this->data->sent_back_results_number = 0;
+			$this->data->results_pages = 1;
+			$this->data->results_page = 1;
+			return true;
+		}
+		
+		//validation		
+		if(!is_resource($resource)) {
+			$this->report('invalid_resource', '');
+			return false;
+		}
+		
+		if(is_null($sort_by)) $sort_by = array();
+
+		if(!is_array($sort_by))
+		{
+			$this->report('trigger', __FUNCTION__.': sort_by should be an array.','415');
+			return false;
+		}
+		
+		if(is_array($flow_order))
+		{
+			$this->report('trigger', __FUNCTION__.': The flow_order should be a string with one of these values: "asc" or "desc".','415');
+			return false;
+		}
+		
+		if(is_null($flow_order)) $flow_order = 'asc';
+		$available_orders = array('asc','desc');
+		if(!in_array($flow_order, $available_orders)) {
+			$this->report('trigger', __FUNCTION__.': The flow_order should be either "asc" or "desc".','415');
+			return false;
+		}
+		
+		if(is_null($wanted_page)) $wanted_page = 0;
+		if(!is_int($wanted_page))
+		{
+			$this->report('trigger', __FUNCTION__.': The wanted page should be an integer.','415');
+			return false;
+		}
+
+		if(is_null($items_page)) $items_page = 0;
+		if(!is_int($items_page))
+		{
+			$this->report('trigger', __FUNCTION__.': The number of items per page should be an integer.','415');
+			return false;
+		}
+				
+		if ( $wanted_page === 0 || $items_page === 0 )
+		{
+			# fetch all in one page
+			$iStart = 0;
+			$iEnd = $this->data->results_number - 1;
+		}
+		else
+		{
+			# calculate range of page
+			$iStart = $items_page * $wanted_page;
+			$iEnd = $iStart + $items_page - 1;
+			if ( $flow_order === "desc" )
+			{
+				# revert range
+				$iStart = $this->data->results_number - 1 - $iEnd;
+				$iEnd = $iStart + $items_page - 1;
+			}
+		}
+		
+		# fetch entries
+		foreach ($sort_by as $sField) {
+			ldap_sort( $this->connection, $resource, $sField );
+		}
+		
+		$content = array();
+		for (
+	        	$iCurrent = 0, $rEntry = ldap_first_entry( $this->connection, $resource );
+				$iCurrent <= $iEnd && is_resource( $rEntry );
+				$iCurrent++, $rEntry = ldap_next_entry( $this->connection, $rEntry )
+			) {
+			if ( $iCurrent >= $iStart )
+			{
+				array_push( $content, ldap_get_attributes( $this->connection, $rEntry ) );
+			}
+		}
+		
+		# if order is desc revert page's entries
+		if($flow_order === "desc") $content = array_reverse( $content );
+		
+		$this->data->content = $content;
+		
+		//adding RESTinfo
+		$this->data->sent_back_results_number = count($content);
+		
+		$items_page == 0 ? $this->data->results_pages = 1 : $this->data->results_pages =  ceil( $this->data->results_number / $items_page );
+		
+		if($this->data->sent_back_results_number == $this->data->results_number) 
+		{
+			$this->data->results_page = 1;
+		} else {
+			$this->data->results_page = $wanted_page;
+		}
+				
+		return true;
 	}	
 	
- 	private function report($type, $message)
+	/**
+	 * This functions triggers error messages. It has some typical error message cases and adds the http_status_code for REST.
+	 * 
+	 * @access		protected
+	 * @param		$type				string		The error case.
+	 * @param		$message			string		The error message.
+	 * @param		$http_status_code	integer		The http_status_code used by REST. http://restpatterns.org/HTTP_Status_Codes
+	 * @var			
+	 * @return		
+	 * @example
+	 * @see
+	 * 
+	 * @author 		Damiano Venturin
+	 * @copyright 	2V S.r.l.
+	 * @license		GPL
+	 * @link		http://www.contact-engine.info
+	 * @since		Feb 24, 2012
+	 * 
+	 * @todo		
+	 */
+ 	protected function report($type, $message, $http_status_code = null)
 	{
 		switch ($type) {
-			case 'exception':
-				throw new OutOfRangeException('LDAP error: code:'.$message, 0);
-			break;
-
-			case 'dn':
-				return $this->report('trigger','No valid uid or dn was provided.');
-			break;
 			
-			case 'entry':
-				return $this->report('trigger','No attributes were provided for update.');
+			case 'baseDN_false':
+				return $this->report('trigger','No baseDN was specified.','415');
 			break;
 
-			case 'entry':
-				return $this->report('trigger','The attributes provided are not validated.');
+			case 'configuration_empty':
+				return $this->report('trigger','The configuration item "'.$message.'" is not set. Please check the ri_ldap.php configuration file.','500');
 			break;			
-
+			
 			case 'connection':
-				return $this->report('trigger','I can not connect to a valid LDAP server.');
+				return $this->report('trigger','Ldap connection error: '.$message.'.','500');
+			break;
+							
+			case 'connection_false':
+				return $this->report('trigger','Ldap connection error: no valid connection established with this URL: '.$message.' Check the ri_ldap.php configuration file.','400');
+			break;
+							
+			case 'dn':
+				return $this->report('trigger','No valid uid or dn was provided.','415');
 			break;			
 			
+			case 'entry':
+				return $this->report('trigger','The attributes provided are not validated.','415');
+			break;
+
+			case 'filter_false':
+				return $this->report('trigger','No filter was specified.','415');
+			break;
+
+			case 'invalid_resource':
+				return $this->report('trigger','The LDAP resource is not valid.','500');
+			break;
+							
+			case 'search_ldap_query':
+				return $this->report('trigger','Error in search LDAP query.','500');
+			break;
+			
+			case 'service_unavailable':
+				return $this->report('trigger','Service Unavailable', '503');
+			break;
+
 			default:
 			case 'trigger':
-				try {
+  				try {
 					if(true)
 					{
-						throw new Exception($message);
+						if(is_null($http_status_code)) $http_status_code = '500';
+						throw new OutOfRangeException($message, $http_status_code);
 					}
 				} catch (Exception $e) {
-					return $e;
+					return $this->LdapErrorHandler(8,$e->getMessage(),$e->getFile(),$e->getLine(), null, $http_status_code);
 				} 
-			break;
+ 			break;
 		}
 	} 
 	
+	/**
+	 * PHP Error Handler replacement (only for the objects Ldap and Ri_Ldap)
+	 *
+	 * PHP ERROR TYPES:
+	 * 2 		E_WARNING 				Non-fatal run-time errors. Execution of the script is not halted
+	 * 8 		E_NOTICE 				Run-time notices. The script found something that might be an error, but could also happen when running a script normally
+	 * 256 		E_USER_ERROR 			Fatal user-generated error. This is like an E_ERROR set by the programmer using the PHP function trigger_error()
+	 * 512 		E_USER_WARNING 			Non-fatal user-generated warning. This is like an E_WARNING set by the programmer using the PHP function trigger_error()
+	 * 1024 	E_USER_NOTICE 			User-generated notice. This is like an E_NOTICE set by the programmer using the PHP function trigger_error()
+	 * 4096 	E_RECOVERABLE_ERROR 	Catchable fatal error. This is like an E_ERROR but can be caught by a user defined handle (see also set_error_handler())
+	 * 8191 	E_ALL 					All errors and warnings, except level E_STRICT (E_STRICT will be part of E_ALL as of PHP 6.0)
+	 * 
+	 * 
+	 * @access		public
+	 * @param		$errno			integer		The PHP error code number
+	 * @param		$errstr			string		The error message
+	 * @param		$errfile		string		The path of the file generating the error
+	 * @param		$errline 		string		Optional. The line of code generating the error
+	 * @param		$errcontext 	string		Optional. The attached variables (sort of backtrace)
+	 * @var			
+	 * @return		false			boolean		Returns always false because an error exception was trown and catched	
+	 * @example
+	 * @see
+	 * 
+	 * @author 		Damiano Venturin
+	 * @copyright 	2V S.r.l.
+	 * @license		GPL
+	 * @link		http://www.squadrainformatica.com/en/development#mcbsb  MCB-SB official page
+	 * @since		Feb 16, 2012
+	 * 
+	 * @todo		
+	 */
+	public function LdapErrorHandler($errno, $errstr, $errfile, $errline, $errcontext = null, $http_status_code = null)
+	{	
+		$this->result->addError($errno, $errstr, $errfile, $errline, $http_status_code);
+		log_message('DEBUG','!#### '.$errstr.' ##### '.$errfile.' '.$errline);
+		
+		return false;
+	}	
+
 }
 
 

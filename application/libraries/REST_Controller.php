@@ -33,6 +33,9 @@ class REST_Controller extends CI_Controller {
 			// Lets grab the config and get ready to party
 			$this->load->config('rest');
 
+			//DAM  //this is to avoid the php error "Creating default object from empty value"
+			$this->request = new stdClass();
+			
 			// How is this request being made? POST, DELETE, GET, PUT?
 			$this->request->method = $this->_detect_method();
 

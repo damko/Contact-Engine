@@ -1,23 +1,30 @@
 <?php  defined('BASEPATH') OR exit('No direct script access allowed');
 
-function LdapErrorHandler($errno, $errstr, $errfile, $errline)
-{
-	static $OUT_OF_RANGE_ERROR_CODE = 8;
-	
-	switch ($errno) {
-		case 8:
-			log_message('DEBUG','!!#### '.$errstr.' ##### '.$errfile.' '.$errline);
-			try{
-				if(true) throw new OutOfRangeException($errstr, 0);
-			}catch (Exception $e) {
-				return $e;
-			}
-		break;
-		
-		default:
-			log_message('DEBUG','##### '.$errstr.' ##### '.$errfile.' '.$errline);
-		break;
-	}
 
+/**
+* This method verifies if a given object is an OutOfRangeException
+*
+* @access		public
+* @param		$exception		object		The object to verify
+* @var
+* @return		boolean
+* @example
+* @see
+*
+* @author 		Damiano Venturin
+* @copyright 	2V S.r.l.
+* @license		GPL
+* @link			http://www.contact-engine.info
+* @since		Feb 24, 2012
+*
+* @todo
+*/
+/*
+function is_exception($exception){
+	if(is_object($exception))
+	{
+		return (get_class($exception) == 'OutOfRangeException') ? true : false;
+	}
 	return false;
 }
+ */

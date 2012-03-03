@@ -20,6 +20,7 @@ class ObjectCommon extends CI_Model
 	protected $properties;
 	protected $baseDn;
 	public $conf;
+	protected $return;
 		
 	public function __construct() {
 		parent::__construct();
@@ -97,7 +98,12 @@ class ObjectCommon extends CI_Model
 		}
 		
 		//perform the search
-		$ldap_result = $this->ri_ldap->CEsearch($this->baseDn, $filter, $wanted_attributes, 0, null, $sort_by,  $flow_order, $wanted_page, $items_page);
+		if($this->errorReturn($ldap_result = $this->ri_ldap->CEsearch($this->baseDn, $filter, $wanted_attributes, 0, null, $sort_by,  $flow_order, $wanted_page, $items_page)))
+		{
+			return $ldap_result;
+		}
+
+		if(!$ldap_result) return $this->result;
 		
 		//saving and removing info about the ldap query
 		if(!empty($ldap_result['RestStatus']))
@@ -260,15 +266,24 @@ class ObjectCommon extends CI_Model
 		return;
 	}
 	
-	protected function checkReturn($return){
-		if(is_object($return))
+	protected function errorReturn($return){
+/* 		if(is_object($return))
 		{
-			//it's an exception for sure
-			$data = array();
-			$data['error'] = $return->getMessage();
-			return $data;
+			if(get_class($return) == 'OutOfRangeException')
+			{	
+				//it's an exception for sure
+				$this->return = array();
+				$this->return['error'] = $return->getMessage();
+				return false;
+			}
 		}
-		if(is_bool($return) and $return === true) return true;
+		//if(is_bool($return) and $return === true) return true;
+		return $return; */
+		if(is_array($return) && isset($return['error']))
+		{
+			return true;
+		}
+		return false;
 	}
 
 }

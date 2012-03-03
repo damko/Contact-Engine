@@ -66,6 +66,7 @@ class Person extends ObjectCommon
 		if(empty($this->objectClass)) $this->objectClass = $this->conf['objectClass'];
 		
 		//return $this->ri_ldap->CEcreate($dn,$this->toRest(false)) ? $this->getUid() : false;
+		$entry = $this->toRest(false); //TODO delme
 		if($this->ri_ldap->CEcreate($dn,$this->toRest(false)))
 		{
 			return $this->getUid();

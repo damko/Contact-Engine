@@ -264,7 +264,9 @@ $config['rest_ajax_only'] = FALSE;
  |
  */
 $config['rest_server']	= 'http://ce_github/index.php/api/';
-//$config['rest_server']	= site_url('api').'/';   //don't forget the trailing slash
+//TODO DAM I can't use site_url because the url helper is not yet loaded
+// $this->load->helper('url');
+// $config['rest_server']	= site_url('api');   //don't forget the trailing slash
 
 
 /* End of file config.php */

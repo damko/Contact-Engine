@@ -1,14 +1,18 @@
-<?php  if ( ! defined('BASEPATH'))
- exit('No direct script access allowed');
+<?php  if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+
 // Created on Aug 26, 2011 by Damiano Venturin @ Squadra Informatica
 
 // This can be removed if you use __autoload() in config.php OR use Modular Extensions
 require APPPATH.'/libraries/test_controller.php';
+//TODO why this doesn't work?
+//$CI = &get_instance();
+//$CI->load->library('test_controller');
 
 class Ce_Tests extends Test_Controller {
 	public function __construct()
 	{
 		parent::__construct();
+		
 		
 		$this->show_rest_return = false;
 		
@@ -17,10 +21,10 @@ class Ce_Tests extends Test_Controller {
 			$this->show_rest_return = true; 
 		}
 
-		if(ENVIRONMENT != 'production') {
+ 		if(ENVIRONMENT != 'production') {
 			echo '<h2>please set the constant ENVIROMENT in index.php to "production" !</h2>';
 			die();
-		}
+		} 
 		
 		
 /* 		//set up a new template for the tests output
@@ -37,15 +41,6 @@ class Ce_Tests extends Test_Controller {
 		
 		$this->unit->set_template($str); */
 	}	
- 
-	private function testTitle($text,$subtext = null)
-	{
-		echo '[<a href="'.site_url().'">Home</a>]';
-		echo '<hr/>';
-		echo '<h3>'.$text.'</h3>';
-		echo '<p>'.$subtext.'</p>';
-	}
-	
 	
 	public function index()
 	{
@@ -69,7 +64,7 @@ class Ce_Tests extends Test_Controller {
 	
 	public function testPersonProperties()
 	{
-		$this->rest->initialize(array('server' => $this->config->item('rest_server').'/exposeObj/person/'));
+		$this->rest->initialize(array('server' => $this->config->item('rest_server').'exposeObj/person/'));
 		
 		//########################################
 		// GET PROPERTIES
@@ -92,7 +87,28 @@ class Ce_Tests extends Test_Controller {
 
 	public function testPersonRead()
 	{	
-		$this->rest->initialize(array('server' => $this->config->item('rest_server').'/exposeObj/person/'));
+		$this->rest->initialize(array('server' => $this->config->item('rest_server').'exposeObj/person/'));
+		
+		//calling the methon READ for object person with a filter
+		$this->testTitle('Test: read person entry','Sending a request with filter: (uid=10000000). I expect to get the person: Demo Person ');
+		$method = 'read';
+		$input = array();
+		$input['filter'] = '(uid=10000000)';
+		//check to get an array as a return
+		$rest_return = $this->rest->get($method, $input, 'serialize');
+		$this->arrayReturn($method, $rest_return);
+		
+		//the filter has not been specified then it should return an error
+		$this->checkNoRestError($method, $rest_return);
+		
+		//check status code == 200
+		$this->check200($method, $rest_return);
+		
+		$this->printReturn($rest_return);
+
+		return;
+		
+		//----------------------
 		
 		//calling the methon READ for object person without a filter
 		$this->testTitle('Test: read person entries','Sending a request missing "filter". I expect a failure');
@@ -153,7 +169,7 @@ class Ce_Tests extends Test_Controller {
 
 	public function testPersonCreate() 
 	{	
-		$this->rest->initialize(array('server' => $this->config->item('rest_server').'/exposeObj/person/'));
+		$this->rest->initialize(array('server' => $this->config->item('rest_server').'exposeObj/person/'));
 
 		//calling the methon CREATE for object person without a filter
 		$this->testTitle('Test: create 1 person');
@@ -196,7 +212,7 @@ class Ce_Tests extends Test_Controller {
 
 	public function testPersonUpdate()
 	{	
-		$this->rest->initialize(array('server' => $this->config->item('rest_server').'/exposeObj/person/'));
+		$this->rest->initialize(array('server' => $this->config->item('rest_server').'exposeObj/person/'));
 
 		
 		
@@ -403,7 +419,7 @@ class Ce_Tests extends Test_Controller {
 	
 	public function testPersonDelete()
 	{
-		$this->rest->initialize(array('server' => $this->config->item('rest_server').'/exposeObj/person/'));
+		$this->rest->initialize(array('server' => $this->config->item('rest_server').'exposeObj/person/'));
 
 		//calling the methon READ for object person with a filter
 		$this->testTitle('Test: delete 1 person taken randomly but starting with Willy*');
@@ -481,7 +497,7 @@ class Ce_Tests extends Test_Controller {
 	
 	public function testPersonAssocOrg($loadview = true, $getInfo = false)
 	{
-		$this->rest->initialize(array('server' => $this->config->item('rest_server').'/exposeObj/person/'));
+		$this->rest->initialize(array('server' => $this->config->item('rest_server').'exposeObj/person/'));
 	
 		$oid = $this->testOrganizationCreate();
 		$uid = $this->testPersonCreate();
@@ -513,7 +529,7 @@ class Ce_Tests extends Test_Controller {
 	
 	public function testPersonAssocLoc($loadview = true, $getInfo = false)
 	{
-		$this->rest->initialize(array('server' => $this->config->item('rest_server').'/exposeObj/person/'));
+		$this->rest->initialize(array('server' => $this->config->item('rest_server').'exposeObj/person/'));
 	
 		$locId = $this->testLocationCreate();
 		$uid = $this->testPersonCreate();
@@ -554,7 +570,7 @@ class Ce_Tests extends Test_Controller {
 
 	public function testOrganizationProperties()
 	{
-		$this->rest->initialize(array('server' => $this->config->item('rest_server').'/exposeObj/organization/'));	
+		$this->rest->initialize(array('server' => $this->config->item('rest_server').'exposeObj/organization/'));	
 
 		$this->testTitle('Test: get organization properties</h3>');
 		$method = 'getProperties';
@@ -574,7 +590,7 @@ class Ce_Tests extends Test_Controller {
 
 	public function testOrganizationRead()
 	{
-		$this->rest->initialize(array('server' => $this->config->item('rest_server').'/exposeObj/organization/'));
+		$this->rest->initialize(array('server' => $this->config->item('rest_server').'exposeObj/organization/'));
 		
 		//calling the methon READ for object organization without a filter
 		$this->testTitle('Test: read organization entries','Sending a request missing "filter". I expect a failure');
@@ -617,7 +633,7 @@ class Ce_Tests extends Test_Controller {
 
 	public function testOrganizationCreate()
 	{
-		$this->rest->initialize(array('server' => $this->config->item('rest_server').'/exposeObj/organization/'));
+		$this->rest->initialize(array('server' => $this->config->item('rest_server').'exposeObj/organization/'));
 			
 		//calling the methon CREATE for object organization without a filter
 		$this->testTitle('Test: create 1 organization');
@@ -653,7 +669,7 @@ class Ce_Tests extends Test_Controller {
 		
 	public function testOrganizationUpdate()
 	{
-		$this->rest->initialize(array('server' => $this->config->item('rest_server').'/exposeObj/organization/'));		
+		$this->rest->initialize(array('server' => $this->config->item('rest_server').'exposeObj/organization/'));		
 		
 		//calling the methon READ for object organization with a filter
 		$this->testTitle('Test: update 1 organization taken randomly but starting with Acme*');
@@ -718,7 +734,7 @@ class Ce_Tests extends Test_Controller {
 
 	public function testOrganizationDelete()
 	{
-		$this->rest->initialize(array('server' => $this->config->item('rest_server').'/exposeObj/organization/'));	
+		$this->rest->initialize(array('server' => $this->config->item('rest_server').'exposeObj/organization/'));	
 		//########################################
 		// DELETE
 		//########################################
@@ -774,7 +790,7 @@ class Ce_Tests extends Test_Controller {
 
 	public function testOrganizationAssocLoc($loadview = true, $getInfo = false)
 	{
-		$this->rest->initialize(array('server' => $this->config->item('rest_server').'/exposeObj/organization/'));
+		$this->rest->initialize(array('server' => $this->config->item('rest_server').'exposeObj/organization/'));
 	
 		$locId = $this->testLocationCreate();
 		$oid = $this->testOrganizationCreate();
@@ -815,7 +831,7 @@ class Ce_Tests extends Test_Controller {
 		
 	public function testLocationProperties()
 	{		
-		$this->rest->initialize(array('server' => $this->config->item('rest_server').'/exposeObj/location/'));
+		$this->rest->initialize(array('server' => $this->config->item('rest_server').'exposeObj/location/'));
 		
 		$this->testTitle('Test: get location properties</h3>');
 		$method = 'getProperties';
@@ -835,7 +851,7 @@ class Ce_Tests extends Test_Controller {
 	
 	public function testLocationRead()
 	{
-		$this->rest->initialize(array('server' => $this->config->item('rest_server').'/exposeObj/location/'));
+		$this->rest->initialize(array('server' => $this->config->item('rest_server').'exposeObj/location/'));
 
 		//calling the methon READ for object location without a filter
 		$this->testTitle('Test: read location entries','Sending a request missing "filter". I expect a failure');
@@ -877,7 +893,7 @@ class Ce_Tests extends Test_Controller {
 	
 	public function testLocationCreate()
 	{
-		$this->rest->initialize(array('server' => $this->config->item('rest_server').'/exposeObj/location/'));	
+		$this->rest->initialize(array('server' => $this->config->item('rest_server').'exposeObj/location/'));	
 
 		//calling the methon CREATE for object location without a filter
 		$this->testTitle('Test: create 1 location');
@@ -916,7 +932,7 @@ class Ce_Tests extends Test_Controller {
 
 	public function testLocationUpdate()
 	{
-		$this->rest->initialize(array('server' => $this->config->item('rest_server').'/exposeObj/location/'));	
+		$this->rest->initialize(array('server' => $this->config->item('rest_server').'exposeObj/location/'));	
 		
 		//calling the methon READ for object location with a filter
 		$this->testTitle('Test: update 1 location taken randomly but starting with MyDescription*');
@@ -981,7 +997,7 @@ class Ce_Tests extends Test_Controller {
 	
 	public function testLocationDelete()
 	{
-		$this->rest->initialize(array('server' => $this->config->item('rest_server').'/exposeObj/location/'));	
+		$this->rest->initialize(array('server' => $this->config->item('rest_server').'exposeObj/location/'));	
 
 		//calling the methon READ for object location with a filter
 		$this->testTitle('Test: delete 1 location taken randomly but starting with MyDescription*');
@@ -1026,7 +1042,7 @@ class Ce_Tests extends Test_Controller {
 		
 	public function testContact()
 	{
-		$this->rest->initialize(array('server' => $this->config->item('rest_server').'/exposeObj/contact/'));
+		$this->rest->initialize(array('server' => $this->config->item('rest_server').'exposeObj/contact/'));
 		
 		//calling the methon READ for object contact with a filter
 		$this->testTitle('Testing CONTACT: get a contact using this filter: (|(givenName=Willy*)(o=A*))');
