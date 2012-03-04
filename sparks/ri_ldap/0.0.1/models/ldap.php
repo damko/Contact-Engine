@@ -1,12 +1,15 @@
 <?php  if ( ! defined('BASEPATH')) exit('No direct script access allowed'); 
 
 /**
- * This object interacts directly with a LDAP server and performs on it a full CRUD. 
- * It connects to a master LDAP server to create, update and delete and to a slave LDAP server performs to read.
- * It's extented and loaded by Ri_Ldap object. 
+ * The LDAP object interacts directly with a LDAP server and performs on it a full CRUD. 
+ * It connects to a master LDAP server to create, update and delete and to a slave LDAP server to read and search.
  * 
- * Every method which interacts with LDAP returns true or false as an exit status, while the LDAP errors or the LDAP results are stored in Ldap->result.
- * Ldap->result is a LDAP_Return_Object which is composed of other two object LDAP_Error_Object and LDAP_Data_Object.
+ * Every method which interacts with LDAP returns true or false as an exit status, while the LDAP errors or the LDAP results 
+ * are stored in Ldap->result.
+ * Ldap->result is a LDAP_Return_Object which is composed by two objects: LDAP_Error_Object and LDAP_Data_Object.
+ * 
+ * It's extented and loaded by the Ri_Ldap object which acts like an interface for the LDAP Object and adds precious information
+ * for the REST protocol.
  * 
  * @author 		Damiano Venturin
  * @copyright 	2V S.r.l.
@@ -234,7 +237,7 @@ class Ldap extends CI_Model {
 	 * 
 	 * @access		public
 	 * @param		$entry	array	Mandatory. The array containing the data for the entry.
-	 * @param		$dn		string	The DN of the new entry.
+	 * @param		$dn		string	The DN of the new entry. If empty $this->dn will be used instead.
 	 * @var			
 	 * @return		boolean
 	 * @example
@@ -258,17 +261,34 @@ class Ldap extends CI_Model {
 		return $this->run($params) ? true : false;	
 	}
 	
+	
+	/**
+	 * Deletes a LDAP entry
+	 * 
+	 * @access		public
+	 * @param		$dn		string	The DN of the new entry. If empty $this->dn will be used instead.
+	 * @var			
+	 * @return		boolean
+	 * @example
+	 * @see
+	 * 
+	 * @author 		Damiano Venturin
+	 * @copyright 	2V S.r.l.
+	 * @license		GPL
+	 * @link		http://www.contact-engine.info
+	 * @since		Mar 4, 2012
+	 * 
+	 * @todo		
+	 */
 	public function delete($dn = null)
 	{
 		if(!empty($dn) and !is_array($dn)) $this->dn = $dn;
 
-		$params = array(
-								'command' => 'ldap_delete',
-								//'dn' => $dn,
-		);
+		$params = array('command' => 'ldap_delete');
 		
 		return $this->run($params) ? true : false;
 	}
+	
 	
 	/**
 	 * Performs a LDAP search with "server side pagination". "Server side pagination" means that only a specified subset of the results is returned. 
@@ -324,21 +344,61 @@ class Ldap extends CI_Model {
 		return $this->sort_paginate($resource, $sort_by, $flow_order, $wanted_page, $items_page) ? true : false;
 	}
 	
+	/**
+	 * The method read() is a sort of interface for the search() method and it's meant to return all the attributes of the current ldap object.
+	 *
+	 * @access		public
+	 * @param		$dn				string	The DN of the new entry. If empty $this->dn will be used instead.
+	 * @param		$sizeLimit		integer		Search param. It limits the max amount of items to get from LDAP. If it's not set it will be substituted with the value stored in the config file.
+	 * @param		$timeLimit		integer		Search param. It limits the max amount of time to perform the LDAP search query. If it's not set it will be substituted with the value stored in the config file.
+	 * @param		$deref			integer		Search param. It specifies how aliases should be handled during the search. http://www.php.net/ldap_list
+	 * @var
+	 * @return		boolean
+	 * @example
+	 * @see
+	 *
+	 * @author 		Damiano Venturin
+	 * @copyright 	2V S.r.l.
+	 * @license		GPL
+	 * @link		http://www.contact-engine.info
+	 * @since		Mar 4, 2012
+	 *
+	 * @todo
+	 */
 	public function read($dn = null, $sizeLimit = null, $timeLimit = null, $defer = null) {
 		if(!empty($dn) and !is_array($dn)) $this->dn = $dn;
-		
+	
 		$pieces = preg_split('/,/', $this->dn);
-		
+	
 		$filter = '('.$pieces[0].')';
-		
+	
 		unset($pieces[0]);
 		$baseDN = implode(',', $pieces);
-		
-		$attributes = array();
-		
-		return $this->search($baseDN, $filter, $attributes, 0, $sizeLimit, $timeLimit, $defer);
-	}
 	
+		$attributes = array();
+	
+		return $this->search($baseDN, $filter, $attributes, 0, $sizeLimit, $timeLimit, $defer);
+	}	
+	
+	/**
+	 * Updates a LDAP entry
+	 * 
+	 * @access		public
+	 * @param		$entry	array	Mandatory. The array containing the data for the entry.
+	 * @param		$dn		string	The DN of the new entry. If empty $this->dn will be used instead.
+	 * @var			
+	 * @return		boolean
+	 * @example
+	 * @see
+	 * 
+	 * @author 		Damiano Venturin
+	 * @copyright 	2V S.r.l.
+	 * @license		GPL
+	 * @link		http://www.contact-engine.info
+	 * @since		Mar 4, 2012
+	 * 
+	 * @todo		
+	 */
 	public function update($entry, $dn = null) {
 		
 		if(!empty($dn) and !is_array($dn)) $this->dn = $dn;
@@ -352,7 +412,7 @@ class Ldap extends CI_Model {
 	}
 
 	/**
-	 * Performs the validation of LDAP parameters and throws errors if necessary.
+	 * Performs the validation of the LDAP parameters and throws errors if necessary.
 	 * 
 	 * @access		private
 	 * @param		$params		array	Mandatory. It contains the parameters for the LDAP function.
@@ -444,10 +504,10 @@ class Ldap extends CI_Model {
 	/**
 	 * Executes a LDAP command and throws errors if needed.
 	 * 
-	 * @access		public
+	 * @access		private
 	 * @param		$params		array	Mandatory. It contains the parameters for the LDAP function.		
 	 * @var			
-	 * @return		$result		It could be the LDAP result or false if something went wrong.
+	 * @return		$result		It can be the LDAP result or false if something went wrong.
 	 * @example
 	 * @see
 	 * 
@@ -585,12 +645,7 @@ class Ldap extends CI_Model {
 		return $result;
 	}
 	
-	/**
-	* 
-	*
 
-	* @return string[]
-	*/
 	/**
 	 * Sorts a LDAP search in ascending and descending order. It stores the LDAP results in LDAP->data.
 	 * 
