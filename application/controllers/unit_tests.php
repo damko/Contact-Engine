@@ -92,6 +92,8 @@ class Unit_Tests extends Test_Controller {
 		echo '<div id="left">';
 		$this->test_Ldap_Connection();
 		$dn = $this->test_Ldap_create();
+		if($dn) $this->test_Ldap_read($dn);
+		if($dn) $this->test_Ldap_update($dn);
 		if($dn) $this->test_Ldap_delete($dn);
 		echo '</div>';
 		
@@ -117,6 +119,7 @@ class Unit_Tests extends Test_Controller {
 		$this->test_Ri_LDAP_Initialize();
 		$this->test_Ri_Ldap_create();
 		$this->test_Ri_Ldap_search();
+		$this->test_Ri_Ldap_update();
 		$this->test_Ri_Ldap_delete();
 		echo '</div>';
 		
@@ -179,7 +182,7 @@ class Unit_Tests extends Test_Controller {
 		
 		
 		$random = rand(999999,9999999);
-		$surname = 'Coyote'.$random;
+		$surname = 'Coyote_'.$random;
 		$name = 'Willy';
 	
 		//entry fields from the LDAP schema MUST attribute
@@ -196,7 +199,7 @@ class Unit_Tests extends Test_Controller {
 		$entry['category'] = 'mycategory';
 		$entry['objectClass'] = 'dueviPerson';		
 		
-		$dn = 'uid='.$entry['uid'].',ou=users,o=ce,dc=2v,dc=ntw';
+		$dn = 'uid='.$entry['uid'].','.$this->baseDN;
 		
 		$test = $this->ldap->create($entry, $dn);
 		echo $this->run($test, 'is_true', 'Is the exit status true ?', '');
@@ -206,6 +209,48 @@ class Unit_Tests extends Test_Controller {
 			return $dn;
 		}
 	}
+
+	public function test_Ldap_read($dn)
+	{
+		$this->testTitle('Testing the LDAP Object read() method');
+		
+		
+		$this->subTestTitle('Performing a good creation using all the mandatory attributes');
+		$this->getCodeOrigin();
+		$this->ldap = new Ldap();
+		$this->ldap->connect($this->server,$this->ldapdn,$this->ldappw,$this->version);
+		
+ 		$test = $this->ldap->read($dn,'500','5','0');
+ 		echo $this->run($test, 'is_true', 'Is the exit status true ?', '');
+		
+	}
+	
+	public function test_Ldap_update($dn)
+	{
+		$this->testTitle('Testing the LDAP Object update() method');
+		
+		
+		$this->subTestTitle('Performing a good update');
+		$this->getCodeOrigin();
+		$this->ldap = new Ldap();
+		$this->ldap->connect($this->server,$this->ldapdn,$this->ldappw,$this->version);
+		
+		//entry fields from the LDAP schema MUST attribute
+		$entry = array();
+		$entry['uid'] = '10000000';
+		$entry['mozillaHomeCountryName'] = 'Italy';
+		
+		$dn = 'uid='.$entry['uid'].','.$this->baseDN;
+		
+		$test = $this->ldap->update($entry, $dn);
+		echo $this->run($test, 'is_true', 'Is the exit status true ?', '');
+		
+		if($test){
+			echo 'Created entry with dn '.$dn.'<br/>';
+			return $dn;
+		}
+		
+	}	
 	
 	public function test_Ldap_delete($dn)
 	{
@@ -257,7 +302,7 @@ class Unit_Tests extends Test_Controller {
 		$this->rildap = new Ri_Ldap();
 	
 		$random = rand(999999,9999999);
-		$surname = 'Coyote'.$random;
+		$surname = 'Coyote_'.$random;
 		$name = 'Willy';
 	
 		//entry fields from the LDAP schema MUST attribute
@@ -274,7 +319,7 @@ class Unit_Tests extends Test_Controller {
 		$entry['category'] = 'mycategory';
 		$entry['objectClass'] = 'dueviPerson';
 	
-		$dn = 'uid='.$entry['uid'].',ou=users,o=ce,dc=2v,dc=ntw';
+		$dn = 'uid='.$entry['uid'].','.$this->baseDN;
 	
 		$test = $this->rildap->CEcreate($entry,$dn);
 		echo $this->run($test, 'is_true', 'Is the exit status true ?', '');
@@ -303,7 +348,7 @@ class Unit_Tests extends Test_Controller {
 		$this->rildap = new Ri_Ldap();
 		
 		$random = rand(999999,9999999);
-		$surname = 'Coyote'.$random;
+		$surname = 'Coyote_'.$random;
 		$name = 'Willy';
 		
 		//entry fields from the LDAP schema MUST attribute
@@ -350,7 +395,7 @@ class Unit_Tests extends Test_Controller {
 		$this->rildap = new Ri_Ldap();
 		
 		$random = rand(999999,9999999);
-		$surname = 'Coyote'.$random;
+		$surname = 'Coyote_'.$random;
 		$name = 'Willy';
 		
 		//entry fields from the LDAP schema MUST attribute
@@ -394,7 +439,7 @@ class Unit_Tests extends Test_Controller {
 		$this->rildap = new Ri_Ldap();
 		
 		$random = rand(999999,9999999);
-		$surname = 'Coyote'.$random;
+		$surname = 'Coyote_'.$random;
 		$name = 'Willy';
 		
 		//entry fields from the LDAP schema MUST attribute
@@ -440,7 +485,7 @@ class Unit_Tests extends Test_Controller {
 		$this->rildap = new Ri_Ldap();
 		
 		$random = rand(999999,9999999);
-		$surname = 'Coyote'.$random;
+		$surname = 'Coyote_'.$random;
 		$name = 'Willy';
 		
 		//entry fields from the LDAP schema MUST attribute
@@ -486,7 +531,7 @@ class Unit_Tests extends Test_Controller {
 		$this->rildap = new Ri_Ldap();
 		
 		$random = rand(999999,9999999);
-		$surname = 'Coyote'.$random;
+		$surname = 'Coyote_'.$random;
 		$name = 'Willy';
 		
 		//entry fields from the LDAP schema MUST attribute
@@ -523,7 +568,7 @@ class Unit_Tests extends Test_Controller {
 		$this->rildap = new Ri_Ldap();
 		
 		$random = rand(999999,9999999);
-		$surname = 'Coyote'.$random;
+		$surname = 'Coyote_'.$random;
 		$name = 'Willy';
 		
 		//entry fields from the LDAP schema MUST attribute
@@ -540,7 +585,7 @@ class Unit_Tests extends Test_Controller {
 		$entry['category'] = 'mycategory';
 		//$entry['objectClass'] = 'dueviPerson';
 		
-		$dn = 'uid='.$entry['uid'].',ou=users,o=ce,dc=2v,dc=ntw';
+		$dn = 'uid='.$entry['uid'].','.$this->baseDN;
 		
 		$test = $this->rildap->CEcreate($entry,$dn);
 		echo $this->run($test, 'is_false', 'Is the exit status false ?', '');
@@ -571,7 +616,7 @@ class Unit_Tests extends Test_Controller {
 		$this->rildap = new Ri_Ldap();
 		
 		$random = rand(999999,9999999);
-		$surname = 'Coyote'.$random;
+		$surname = 'Coyote_'.$random;
 		$name = 'Willy';
 		
 		//entry fields from the LDAP schema MUST attribute
@@ -588,7 +633,55 @@ class Unit_Tests extends Test_Controller {
 		$entry['category'] = 'mycategory';
 		$entry['objectClass'] = 'dueviPerson';
 		
-		$dn = 'uid='.$entry['uid'].',ou=users,o=ce,dc=2v,dc=ntw';
+		$dn = 'uid='.$entry['uid'].','.$this->baseDN;
+		
+		$test = $this->rildap->CEcreate($entry,$dn);
+		echo $this->run($test, 'is_false', 'Is the exit status false ?', '');
+		
+		
+		
+		
+		$this->getCodeOrigin();
+		$this->checkLdapReturnObject($this->rildap->result);
+		
+		
+		
+		$this->getCodeOrigin();
+		$this->checkLdapReturnObjectHasError($this->rildap->result);
+		
+		
+		
+		$this->getCodeOrigin();
+		$this->checkLdapReturnObjectHasNoContent($this->rildap->result);
+		$this->printLdapResult($this->rildap->result);		
+		
+		
+		
+		
+		
+		$this->subTestTitle('Creating an already existent entry');
+		$this->getCodeOrigin();
+		$this->rildap = new Ri_Ldap();
+		
+		$random = rand(999999,9999999);
+		$surname = 'Coyote_'.$random;
+		$name = 'Willy';
+		
+		//entry fields from the LDAP schema MUST attribute
+		$entry = array();
+		$entry['uid'] = '10000000';
+		$entry['cn'] = $name.' '.$surname;
+		$entry['sn'] = $surname;
+		$entry['givenName'] = $name;
+		$entry['displayName'] = $entry['cn'];
+		$entry['fileAs'] = $entry['cn'];
+		$entry['userPassword'] = 'mypassword';
+		$entry['enabled'] = 'TRUE';
+		$entry['entryCreatedBy'] = 'unit tests';
+		$entry['category'] = 'mycategory';
+		$entry['objectClass'] = 'dueviPerson';
+		
+		$dn = 'uid='.$entry['uid'].','.$this->baseDN;
 		
 		$test = $this->rildap->CEcreate($entry,$dn);
 		echo $this->run($test, 'is_false', 'Is the exit status false ?', '');
@@ -610,7 +703,7 @@ class Unit_Tests extends Test_Controller {
 		$this->checkLdapReturnObjectHasNoContent($this->rildap->result);
 		$this->printLdapResult($this->rildap->result);		
 	}
-		
+
 	public function test_Ri_Ldap_search()
 	{
 		$this->testTitle('Testing the Ri_LDAP Object CEsearch() method');
@@ -684,7 +777,7 @@ class Unit_Tests extends Test_Controller {
 		$filter = '(uid=10000000)';
 		$attributes = array('uid','cn','sn','giveName');
 		$test = $this->rildap->CEsearch($baseDN, $filter, $attributes);
-		echo $this->run($test, 'is_false', 'Is the exit status false when I search with a wrong baseDN ?', '');
+		echo $this->run($test, 'is_false', 'Is the exit status false ?', '');
 		
 		
 		
@@ -828,7 +921,7 @@ class Unit_Tests extends Test_Controller {
 		$filter = array('(uid=100000000000000000000000000000000000000)');
 		$attributes = array('uid','cn','sn','giveName');
 		$test = $this->rildap->CEsearch($baseDN, $filter, $attributes);
-		echo $this->run($test, 'is_false', 'Is the exit status false when I search with a wrong baseDN ?', '');
+		echo $this->run($test, 'is_false', 'Is the exit status false ?', '');
 		
 		
 		
@@ -857,7 +950,7 @@ class Unit_Tests extends Test_Controller {
 		$filter = '(uid=100*)';
 		$attributes = array('uid','cn','sn','giveName');
 		$test = $this->rildap->CEsearch($baseDN, $filter, $attributes);
-		echo $this->run($test, 'is_true', 'Is the exit status true when I search with a wrong baseDN ?', '');
+		echo $this->run($test, 'is_true', 'Is the exit status true ?', '');
 		
 		
 		
@@ -995,7 +1088,7 @@ class Unit_Tests extends Test_Controller {
 		$items_per_page = 3;
 		$order = 'myorder';
 		$test = $this->rildap->CEsearch($baseDN, $filter, $attributes, 0, null, $sort_by, $order, $wanted_page, $items_per_page);
-		echo $this->run($test, 'is_false', 'Is the exit status false when I search with a wrong baseDN ?', '');
+		echo $this->run($test, 'is_false', 'Is the exit status false ?', '');
 		
 		
 		
@@ -1027,7 +1120,7 @@ class Unit_Tests extends Test_Controller {
 		$items_per_page = 3;
 		$order = 'asc';
 		$test = $this->rildap->CEsearch($baseDN, $filter, $attributes, 0, null, $sort_by, $order, $wanted_page, $items_per_page);
-		echo $this->run($test, 'is_false', 'Is the exit status false when I search with a wrong baseDN ?', '');
+		echo $this->run($test, 'is_false', 'Is the exit status false ?', '');
 		
 		
 		
@@ -1059,7 +1152,7 @@ class Unit_Tests extends Test_Controller {
 		$items_per_page = '3';
 		$order = 'asc';
 		$test = $this->rildap->CEsearch($baseDN, $filter, $attributes, 0, null, $sort_by, $order, $wanted_page, $items_per_page);
-		echo $this->run($test, 'is_false', 'Is the exit status false when I search with a wrong baseDN ?', '');
+		echo $this->run($test, 'is_false', 'Is the exit status false ?', '');
 		
 		
 		
@@ -1079,13 +1172,45 @@ class Unit_Tests extends Test_Controller {
 	}
 	
 	
-	public function test_Ri_Ldap_delete()
+	public function test_Ri_Ldap_read()
 	{
-		$this->testTitle('Testing the Ri_LDAP Object CEdelete() method');
-	
-		$this->rildap = new Ri_Ldap();
-		$this->rildap->initialize();
+		$this->testTitle('Testing the Ri_LDAP Object CEsearch() method');
+		
+		$this->subTestTitle('Reading an existent entry');
+		
+		$dn = $this->get_random_entry();
+		
+		if($dn)
+		{
+			$this->rildap = new Ri_Ldap();
+			$this->riLdap->ldap = $dn;
+			$this->getCodeOrigin();
+			$test = $this->rildap->CEread();
+			echo $this->run($test, 'is_true', 'Is the exit status true ?', '');
+			
+			
+			
+			$this->getCodeOrigin();
+			$this->checkLdapReturnObject($this->rildap->result);
+			
+			
+			
+			$this->getCodeOrigin();
+			$this->checkLdapReturnObjectHasNoError($this->rildap->result);
+			
+			
+			
+			$this->getCodeOrigin();
+			$this->checkLdapReturnObjectHasContent($this->rildap->result);
+			$this->printLdapResult($this->rildap->result);
+		}		
+	}
 
+	
+	private function get_random_entry()
+	{
+		$this->rildap = new Ri_Ldap();
+		
 		$this->subTestTitle('Searching for a valid entry');
 		$this->getCodeOrigin();
 		$baseDN = $this->baseDN;
@@ -1093,15 +1218,7 @@ class Unit_Tests extends Test_Controller {
 		$attributes = array('uid');
 		$test = $this->rildap->CEsearch($baseDN, $filter, $attributes);
 		echo $this->run($test, 'is_true', 'Is the exit status true ?', '');
-
 		
-		//take the last result
-		$content = $this->rildap->result->data->content;
-		$item = array_pop($content);
-		if($item['uid'][0] == '10000000') $item = array_pop($content);
-		if(count($item)>0) $dn = 'uid='.$item['uid'][0].','.$this->baseDN;
-		
-	
 		$this->getCodeOrigin();
 		$this->checkLdapReturnObject($this->rildap->result);
 		
@@ -1116,14 +1233,92 @@ class Unit_Tests extends Test_Controller {
 		$this->checkLdapReturnObjectHasContent($this->rildap->result);
 		
 		
+		//take the last result
+		$dn = false;
+		$content = $this->rildap->result->data->content;
+		$item = array_pop($content);
+		if($item['uid'][0] == '10000000') $item = array_pop($content);
+		if(!empty($item['uid'][0])) $dn = 'uid='.$item['uid'][0].','.$this->baseDN;
 		
+		return $dn;		
+	}
+		
+	
+	public function test_Ri_Ldap_update()
+	{
 
+		$this->testTitle('Testing the Ri_LDAP Object CEupdate() method');
+		
+		$dn = $this->get_random_entry();
+		
+		$this->rildap = new Ri_Ldap();
+		$entry = array();
+		$entry['mozillaHomeCountryName'] = 'USA';
+		
+		$this->subTestTitle('Updating the attribute mozillaHomeCountryName to "USA" for entry with dn: '.$dn);
+		$this->getCodeOrigin();
+		$test = $this->rildap->CEupdate($entry, $dn);
+		echo $this->run($test, 'is_true', 'Is the exit status true ?', '');
+		
+	
+		
+		$this->getCodeOrigin();
+		$this->checkLdapReturnObject($this->rildap->result);
+			
+			
+			
+		$this->getCodeOrigin();
+		$this->checkLdapReturnObjectHasNoError($this->rildap->result);
+			
+			
+			
+		$this->getCodeOrigin();
+		$this->checkLdapReturnObjectHasNoContent($this->rildap->result);
+		$this->printLdapResult($this->rildap->result);
+		
+		
+		
+		
+		
+		$dn = $this->get_random_entry();
+		
+		$this->rildap = new Ri_Ldap();
+		$entry = 'fake';
+		
+		$this->subTestTitle('Updating the entry with dn: '.$dn.' using a string as entry');
+		$this->getCodeOrigin();
+		$test = $this->rildap->CEupdate($entry, $dn);
+		echo $this->run($test, 'is_false', 'Is the exit status true ?', '');
+		
+		
+		
+		$this->getCodeOrigin();
+		$this->checkLdapReturnObject($this->rildap->result);
+			
+			
+			
+		$this->getCodeOrigin();
+		$this->checkLdapReturnObjectHasError($this->rildap->result);
+			
+			
+			
+		$this->getCodeOrigin();
+		$this->checkLdapReturnObjectHasNoContent($this->rildap->result);
+		$this->printLdapResult($this->rildap->result);		
+	}
+	
+	
+	public function test_Ri_Ldap_delete()
+	{
+		$this->testTitle('Testing the Ri_LDAP Object CEdelete() method');
+	
+		$dn = $this->get_random_entry();
 		if($dn)
 		{			
 			$this->subTestTitle('Deleting entry with dn: '.$dn);
 			$this->rildap = new Ri_Ldap();
-			$this->rildap->initialize();
 			
+			$this->getCodeOrigin();
 			$test = $this->rildap->CEdelete($dn);
 			echo $this->run($test, 'is_true', 'Is the exit status true ?', '');
 			
@@ -1149,47 +1344,13 @@ class Unit_Tests extends Test_Controller {
 		
 		
 		
-		$this->rildap = new Ri_Ldap();
-		$this->rildap->initialize();
-		
-		$this->subTestTitle('Searching for a valid entry');
-		$this->getCodeOrigin();
-		$baseDN = $this->baseDN;
-		$filter = '(givenName=*)';
-		$attributes = array('uid');
-		$test = $this->rildap->CEsearch($baseDN, $filter, $attributes);
-		echo $this->run($test, 'is_true', 'Is the exit status true ?', '');
-		
-		
-		//take the last result
-		$content = $this->rildap->result->data->content;
-		$item = array_pop($content);
-		if($item['uid'][0] == '10000000') $item = array_pop($content);
-		if(count($item)>0) $dn = 'uid='.$item['uid'][0].','.$this->baseDN;
-		
-		
-		$this->getCodeOrigin();
-		$this->checkLdapReturnObject($this->rildap->result);
-		
-		
-		
-		$this->getCodeOrigin();
-		$this->checkLdapReturnObjectHasNoError($this->rildap->result);
-		
-		
-		
-		$this->getCodeOrigin();
-		$this->checkLdapReturnObjectHasContent($this->rildap->result);
-		
-		
-		
-		
+		$dn = $this->get_random_entry();
 		if($dn)
 		{
 			$this->subTestTitle('Deleting entry with dn: '.$dn.' saving the dn in the object and avoiding to pass it as a param.');
 			$this->rildap = new Ri_Ldap();
-			$this->rildap->initialize();
 			$this->rildap->dn = $dn;
+			$this->getCodeOrigin();
 			$test = $this->rildap->CEdelete();
 			echo $this->run($test, 'is_true', 'Is the exit status true ?', '');
 				
@@ -1209,7 +1370,7 @@ class Unit_Tests extends Test_Controller {
 			$this->checkLdapReturnObjectHasNoContent($this->rildap->result);
 			$this->printLdapResult($this->rildap->result);
 		}
-
+		unset($dn);
 		
 		
 		
@@ -1217,7 +1378,6 @@ class Unit_Tests extends Test_Controller {
 		$dn = 'uid=do_not_exists,ou=users,o=ce,dc=2v,dc=ntw';
 		$this->subTestTitle('Deleting a non existent entry with dn: '.$dn);
 		$this->rildap = new Ri_Ldap();
-		$this->rildap->initialize();
 		$this->rildap->dn = $dn;
 		$test = $this->rildap->CEdelete();
 		echo $this->run($test, 'is_false', 'Is the exit status false ?', '');
@@ -1244,8 +1404,8 @@ class Unit_Tests extends Test_Controller {
 		$dn = array('uid=do_not_exists,ou=users,o=ce,dc=2v,dc=ntw');
 		$this->subTestTitle('Deleting by passing an array as dn ');
 		$this->rildap = new Ri_Ldap();
-		$this->rildap->initialize();
 		$this->rildap->dn = $dn;
+		$this->getCodeOrigin();
 		$test = $this->rildap->CEdelete();
 		echo $this->run($test, 'is_false', 'Is the exit status false ?', '');
 		
@@ -1272,8 +1432,8 @@ class Unit_Tests extends Test_Controller {
 		$dn = $this->baseDN;
 		$this->subTestTitle('Attempt to delete the baseDn ');
 		$this->rildap = new Ri_Ldap();
-		$this->rildap->initialize();
 		$this->rildap->dn = $dn;
+		$this->getCodeOrigin();
 		$test = $this->rildap->CEdelete();
 		echo $this->run($test, 'is_false', 'Is the exit status false ?', '');
 		
