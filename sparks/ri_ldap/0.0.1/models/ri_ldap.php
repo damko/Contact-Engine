@@ -130,9 +130,9 @@ class Ri_Ldap extends Ldap {
 		{
 			$this->getActiveConnections();
 		} else {
-			return false;
+			return $this->restReturn(false);
 		}
-		return true;		
+		return $this->restReturn(true);		
 	}
 
 	/**
@@ -198,38 +198,29 @@ class Ri_Ldap extends Ldap {
 		
 		$this->dn = $dn;
 		
-		if($this->create($entry))
-		{
-			$this->data->http_status_code = '200';
-			$this->result->storeData($this->data);
-			return true;
-		}
-		return false;
+		return $this->restReturn($this->create($entry));
+		
 	}
 	
 	public function CEsearch($baseDn, $filter, $attributes = null, $attributesOnly = 0, $deref = null, array $sort_by = null, $flow_order = null, $wanted_page = null, $items_page = null) {
 		if(!$this->initialize()) return $this->result;
 		$this->connection = $this->RoConnection;
-		if($this->search($baseDn, $filter, $attributes, $attributesOnly, null, null, $deref, $sort_by, $flow_order, $wanted_page, $items_page))
-		{
-			$this->data->http_status_code = '200';
-			$this->result->storeData($this->data);
-			return true;
-		}
-		return false;
+		
+		return $this->restReturn($this->search($baseDn, $filter, $attributes, $attributesOnly, null, null, $deref, $sort_by, $flow_order, $wanted_page, $items_page));
 	}
 	
 	public function CEupdate($dn, array $entry) {
 		$this->dn = $dn;
 		$this->connection = $this->WrConnection;
-		return $this->update($entry);
+		
+		return $this->restReturn($this->update($entry));
 	}
 	
-	public function CEdelete($dn) {
+	public function CEdelete($dn = null) {
 		$this->connection = $this->WrConnection;
-		return $this->delete($dn);
+		return $this->restReturn($this->delete($dn));
 	}
-				
+	
 	private function getActiveConnections() {
 		
 		$num_masters = 0;
@@ -272,6 +263,15 @@ class Ri_Ldap extends Ldap {
 			$this->RoConnection = $this->servers['slave'][$serverId]['connection'];
 		}				
 	}
+	
+	private function restReturn($exit_status) {
+		if($exit_status){
+			$this->data->http_status_code = '200';
+			$this->result->storeData($this->data);
+			return true;
+		}
+		return false;
+	}	
 }
 
 /* End of ri_ldap.php */

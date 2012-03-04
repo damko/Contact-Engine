@@ -258,21 +258,16 @@ class Ldap extends CI_Model {
 		return $this->run($params) ? true : false;	
 	}
 	
-	public function delete($dn)
+	public function delete($dn = null)
 	{
-		if(empty($dn) or is_array($dn)) return $this->report('dn','');
-	
+		if(!empty($dn) and !is_array($dn)) $this->dn = $dn;
+
 		$params = array(
 								'command' => 'ldap_delete',
-								'entry' => $entry,
+								//'dn' => $dn,
 		);
-		try {
-			$result = $this->run($params);
-		} catch (OutOfRangeException $e) {
-			return $e;
-		}
-	
-		return ($result) ? true : false;
+		
+		return $this->run($params) ? true : false;
 	}
 	
 	/**
@@ -330,10 +325,7 @@ class Ldap extends CI_Model {
 	}
 	
 	public function update(array $entry, $dn = null) {
-	
-		//validation
-		//if(is_object($return = $this->commonValidationsSet($entry))) return $return;
-	
+		
 		$params = array(
 							'command' => 'ldap_modify',
 							'entry' => $entry,
@@ -499,6 +491,10 @@ class Ldap extends CI_Model {
 				if(! $result = ldap_delete($this->connection, $this->dn)) {
 					$ldap_error = $this->getLdapError($command);
 					$message = $ldap_error['message'];
+					if($ldap_error['ldap_errno'] == '32') {
+						$message .= '. The entry you want to delete does not exist.';
+						$http_status_code = '415';
+					}					
 				}
 			break;
 					

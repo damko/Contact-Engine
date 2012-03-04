@@ -4,7 +4,7 @@ require APPPATH.'/libraries/test_controller.php';
 
 
 
-class Rildap_Tests extends Test_Controller {
+class Unit_Tests extends Test_Controller {
 	public function __construct()
 	{
 		parent::__construct();		
@@ -44,29 +44,34 @@ class Rildap_Tests extends Test_Controller {
 		$this->ldappw = 'Wi7Xkcv300z';
 		$this->version = '3';
 		$this->baseDN = 'ou=users,o=ce,dc=2v,dc=ntw';
+		
+		global $header;
+
+		$header = '
+		<h1>Contact Engine unit-tests</h1>
+		<div>
+			<h3>Before running these tests remind to: </h3>
+			<ol>
+				<li>set the connections parameters hardcoded in the tests file unit_tests.php</li>
+				<li><a href="/index.php/populate_LDAP/" target="_blank">populate</a> the LDAP database</li>
+			</ol>
+		</div>
+		<div id="container">		
+		';
 	}
 	
 	public function index()
 	{
-
+		global $header;
+		
 		$this->load->view('rildap_tests');
 				
-		echo '<h1>RiLdap Unit Tests</h1>
-		<div>
-			<h3>Before running these tests remind to: </h3>
-			<ol>
-			<li>set the connections parameters hardcoded in the tests file rildap_tests.php</li>
-			</ol>
-		</div>
-		<div id="container">';
+		echo $header;
 
 		//runs tests
 		echo '<div id="left">';
-		$this->test_LDAP_Connection();
-		$this->test_Ldap_create();
-		$this->test_Ri_LDAP_Initialize();
-		$this->test_Ri_Ldap_create();
-		$this->test_Ri_Ldap_search();
+		echo 'Run <a href="/index.php/unit_tests/ldapTests">LDAP class tests</a><br/>';
+		echo 'Run <a href="/index.php/unit_tests/riLdapTests">Ri_LDAP class tests</a><br/>';
 		echo '</div>';
 		
 		$this->printSummary();
@@ -74,8 +79,54 @@ class Rildap_Tests extends Test_Controller {
 		echo '<div></body></html>';
 	}
 	
+	public function ldapTests(){
+		
+		global $header;
+		
+		$this->load->view('rildap_tests');
+		
+		echo $header;
+		echo '<a href="/index.php/unit_tests/">Back</a> to unit-tests front page.<br/>';
+		
+		//runs tests
+		echo '<div id="left">';
+		$this->test_Ldap_Connection();
+		$dn = $this->test_Ldap_create();
+		if($dn) $this->test_Ldap_delete($dn);
+		echo '</div>';
+		
+		$this->printSummary();
+		
+		echo '<div></body></html>';
+				
+	}
 	
-	public function test_LDAP_Connection()
+	public function riLdapTests(){
+		
+		global $header;
+		
+		$this->load->view('rildap_tests');
+		
+		echo $header ;
+		echo '<a href="/index.php/unit_tests/">Back</a> to unit-tests front page.<br/>';
+		echo '<hr/>';
+		echo '<h2>Ri_LDAP Class unit-tests</h2>';
+		
+		//runs tests
+		echo '<div id="left">';
+		$this->test_Ri_LDAP_Initialize();
+		$this->test_Ri_Ldap_create();
+		$this->test_Ri_Ldap_search();
+		$this->test_Ri_Ldap_delete();
+		echo '</div>';
+		
+		$this->printSummary();
+		
+		echo '<div></body></html>';
+			
+	}
+		
+	public function test_Ldap_Connection()
 	{	
 		$this->testTitle('Testing the LDAP Object connect() method');
 		
@@ -127,9 +178,9 @@ class Rildap_Tests extends Test_Controller {
 		$this->ldap->connect($this->server,$this->ldapdn,$this->ldappw,$this->version);
 		
 		
-		$random = rand(999,9999);
+		$random = rand(999999,9999999);
 		$surname = 'Coyote'.$random;
-		$name = 'Willy'.$random;
+		$name = 'Willy';
 	
 		//entry fields from the LDAP schema MUST attribute
 		$entry = array();
@@ -148,9 +199,29 @@ class Rildap_Tests extends Test_Controller {
 		$dn = 'uid='.$entry['uid'].',ou=users,o=ce,dc=2v,dc=ntw';
 		
 		$test = $this->ldap->create($entry, $dn);
-		echo $this->run($test, 'is_true', 'Do I get true back as exit status ?', '');
+		echo $this->run($test, 'is_true', 'Is the exit status true ?', '');
 		
+		if($test){
+			echo 'Created entry with dn '.$dn.'<br/>';
+			return $dn;
+		}
 	}
+	
+	public function test_Ldap_delete($dn)
+	{
+		$this->testTitle('Testing the LDAP Object delete() method');
+	
+		if(is_null($dn)) return false;
+		
+		$this->subTestTitle('Deleting entry with dn: '.$dn);
+		$this->getCodeOrigin();
+		$this->ldap = new Ldap();
+		$this->ldap->connect($this->server,$this->ldapdn,$this->ldappw,$this->version);	
+		
+		
+		$test = $this->ldap->delete($dn);
+		echo $this->run($test, 'is_true', 'Is the exit status true ?', '');
+	}	
 		
 	public function test_Ri_LDAP_Initialize()
 	{
@@ -168,6 +239,11 @@ class Rildap_Tests extends Test_Controller {
 		$test = count($this->rildap->result->errors);
 		echo $this->run($test, '0','Counting errors of the previous test: expecting 0, got: '.$test,'');
 		$this->printLdapResult($this->rildap->result);
+		
+		
+		
+		$this->getCodeOrigin();
+		$this->checkLdapReturnObjectHasNoContent($this->rildap->result);		
 	}
 	
 	
@@ -180,9 +256,9 @@ class Rildap_Tests extends Test_Controller {
 		$this->getCodeOrigin();
 		$this->rildap = new Ri_Ldap();
 	
-		$random = rand(999,9999);
+		$random = rand(999999,9999999);
 		$surname = 'Coyote'.$random;
-		$name = 'Willy'.$random;
+		$name = 'Willy';
 	
 		//entry fields from the LDAP schema MUST attribute
 		$entry = array();
@@ -201,7 +277,7 @@ class Rildap_Tests extends Test_Controller {
 		$dn = 'uid='.$entry['uid'].',ou=users,o=ce,dc=2v,dc=ntw';
 	
 		$test = $this->rildap->CEcreate($entry,$dn);
-		echo $this->run($test, 'is_true', 'Do I get true back as exit status ?', '');
+		echo $this->run($test, 'is_true', 'Is the exit status true ?', '');
 
 		
 		
@@ -217,7 +293,7 @@ class Rildap_Tests extends Test_Controller {
 		
 		
 		$this->getCodeOrigin();
-		$this->checkLdapReturnObjectHasData($this->rildap->result);
+		$this->checkLdapReturnObjectHasNoContent($this->rildap->result);
 		$this->printLdapResult($this->rildap->result);
 		
 		
@@ -226,9 +302,9 @@ class Rildap_Tests extends Test_Controller {
 		$this->getCodeOrigin();
 		$this->rildap = new Ri_Ldap();
 		
-		$random = rand(999,9999);
+		$random = rand(999999,9999999);
 		$surname = 'Coyote'.$random;
-		$name = 'Willy'.$random;
+		$name = 'Willy';
 		
 		//entry fields from the LDAP schema MUST attribute
 		$entry = array();
@@ -247,7 +323,7 @@ class Rildap_Tests extends Test_Controller {
 		$dn = 'ou=fakeDN,o=ce,dc=2v,dc=ntw';
 		
 		$test = $this->rildap->CEcreate($entry,$dn);
-		echo $this->run($test, 'is_false', 'Do I get false back as exit status ?', '');
+		echo $this->run($test, 'is_false', 'Is the exit status false ?', '');
 		
 		
 		
@@ -263,7 +339,7 @@ class Rildap_Tests extends Test_Controller {
 		
 		
 		$this->getCodeOrigin();
-		$this->checkLdapReturnObjectHasNoData($this->rildap->result);
+		$this->checkLdapReturnObjectHasNoContent($this->rildap->result);
 		$this->printLdapResult($this->rildap->result);		
 		
 		
@@ -273,9 +349,9 @@ class Rildap_Tests extends Test_Controller {
 		$this->getCodeOrigin();
 		$this->rildap = new Ri_Ldap();
 		
-		$random = rand(999,9999);
+		$random = rand(999999,9999999);
 		$surname = 'Coyote'.$random;
-		$name = 'Willy'.$random;
+		$name = 'Willy';
 		
 		//entry fields from the LDAP schema MUST attribute
 		$entry = array();
@@ -292,7 +368,7 @@ class Rildap_Tests extends Test_Controller {
 		$entry['objectClass'] = 'dueviPerson';
 
 		$test = $this->rildap->CEcreate($entry);
-		echo $this->run($test, 'is_false', 'Do I get false back as exit status ?', '');
+		echo $this->run($test, 'is_false', 'Is the exit status false ?', '');
 		
 		
 		
@@ -308,7 +384,7 @@ class Rildap_Tests extends Test_Controller {
 		
 		
 		$this->getCodeOrigin();
-		$this->checkLdapReturnObjectHasNoData($this->rildap->result);
+		$this->checkLdapReturnObjectHasNoContent($this->rildap->result);
 		$this->printLdapResult($this->rildap->result);		
 		
 		
@@ -317,9 +393,9 @@ class Rildap_Tests extends Test_Controller {
 		$this->getCodeOrigin();
 		$this->rildap = new Ri_Ldap();
 		
-		$random = rand(999,9999);
+		$random = rand(999999,9999999);
 		$surname = 'Coyote'.$random;
-		$name = 'Willy'.$random;
+		$name = 'Willy';
 		
 		//entry fields from the LDAP schema MUST attribute
 		$entry = array();
@@ -338,7 +414,7 @@ class Rildap_Tests extends Test_Controller {
 		$dn = '';
 		
 		$test = $this->rildap->CEcreate($entry, $dn);
-		echo $this->run($test, 'is_false', 'Do I get false back as exit status ?', '');
+		echo $this->run($test, 'is_false', 'Is the exit status false ?', '');
 		
 		
 		
@@ -354,7 +430,7 @@ class Rildap_Tests extends Test_Controller {
 		
 		
 		$this->getCodeOrigin();
-		$this->checkLdapReturnObjectHasNoData($this->rildap->result);
+		$this->checkLdapReturnObjectHasNoContent($this->rildap->result);
 		$this->printLdapResult($this->rildap->result);		
 		
 		
@@ -363,9 +439,9 @@ class Rildap_Tests extends Test_Controller {
 		$this->getCodeOrigin();
 		$this->rildap = new Ri_Ldap();
 		
-		$random = rand(999,9999);
+		$random = rand(999999,9999999);
 		$surname = 'Coyote'.$random;
-		$name = 'Willy'.$random;
+		$name = 'Willy';
 		
 		//entry fields from the LDAP schema MUST attribute
 		$entry = array();
@@ -384,7 +460,7 @@ class Rildap_Tests extends Test_Controller {
 		$dn = array('ou=fakeDN,o=ce,dc=2v,dc=ntw');
 		
 		$test = $this->rildap->CEcreate($entry, $dn);
-		echo $this->run($test, 'is_false', 'Do I get false back as exit status ?', '');
+		echo $this->run($test, 'is_false', 'Is the exit status false ?', '');
 		
 		
 		
@@ -400,7 +476,7 @@ class Rildap_Tests extends Test_Controller {
 		
 		
 		$this->getCodeOrigin();
-		$this->checkLdapReturnObjectHasNoData($this->rildap->result);
+		$this->checkLdapReturnObjectHasNoContent($this->rildap->result);
 		$this->printLdapResult($this->rildap->result);		
 		
 		
@@ -409,16 +485,16 @@ class Rildap_Tests extends Test_Controller {
 		$this->getCodeOrigin();
 		$this->rildap = new Ri_Ldap();
 		
-		$random = rand(999,9999);
+		$random = rand(999999,9999999);
 		$surname = 'Coyote'.$random;
-		$name = 'Willy'.$random;
+		$name = 'Willy';
 		
 		//entry fields from the LDAP schema MUST attribute
 		$entry = '';
 		$dn = 'uid=myuid,ou=users,o=ce,dc=2v,dc=ntw';
 		
 		$test = $this->rildap->CEcreate($entry, $dn);
-		echo $this->run($test, 'is_false', 'Do I get false back as exit status ?', '');
+		echo $this->run($test, 'is_false', 'Is the exit status false ?', '');
 		
 		
 		
@@ -434,7 +510,7 @@ class Rildap_Tests extends Test_Controller {
 		
 		
 		$this->getCodeOrigin();
-		$this->checkLdapReturnObjectHasNoData($this->rildap->result);
+		$this->checkLdapReturnObjectHasNoContent($this->rildap->result);
 		$this->printLdapResult($this->rildap->result);	
 
 		
@@ -446,9 +522,9 @@ class Rildap_Tests extends Test_Controller {
 		$this->getCodeOrigin();
 		$this->rildap = new Ri_Ldap();
 		
-		$random = rand(999,9999);
+		$random = rand(999999,9999999);
 		$surname = 'Coyote'.$random;
-		$name = 'Willy'.$random;
+		$name = 'Willy';
 		
 		//entry fields from the LDAP schema MUST attribute
 		$entry = array();
@@ -467,7 +543,7 @@ class Rildap_Tests extends Test_Controller {
 		$dn = 'uid='.$entry['uid'].',ou=users,o=ce,dc=2v,dc=ntw';
 		
 		$test = $this->rildap->CEcreate($entry,$dn);
-		echo $this->run($test, 'is_false', 'Do I get false back as exit status ?', '');
+		echo $this->run($test, 'is_false', 'Is the exit status false ?', '');
 		
 		
 		
@@ -483,7 +559,7 @@ class Rildap_Tests extends Test_Controller {
 		
 		
 		$this->getCodeOrigin();
-		$this->checkLdapReturnObjectHasNoData($this->rildap->result);
+		$this->checkLdapReturnObjectHasNoContent($this->rildap->result);
 		$this->printLdapResult($this->rildap->result);		
 		
 		
@@ -494,9 +570,9 @@ class Rildap_Tests extends Test_Controller {
 		$this->getCodeOrigin();
 		$this->rildap = new Ri_Ldap();
 		
-		$random = rand(999,9999);
+		$random = rand(999999,9999999);
 		$surname = 'Coyote'.$random;
-		$name = 'Willy'.$random;
+		$name = 'Willy';
 		
 		//entry fields from the LDAP schema MUST attribute
 		$entry = array();
@@ -515,7 +591,7 @@ class Rildap_Tests extends Test_Controller {
 		$dn = 'uid='.$entry['uid'].',ou=users,o=ce,dc=2v,dc=ntw';
 		
 		$test = $this->rildap->CEcreate($entry,$dn);
-		echo $this->run($test, 'is_false', 'Do I get false back as exit status ?', '');
+		echo $this->run($test, 'is_false', 'Is the exit status false ?', '');
 		
 		
 		
@@ -531,7 +607,7 @@ class Rildap_Tests extends Test_Controller {
 		
 		
 		$this->getCodeOrigin();
-		$this->checkLdapReturnObjectHasNoData($this->rildap->result);
+		$this->checkLdapReturnObjectHasNoContent($this->rildap->result);
 		$this->printLdapResult($this->rildap->result);		
 	}
 		
@@ -545,10 +621,9 @@ class Rildap_Tests extends Test_Controller {
 		$this->rildap = new Ri_Ldap();
 		$baseDN = $this->baseDN; 
 		$filter = '(uid=10000000)';
-		//$attributes = array('uid','cn','sn','giveName');
 		$attributes = array(); 
 		$test = $this->rildap->CEsearch($baseDN, $filter, $attributes);	
-		echo $this->run($test, 'is_true', 'Do I get true back as exit status ?', '');
+		echo $this->run($test, 'is_true', 'Is the exit status true ?', '');
 		
 		
 		
@@ -563,7 +638,7 @@ class Rildap_Tests extends Test_Controller {
 		
 		
 		$this->getCodeOrigin();
-		$this->checkLdapReturnObjectHasData($this->rildap->result);
+		$this->checkLdapReturnObjectHasContent($this->rildap->result);
 		$this->printLdapResult($this->rildap->result);
 		
 		
@@ -578,7 +653,7 @@ class Rildap_Tests extends Test_Controller {
 		$filter = '(uid=10000000)';
 		$attributes = array('uid');
 		$test = $this->rildap->CEsearch($baseDN, $filter, $attributes);
-		echo $this->run($test, 'is_true', 'Do I get true back as exit status ?', '');
+		echo $this->run($test, 'is_true', 'Is the exit status true ?', '');
 		
 		
 		
@@ -593,7 +668,7 @@ class Rildap_Tests extends Test_Controller {
 		
 		
 		$this->getCodeOrigin();
-		$this->checkLdapReturnObjectHasData($this->rildap->result);
+		$this->checkLdapReturnObjectHasContent($this->rildap->result);
 		$this->printLdapResult($this->rildap->result);		
 		
 		
@@ -609,7 +684,7 @@ class Rildap_Tests extends Test_Controller {
 		$filter = '(uid=10000000)';
 		$attributes = array('uid','cn','sn','giveName');
 		$test = $this->rildap->CEsearch($baseDN, $filter, $attributes);
-		echo $this->run($test, 'is_false', 'Do I get false back as exit status when I search with a wrong baseDN ?', '');
+		echo $this->run($test, 'is_false', 'Is the exit status false when I search with a wrong baseDN ?', '');
 		
 		
 		
@@ -624,7 +699,7 @@ class Rildap_Tests extends Test_Controller {
 		
 		
 		$this->getCodeOrigin();
-		$this->checkLdapReturnObjectHasNoData($this->rildap->result);
+		$this->checkLdapReturnObjectHasNoContent($this->rildap->result);
 		$this->printLdapResult($this->rildap->result);		
 
 
@@ -639,7 +714,7 @@ class Rildap_Tests extends Test_Controller {
 		$filter = array('(uid=10000000)');
 		$attributes = array('uid','cn','sn','giveName');
 		$test = $this->rildap->CEsearch($baseDN, $filter, $attributes);
-		echo $this->run($test, 'is_false', 'Do I get false back as exit status when I search with a wrong filter ?', '');
+		echo $this->run($test, 'is_false', 'Is the exit status false when I search with a wrong filter ?', '');
 		
 		
 		
@@ -654,7 +729,7 @@ class Rildap_Tests extends Test_Controller {
 		
 		
 		$this->getCodeOrigin();
-		$this->checkLdapReturnObjectHasNoData($this->rildap->result);
+		$this->checkLdapReturnObjectHasNoContent($this->rildap->result);
 		$this->printLdapResult($this->rildap->result);
 				
 
@@ -668,7 +743,7 @@ class Rildap_Tests extends Test_Controller {
 		$filter = '(uid=10000000)';
 		$attributes = 'uid,cn,sn,giveName';
 		$test = $this->rildap->CEsearch($baseDN, $filter, $attributes);
-		echo $this->run($test, 'is_false', 'Do I get false back as exit status when I search with a wrong filter ?', '');
+		echo $this->run($test, 'is_false', 'Is the exit status false when I search with a wrong filter ?', '');
 		
 		
 		
@@ -683,7 +758,7 @@ class Rildap_Tests extends Test_Controller {
 		
 		
 		$this->getCodeOrigin();
-		$this->checkLdapReturnObjectHasNoData($this->rildap->result);
+		$this->checkLdapReturnObjectHasNoContent($this->rildap->result);
 		$this->printLdapResult($this->rildap->result);		
 
 		
@@ -696,7 +771,7 @@ class Rildap_Tests extends Test_Controller {
 		$filter = '(uid=10000000)';
 		$attributes = array('uid','cn','sn','giveName');
 		$test = $this->rildap->CEsearch($baseDN, $filter, $attributes, '3');
-		echo $this->run($test, 'is_false', 'Do I get false back as exit status when I search with a wrong filter ?', '');
+		echo $this->run($test, 'is_false', 'Is the exit status false when I search with a wrong filter ?', '');
 		
 		
 		$this->getCodeOrigin();
@@ -708,7 +783,7 @@ class Rildap_Tests extends Test_Controller {
 		
 		
 		$this->getCodeOrigin();
-		$this->checkLdapReturnObjectHasNoData($this->rildap->result);
+		$this->checkLdapReturnObjectHasNoContent($this->rildap->result);
 		$this->printLdapResult($this->rildap->result);		
 
 		
@@ -723,7 +798,7 @@ class Rildap_Tests extends Test_Controller {
 		$filter = '(uid=100000000000000000000000000000000000000)';
 		$attributes = array('uid','cn','sn','giveName');
 		$test = $this->rildap->CEsearch($baseDN, $filter, $attributes);
-		echo $this->run($test, 'is_true', 'Do I get true back as exit status when I search for an entry that can not be found ?', '');
+		echo $this->run($test, 'is_true', 'Is the exit status true when I search for an entry that can not be found ?', '');
 		
 		
 		
@@ -738,7 +813,7 @@ class Rildap_Tests extends Test_Controller {
 		
 		
 		$this->getCodeOrigin();
-		$this->checkLdapReturnObjectHasData($this->rildap->result);
+		$this->checkLdapReturnObjectHasNoContent($this->rildap->result);
 		$this->printLdapResult($this->rildap->result);		
 		
 		
@@ -753,7 +828,7 @@ class Rildap_Tests extends Test_Controller {
 		$filter = array('(uid=100000000000000000000000000000000000000)');
 		$attributes = array('uid','cn','sn','giveName');
 		$test = $this->rildap->CEsearch($baseDN, $filter, $attributes);
-		echo $this->run($test, 'is_false', 'Do I get false back as exit status when I search with a wrong baseDN ?', '');
+		echo $this->run($test, 'is_false', 'Is the exit status false when I search with a wrong baseDN ?', '');
 		
 		
 		
@@ -768,7 +843,7 @@ class Rildap_Tests extends Test_Controller {
 		
 		
 		$this->getCodeOrigin();
-		$this->checkLdapReturnObjectHasNoData($this->rildap->result);
+		$this->checkLdapReturnObjectHasNoContent($this->rildap->result);
 		$this->printLdapResult($this->rildap->result);
 
 
@@ -782,7 +857,7 @@ class Rildap_Tests extends Test_Controller {
 		$filter = '(uid=100*)';
 		$attributes = array('uid','cn','sn','giveName');
 		$test = $this->rildap->CEsearch($baseDN, $filter, $attributes);
-		echo $this->run($test, 'is_true', 'Do I get true back as exit status when I search with a wrong baseDN ?', '');
+		echo $this->run($test, 'is_true', 'Is the exit status true when I search with a wrong baseDN ?', '');
 		
 		
 		
@@ -797,7 +872,7 @@ class Rildap_Tests extends Test_Controller {
 		
 		
 		$this->getCodeOrigin();
-		$this->checkLdapReturnObjectHasData($this->rildap->result);
+		$this->checkLdapReturnObjectHasContent($this->rildap->result);
 		
 		
 		
@@ -838,14 +913,14 @@ class Rildap_Tests extends Test_Controller {
 		$this->getCodeOrigin();
 		$this->rildap = new Ri_Ldap();
 		$baseDN = $this->baseDN;
-		$filter = '(uid=10*)';
+		$filter = '(givenName=Willy)';
 		$attributes = array('uid','cn','sn','giveName');
 		$sort_by = array('sn','givenName');
 		$wanted_page = 1;
 		$items_per_page = 3;
 		$test = $this->rildap->CEsearch($baseDN, $filter, $attributes, 0, null, $sort_by, 'desc', $wanted_page, $items_per_page);
 		//$attributesOnly = 0, $deref = null, array $sort_by = null, $flow_order = null, $wanted_page = null, $items_page = null
-		echo $this->run($test, 'is_true', 'Do I get true back as exit status ?', '');
+		echo $this->run($test, 'is_true', 'Is the exit status true ?', '');
 		
 		
 		
@@ -860,7 +935,7 @@ class Rildap_Tests extends Test_Controller {
 		
 		
 		$this->getCodeOrigin();
-		$this->checkLdapReturnObjectHasData($this->rildap->result);
+		$this->checkLdapReturnObjectHasContent($this->rildap->result);
 		
 		
 		
@@ -920,7 +995,7 @@ class Rildap_Tests extends Test_Controller {
 		$items_per_page = 3;
 		$order = 'myorder';
 		$test = $this->rildap->CEsearch($baseDN, $filter, $attributes, 0, null, $sort_by, $order, $wanted_page, $items_per_page);
-		echo $this->run($test, 'is_false', 'Do I get false back as exit status when I search with a wrong baseDN ?', '');
+		echo $this->run($test, 'is_false', 'Is the exit status false when I search with a wrong baseDN ?', '');
 		
 		
 		
@@ -935,7 +1010,7 @@ class Rildap_Tests extends Test_Controller {
 		
 		
 		$this->getCodeOrigin();
-		$this->checkLdapReturnObjectHasNoData($this->rildap->result);
+		$this->checkLdapReturnObjectHasNoContent($this->rildap->result);
 		$this->printLdapResult($this->rildap->result);
 				
 		
@@ -952,7 +1027,7 @@ class Rildap_Tests extends Test_Controller {
 		$items_per_page = 3;
 		$order = 'asc';
 		$test = $this->rildap->CEsearch($baseDN, $filter, $attributes, 0, null, $sort_by, $order, $wanted_page, $items_per_page);
-		echo $this->run($test, 'is_false', 'Do I get false back as exit status when I search with a wrong baseDN ?', '');
+		echo $this->run($test, 'is_false', 'Is the exit status false when I search with a wrong baseDN ?', '');
 		
 		
 		
@@ -967,7 +1042,7 @@ class Rildap_Tests extends Test_Controller {
 		
 		
 		$this->getCodeOrigin();
-		$this->checkLdapReturnObjectHasNoData($this->rildap->result);
+		$this->checkLdapReturnObjectHasNoContent($this->rildap->result);
 		$this->printLdapResult($this->rildap->result);
 
 		
@@ -984,7 +1059,7 @@ class Rildap_Tests extends Test_Controller {
 		$items_per_page = '3';
 		$order = 'asc';
 		$test = $this->rildap->CEsearch($baseDN, $filter, $attributes, 0, null, $sort_by, $order, $wanted_page, $items_per_page);
-		echo $this->run($test, 'is_false', 'Do I get false back as exit status when I search with a wrong baseDN ?', '');
+		echo $this->run($test, 'is_false', 'Is the exit status false when I search with a wrong baseDN ?', '');
 		
 		
 		
@@ -999,7 +1074,223 @@ class Rildap_Tests extends Test_Controller {
 		
 		
 		$this->getCodeOrigin();
-		$this->checkLdapReturnObjectHasNoData($this->rildap->result);
+		$this->checkLdapReturnObjectHasNoContent($this->rildap->result);
+		$this->printLdapResult($this->rildap->result);		
+	}
+	
+	
+	public function test_Ri_Ldap_delete()
+	{
+		$this->testTitle('Testing the Ri_LDAP Object CEdelete() method');
+	
+		$this->rildap = new Ri_Ldap();
+		$this->rildap->initialize();
+
+		$this->subTestTitle('Searching for a valid entry');
+		$this->getCodeOrigin();
+		$baseDN = $this->baseDN;
+		$filter = '(givenName=*)';
+		$attributes = array('uid');
+		$test = $this->rildap->CEsearch($baseDN, $filter, $attributes);
+		echo $this->run($test, 'is_true', 'Is the exit status true ?', '');
+
+		
+		//take the last result
+		$content = $this->rildap->result->data->content;
+		$item = array_pop($content);
+		if($item['uid'][0] == '10000000') $item = array_pop($content);
+		if(count($item)>0) $dn = 'uid='.$item['uid'][0].','.$this->baseDN;
+		
+	
+		$this->getCodeOrigin();
+		$this->checkLdapReturnObject($this->rildap->result);
+		
+		
+		
+		$this->getCodeOrigin();
+		$this->checkLdapReturnObjectHasNoError($this->rildap->result);
+		
+		
+		
+		$this->getCodeOrigin();
+		$this->checkLdapReturnObjectHasContent($this->rildap->result);
+		
+		
+		
+
+		if($dn)
+		{			
+			$this->subTestTitle('Deleting entry with dn: '.$dn);
+			$this->rildap = new Ri_Ldap();
+			$this->rildap->initialize();
+			
+			$test = $this->rildap->CEdelete($dn);
+			echo $this->run($test, 'is_true', 'Is the exit status true ?', '');
+			
+			
+			
+			$this->getCodeOrigin();
+			$this->checkLdapReturnObject($this->rildap->result);
+			
+			
+			
+			$this->getCodeOrigin();
+			$this->checkLdapReturnObjectHasNoError($this->rildap->result);
+			
+			
+			
+			$this->getCodeOrigin();
+			$this->checkLdapReturnObjectHasNoContent($this->rildap->result);
+			$this->printLdapResult($this->rildap->result);
+		}	
+		unset($dn);
+		
+		
+		
+		
+		
+		$this->rildap = new Ri_Ldap();
+		$this->rildap->initialize();
+		
+		$this->subTestTitle('Searching for a valid entry');
+		$this->getCodeOrigin();
+		$baseDN = $this->baseDN;
+		$filter = '(givenName=*)';
+		$attributes = array('uid');
+		$test = $this->rildap->CEsearch($baseDN, $filter, $attributes);
+		echo $this->run($test, 'is_true', 'Is the exit status true ?', '');
+		
+		
+		//take the last result
+		$content = $this->rildap->result->data->content;
+		$item = array_pop($content);
+		if($item['uid'][0] == '10000000') $item = array_pop($content);
+		if(count($item)>0) $dn = 'uid='.$item['uid'][0].','.$this->baseDN;
+		
+		
+		$this->getCodeOrigin();
+		$this->checkLdapReturnObject($this->rildap->result);
+		
+		
+		
+		$this->getCodeOrigin();
+		$this->checkLdapReturnObjectHasNoError($this->rildap->result);
+		
+		
+		
+		$this->getCodeOrigin();
+		$this->checkLdapReturnObjectHasContent($this->rildap->result);
+		
+		
+		
+		
+		if($dn)
+		{
+			$this->subTestTitle('Deleting entry with dn: '.$dn.' saving the dn in the object and avoiding to pass it as a param.');
+			$this->rildap = new Ri_Ldap();
+			$this->rildap->initialize();
+			$this->rildap->dn = $dn;
+			$test = $this->rildap->CEdelete();
+			echo $this->run($test, 'is_true', 'Is the exit status true ?', '');
+				
+				
+				
+			$this->getCodeOrigin();
+			$this->checkLdapReturnObject($this->rildap->result);
+				
+				
+				
+			$this->getCodeOrigin();
+			$this->checkLdapReturnObjectHasNoError($this->rildap->result);
+				
+				
+				
+			$this->getCodeOrigin();
+			$this->checkLdapReturnObjectHasNoContent($this->rildap->result);
+			$this->printLdapResult($this->rildap->result);
+		}
+
+		
+		
+		
+		
+		$dn = 'uid=do_not_exists,ou=users,o=ce,dc=2v,dc=ntw';
+		$this->subTestTitle('Deleting a non existent entry with dn: '.$dn);
+		$this->rildap = new Ri_Ldap();
+		$this->rildap->initialize();
+		$this->rildap->dn = $dn;
+		$test = $this->rildap->CEdelete();
+		echo $this->run($test, 'is_false', 'Is the exit status false ?', '');
+		
+		
+		
+		$this->getCodeOrigin();
+		$this->checkLdapReturnObject($this->rildap->result);
+		
+		
+		
+		$this->getCodeOrigin();
+		$this->checkLdapReturnObjectHasError($this->rildap->result);
+		
+		
+		
+		$this->getCodeOrigin();
+		$this->checkLdapReturnObjectHasNoContent($this->rildap->result);
+		$this->printLdapResult($this->rildap->result);
+
+		
+		
+		
+		$dn = array('uid=do_not_exists,ou=users,o=ce,dc=2v,dc=ntw');
+		$this->subTestTitle('Deleting by passing an array as dn ');
+		$this->rildap = new Ri_Ldap();
+		$this->rildap->initialize();
+		$this->rildap->dn = $dn;
+		$test = $this->rildap->CEdelete();
+		echo $this->run($test, 'is_false', 'Is the exit status false ?', '');
+		
+		
+		
+		$this->getCodeOrigin();
+		$this->checkLdapReturnObject($this->rildap->result);
+		
+		
+		
+		$this->getCodeOrigin();
+		$this->checkLdapReturnObjectHasError($this->rildap->result);
+		
+		
+		
+		$this->getCodeOrigin();
+		$this->checkLdapReturnObjectHasNoContent($this->rildap->result);
+		$this->printLdapResult($this->rildap->result);
+
+		
+		
+		
+		
+		$dn = $this->baseDN;
+		$this->subTestTitle('Attempt to delete the baseDn ');
+		$this->rildap = new Ri_Ldap();
+		$this->rildap->initialize();
+		$this->rildap->dn = $dn;
+		$test = $this->rildap->CEdelete();
+		echo $this->run($test, 'is_false', 'Is the exit status false ?', '');
+		
+		
+		
+		$this->getCodeOrigin();
+		$this->checkLdapReturnObject($this->rildap->result);
+		
+		
+		
+		$this->getCodeOrigin();
+		$this->checkLdapReturnObjectHasError($this->rildap->result);
+		
+		
+		
+		$this->getCodeOrigin();
+		$this->checkLdapReturnObjectHasNoContent($this->rildap->result);
 		$this->printLdapResult($this->rildap->result);		
 	}
 }

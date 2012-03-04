@@ -45,8 +45,9 @@ class Test_Controller extends CI_Controller {
 			  <span style="font-size: 12px;">
 			  	written in '.$this->code_file.' line '.$this->code_line.'</span>
 			  <span style="font-size: 12px; float: right;">
-			  	[<a style="color: blue;" href="'.site_url().'">Home</a>] &nbsp;&nbsp;
-			  	[<a style="color: blue;" href="#top">Top</a>]&nbsp;&nbsp;
+			  	<a style="color: blue;" href="'.site_url().'">Home</a> &nbsp;|&nbsp;
+			  	<a style="color: blue;" href="'.site_url().'/unit_tests/">Unit-tests home</a> &nbsp;|&nbsp;
+			  	<a style="color: blue;" href="#top">Top</a>&nbsp;&nbsp;
 			  	
 			  </span>
 			  </H4>';
@@ -206,25 +207,34 @@ class Test_Controller extends CI_Controller {
 		echo $this->run($test, 'is_false', 'Is LdapReturnObject->data not an array ?', '');
 	}
 
-	protected function checkLdapReturnObjectHasData($lro) {
-	
-		$test = empty($lro->data);
-		echo $this->run($test, 'is_false', 'Does the LdapReturnObject have data ?', '');
-		
-				
+	private  function checkLdapReturnObjectHasDataObject($lro) {
 		$test = get_class($lro->data);
 		echo $this->run($test, 'Ldap_Data_Object', 'Is LdapReturnObject->data a Ldap_Data_Object ?', '');
-		
+				
 		$test = true;
 		if(!isset($lro->data->http_status_code)) $test = false;
 		if(!isset($lro->data->http_status_message)) $test = false;
 		if(!isset($lro->data->content)) $test = false;
-		echo $this->run($test, 'is_true', 'Are the LdapReturnObject->data mandatory attributes all set ?', '');		
+		echo $this->run($test, 'is_true', 'Are the LdapReturnObject->data mandatory attributes all set ?', '');
+
+		$test = $lro->data->content;
+		echo $this->run($test, 'is_array', 'Is the LdapReturnObject->data->content an array ?', '');
+	}
+	
+	protected function checkLdapReturnObjectHasContent($lro) {
+		
+		$this->checkLdapReturnObjectHasDataObject($lro);
+		
+		$test = empty($lro->data->content);
+		echo $this->run($test, 'is_false', 'Does the LdapReturnObject have data ?', '');
+
 	}
 
-	protected function checkLdapReturnObjectHasNoData($lro) {
-	
-		$test = count($lro->data);
+	protected function checkLdapReturnObjectHasNoContent($lro) {
+		
+		$this->checkLdapReturnObjectHasDataObject($lro);
+		
+		$test = count($lro->data->content);
 		$test = ($test > 0) ? true : false;
 		echo $this->run($test, 'is_false', 'Does the LdapReturnObject have NO data ?', '');
 	}
