@@ -119,6 +119,7 @@ class Unit_Tests extends Test_Controller {
 		$this->test_Ri_LDAP_Initialize();
 		$this->test_Ri_Ldap_create();
 		$this->test_Ri_Ldap_search();
+		$this->test_Ri_Ldap_read();
 		$this->test_Ri_Ldap_update();
 		$this->test_Ri_Ldap_delete();
 		echo '</div>';
@@ -1174,7 +1175,7 @@ class Unit_Tests extends Test_Controller {
 	
 	public function test_Ri_Ldap_read()
 	{
-		$this->testTitle('Testing the Ri_LDAP Object CEsearch() method');
+		$this->testTitle('Testing the Ri_LDAP Object CEread() method');
 		
 		$this->subTestTitle('Reading an existent entry');
 		
@@ -1183,7 +1184,7 @@ class Unit_Tests extends Test_Controller {
 		if($dn)
 		{
 			$this->rildap = new Ri_Ldap();
-			$this->riLdap->ldap = $dn;
+			$this->rildap->dn = $dn;
 			$this->getCodeOrigin();
 			$test = $this->rildap->CEread();
 			echo $this->run($test, 'is_true', 'Is the exit status true ?', '');
@@ -1203,7 +1204,31 @@ class Unit_Tests extends Test_Controller {
 			$this->getCodeOrigin();
 			$this->checkLdapReturnObjectHasContent($this->rildap->result);
 			$this->printLdapResult($this->rildap->result);
-		}		
+		}
+
+		
+		$this->subTestTitle('Reading a non existent entry');
+		$this->rildap = new Ri_Ldap();
+		$this->rildap->dn = 'uid=notexistent,'.$this->baseDN;
+		$this->getCodeOrigin();
+		$test = $this->rildap->CEread();
+		echo $this->run($test, 'is_true', 'Is the exit status true ?', '');
+			
+			
+			
+		$this->getCodeOrigin();
+		$this->checkLdapReturnObject($this->rildap->result);
+			
+			
+			
+		$this->getCodeOrigin();
+		$this->checkLdapReturnObjectHasNoError($this->rildap->result);
+			
+			
+			
+		$this->getCodeOrigin();
+		$this->checkLdapReturnObjectHasNoContent($this->rildap->result);
+		$this->printLdapResult($this->rildap->result);		
 	}
 
 	
@@ -1286,6 +1311,35 @@ class Unit_Tests extends Test_Controller {
 		$entry = 'fake';
 		
 		$this->subTestTitle('Updating the entry with dn: '.$dn.' using a string as entry');
+		$this->getCodeOrigin();
+		$test = $this->rildap->CEupdate($entry, $dn);
+		echo $this->run($test, 'is_false', 'Is the exit status true ?', '');
+		
+		
+		
+		$this->getCodeOrigin();
+		$this->checkLdapReturnObject($this->rildap->result);
+			
+			
+			
+		$this->getCodeOrigin();
+		$this->checkLdapReturnObjectHasError($this->rildap->result);
+			
+			
+			
+		$this->getCodeOrigin();
+		$this->checkLdapReturnObjectHasNoContent($this->rildap->result);
+		$this->printLdapResult($this->rildap->result);		
+		
+		
+		
+		
+		
+		$this->rildap = new Ri_Ldap();
+		$entry = array();
+		$entry['this_is_not_an_attribute'] = 'USA';
+		
+		$this->subTestTitle('Updating the entry with dn: '.$dn.' using an unknown attribute');
 		$this->getCodeOrigin();
 		$test = $this->rildap->CEupdate($entry, $dn);
 		echo $this->run($test, 'is_false', 'Is the exit status true ?', '');
