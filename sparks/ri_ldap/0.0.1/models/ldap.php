@@ -249,8 +249,8 @@ class Ldap extends CI_Model {
 	 * @todo		
 	 */
 	public function create($entry, $dn = null) {
-	
-		if(isset($dn)) $this->dn = $dn;
+		
+		if(!empty($dn) and !is_array($dn)) $this->dn = $dn;
 		
 		$params = get_defined_vars();
 		$params['command'] = 'ldap_add';
@@ -324,19 +324,31 @@ class Ldap extends CI_Model {
 		return $this->sort_paginate($resource, $sort_by, $flow_order, $wanted_page, $items_page) ? true : false;
 	}
 	
-	public function update(array $entry, $dn = null) {
+	public function read($dn = null, $sizeLimit = null, $timeLimit = null, $defer = null) {
+		if(!empty($dn) and !is_array($dn)) $this->dn = $dn;
+		
+		$pieces = preg_split('/,/', $this->dn);
+		
+		$filter = '('.$pieces[0].')';
+		
+		unset($pieces[0]);
+		$baseDN = implode(',', $pieces);
+		
+		$attributes = array();
+		
+		return $this->search($baseDN, $filter, $attributes, 0, $sizeLimit, $timeLimit, $defer);
+	}
+	
+	public function update($entry, $dn = null) {
+		
+		if(!empty($dn) and !is_array($dn)) $this->dn = $dn;
 		
 		$params = array(
 							'command' => 'ldap_modify',
 							'entry' => $entry,
 		);
-		try {
-			$result = $this->run($params);
-		} catch (OutOfRangeException $e) {
-			return $e;
-		}
-	
-		return ($result) ? true : false;
+		
+		return $this->run($params) ? true : false;
 	}
 
 	/**
@@ -359,8 +371,11 @@ class Ldap extends CI_Model {
 	 */
 	private function preRunValidation($command,array $params)
 	{
-		if(count($this->result->errors) >= 1) return false;
-		
+		if(isset($this->result->errors))
+		{
+			if (count($this->result->errors) >= 1) 
+				return false;
+		}
 		if($this->service_unavailable) return false;
 		
 		extract($params);
@@ -405,7 +420,7 @@ class Ldap extends CI_Model {
 				return false;
 			}
 
-			if(isset($attributes) && !is_array($attributes)) {
+			if(!isset($attributes) || !is_array($attributes)) {
 				$this->report('trigger','The parameter "attributes" must be an array.','415');
 				return false;
 			}
@@ -469,7 +484,7 @@ class Ldap extends CI_Model {
 					
 					//Already exists message
 					if($ldap_error['ldap_errno'] == '68') {
-						$message .= ' or your DN is wrong. It should be the DN of the new entry, not an already existant one.';
+						$message .= ' or your DN is wrong. It should be the DN of the new entry and not an already existent one.';
 						$http_status_code = '415';
 					}
 					//Object Class Violation
@@ -502,8 +517,8 @@ class Ldap extends CI_Model {
 				//adjusting optional search parameters
 				if(is_null($sizeLimit)) $sizeLimit = $this->conf['sizeLimit'];
 				if(is_null($timeLimit)) $timeLimit = $this->conf['timeLimit'];
-				if(is_null($deref)) $deref = $this->conf['defer'];
-			
+				if(is_null($deref)) $deref = $this->conf['defer'];					
+					
 				if(! $result = ldap_list($this->connection, $baseDN, $filter, $attributes, $attributesOnly, $sizeLimit, $timeLimit, $deref)) {
 					$ldap_error = $this->getLdapError($command);
 					$message = $ldap_error['message'];

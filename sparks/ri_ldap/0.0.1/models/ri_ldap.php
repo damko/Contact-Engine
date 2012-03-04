@@ -192,32 +192,49 @@ class Ri_Ldap extends Ldap {
 		return true;
 	}
 	
-	public function CEcreate($entry, $dn ) {
-		if(!$this->initialize()) return $this->result;
+	public function CEcreate($entry, $dn = null) {
+		
+		if(!$this->initialize()) return $this->restReturn($this->result);
+		
 		$this->connection = $this->WrConnection;
 		
-		$this->dn = $dn;
-		
-		return $this->restReturn($this->create($entry));
+		return $this->restReturn($this->create($entry, $dn));
 		
 	}
-	
+
 	public function CEsearch($baseDn, $filter, $attributes = null, $attributesOnly = 0, $deref = null, array $sort_by = null, $flow_order = null, $wanted_page = null, $items_page = null) {
-		if(!$this->initialize()) return $this->result;
+		
+		if(!$this->initialize()) return $this->restReturn($this->result);
+		
 		$this->connection = $this->RoConnection;
 		
 		return $this->restReturn($this->search($baseDn, $filter, $attributes, $attributesOnly, null, null, $deref, $sort_by, $flow_order, $wanted_page, $items_page));
 	}
+
+	public function CEread($dn = null, $sizeLimit = null, $timeLimit = null, $defer = null) {
 	
-	public function CEupdate($dn, array $entry) {
-		$this->dn = $dn;
+		if(!$this->initialize()) return $this->restReturn($this->result);
+	
+		$this->connection = $this->RoConnection;
+	
+		return $this->restReturn($this->read($dn = null, $sizeLimit = null, $timeLimit = null, $defer = null));
+	}
+		
+	public function CEupdate($entry, $dn = null) {
+		
+		if(!$this->initialize()) return $this->restReturn($this->result);
+		
 		$this->connection = $this->WrConnection;
 		
-		return $this->restReturn($this->update($entry));
+		return $this->restReturn($this->update($entry, $dn));
 	}
 	
 	public function CEdelete($dn = null) {
+		
+		if(!$this->initialize()) return $this->restReturn($this->result);
+		
 		$this->connection = $this->WrConnection;
+		
 		return $this->restReturn($this->delete($dn));
 	}
 	
