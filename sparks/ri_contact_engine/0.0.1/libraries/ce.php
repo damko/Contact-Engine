@@ -53,6 +53,7 @@ class Ce {
 
 		//let's connect to a LDAP server possibly a slave one
 		//TODO this is a quick and dirty. Can be improved
+		$CI->ri_ldap->initialize();
 		$servers = $CI->ri_ldap->getServers();
 		if(!empty($servers['slave'][0]['url']))
 		{

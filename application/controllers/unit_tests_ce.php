@@ -8,49 +8,40 @@ require APPPATH.'/libraries/test_controller.php';
 //$CI = &get_instance();
 //$CI->load->library('test_controller');
 
-class Ce_Tests extends Test_Controller {
+class Unit_Tests_Ce extends Test_Controller {
 	public function __construct()
 	{
 		parent::__construct();
-		
-		
-		$this->show_rest_return = false;
-		
-		if(isset($_GET['verbose']) && ($_GET['verbose'] == 'on'))
-		{
-			$this->show_rest_return = true; 
-		}
 
- 		if(ENVIRONMENT != 'production') {
+		if(ENVIRONMENT != 'production') {
 			echo '<h2>please set the constant ENVIROMENT in index.php to "production" !</h2>';
 			die();
-		} 
-		
-		
-/* 		//set up a new template for the tests output
-		$this->unit->set_test_items(array('test_name', 'result'));
-		$str = '
-		<table border="0" cellpadding="4" cellspacing="1">
-		{rows}
-		<tr>
-		<td>{item}</td>
-		<td>{result}</td>
-		</tr>
-		{/rows}
-		</table>';
-		
-		$this->unit->set_template($str); */
+		}
+				
+		//load the rest client
+		$this->load->spark('restclient/2.0.0');
 	}	
 	
 	public function index()
 	{
+		$this->load->view('unit_tests');
+		
+		echo '<a href="/index.php/unit_tests/">Back</a> to unit-tests front page.<br/>';
+
+		echo '<div id="left">';
 		$this->testPerson();
 		$this->testOrganization();
 		$this->testLocation();
 		$this->testContact();
 		$this->testPersonAssocOrg();
 		$this->testPersonAssocLoc();
-		$this->testOrganizationAssocLoc();		
+		$this->testOrganizationAssocLoc();
+		echo '</div>';
+		
+		$this->printSummary();
+		
+		echo '<div></body></html>';
+		
 	}
 	
 	public function testPerson()
@@ -74,12 +65,15 @@ class Ce_Tests extends Test_Controller {
 		
 		//check to get an array as a return
 		$rest_return = $this->rest->get($method, null, 'serialize');
+		$this->getCodeOrigin();
 		$this->arrayReturn($method, $rest_return);
 		
 		//check no REST error in return
+		$this->getCodeOrigin();
 		$this->checkNoRestError($method, $rest_return);
 		
 		//check status code == 200
+		$this->getCodeOrigin();
 		$this->check200($method, $rest_return);
 		
 		$this->printReturn($rest_return);
@@ -96,12 +90,15 @@ class Ce_Tests extends Test_Controller {
 		$input['filter'] = '(uid=10000000)';
 		//check to get an array as a return
 		$rest_return = $this->rest->get($method, $input, 'serialize');
+		$this->getCodeOrigin();
 		$this->arrayReturn($method, $rest_return);
 		
 		//the filter has not been specified then it should return an error
+		$this->getCodeOrigin();
 		$this->checkNoRestError($method, $rest_return);
 		
 		//check status code == 200
+		$this->getCodeOrigin();
 		$this->check200($method, $rest_return);
 		
 		$this->printReturn($rest_return);
@@ -116,12 +113,15 @@ class Ce_Tests extends Test_Controller {
 		
 		//check to get an array as a return
 		$rest_return = $this->rest->get($method, null, 'serialize');
+		$this->getCodeOrigin();
 		$this->arrayReturn($method, $rest_return);
 		
 		//the filter has not been specified then it should return an error
+		$this->getCodeOrigin();
 		$this->checkRestError($method, $rest_return);
 		
 		//check status code == 400
+		$this->getCodeOrigin();
 		$this->check400($method, $rest_return);
 		
 		$this->printReturn($rest_return);
@@ -135,12 +135,15 @@ class Ce_Tests extends Test_Controller {
 		$input['filter'] = '(objectClass=*)';
 		//check to get an array as a return
 		$rest_return = $this->rest->get($method, $input, 'serialize');
+		$this->getCodeOrigin();
 		$this->arrayReturn($method, $rest_return);
 		
 		//the filter has not been specified then it should return an error
+		$this->getCodeOrigin();
 		$this->checkNoRestError($method, $rest_return);
 		
 		//check status code == 200
+		$this->getCodeOrigin();
 		$this->check200($method, $rest_return);
 		
 		$this->printReturn($rest_return);
@@ -156,12 +159,15 @@ class Ce_Tests extends Test_Controller {
 		$rest_return = $this->rest->get($method, $input, 'serialize');
 		
 		//check to get an array as a return
+		$this->getCodeOrigin();
 		$this->arrayReturn($method, $rest_return);
 		
 		//the filter has not been specified then it should return an error
+		$this->getCodeOrigin();
 		$this->checkRestError($method, $rest_return);
 		
 		//check status code == 400
+		$this->getCodeOrigin();
 		$this->check400($method, $rest_return);
 		
 		$this->printReturn($rest_return);
@@ -193,9 +199,11 @@ class Ce_Tests extends Test_Controller {
 		
 		//check to get an array as a return
 		$rest_return = $this->rest->get($method, $input, 'serialize');
+		$this->getCodeOrigin();
 		$this->arrayReturn($method, $rest_return);
 		
 		//the filter has not been specified then it should return an error
+		$this->getCodeOrigin();
 		$this->checkNoRestError($method, $rest_return);
 		
 		//check status code == 200
@@ -203,6 +211,7 @@ class Ce_Tests extends Test_Controller {
 		
 		//check uid is a number
 		$test = $rest_return['data']['0'];
+		$this->getCodeOrigin();
 		echo $this->unit->run($test, 'is_numeric', $method.' - Integer uid', 'Checking if the returned uid is a number');
 		
 		$this->printReturn($rest_return);
@@ -227,12 +236,15 @@ class Ce_Tests extends Test_Controller {
 		$rest_return = $this->rest->get($method, $input, 'serialize');
 		
 		//check to get an array as a return
+		$this->getCodeOrigin();
 		$this->arrayReturn($method, $rest_return);
 		
 		//the filter has not been specified then it should return an error
+		$this->getCodeOrigin();
 		$this->checkNoRestError($method, $rest_return);
 		
 		//check status code == 200
+		$this->getCodeOrigin();
 		$this->check200($method, $rest_return);
 		
 		$this->printReturn($rest_return);
@@ -254,7 +266,7 @@ class Ce_Tests extends Test_Controller {
 		 	}		
 		 	
 		 	$uid = $uids[array_rand($uids,1)];
-		 	$this->unit->run($uid,'is_int');
+		 	$this->getCodeOrigin();
 		 	echo $this->unit->run($uid, 'is_numeric', $method.' - Integer uid', 'Checking if the returned uid is a number');
 		 	
 		 	if(!$uid) return false;
@@ -274,12 +286,15 @@ class Ce_Tests extends Test_Controller {
 		$rest_return = $this->rest->get($method, $input, 'serialize');
 		
 		//check to get an array as a return
+		$this->getCodeOrigin();
 		$this->arrayReturn($method, $rest_return);
 		
 		//the filter has been specified then it should not return an error
+		$this->getCodeOrigin();
 		$this->checkNoRestError($method, $rest_return);
 		
 		//check status code == 200
+		$this->getCodeOrigin();
 		$this->check200($method, $rest_return);
 		
 		$this->printReturn($rest_return);
@@ -300,16 +315,20 @@ class Ce_Tests extends Test_Controller {
 		$rest_return = $this->rest->get($method, $input, 'serialize');
 		
 		//check to get an array as a return
+		$this->getCodeOrigin();
 		$this->arrayReturn($method, $rest_return);
 
 		//the filter has been specified then it should not return an error
+		$this->getCodeOrigin();
 		$this->checkNoRestError($method, $rest_return);
 
 		//check status code == 200
+		$this->getCodeOrigin();
 		$this->check200($method, $rest_return);
 		
 		//check uid is a number
  		$uid = $test = $rest_return['data']['0'];
+ 		$this->getCodeOrigin();
 		echo $this->unit->run($test, 'is_numeric', $method.' - Integer uid', 'Checking if the returned uid is a number');
  
 		$this->printReturn($rest_return);
@@ -327,18 +346,22 @@ class Ce_Tests extends Test_Controller {
 		$rest_return = $this->rest->get($method, $input, 'serialize');
 		
 		//check to get an array as a return
+		$this->getCodeOrigin();
 		$this->arrayReturn($method, $rest_return);
 		
 		//the filter has been specified then it should not return an error
+		$this->getCodeOrigin();
 		$this->checkNoRestError($method, $rest_return);
 		
 		//check status code == 200
+		$this->getCodeOrigin();
 		$this->check200($method, $rest_return);
 		
 		//chech that displayName has been modified correctly
 		$displayName = $test = $rest_return['data']['0']['displayName'];
 		$test = false;
 		if($displayName == $new_displayName) $test = true;
+		$this->getCodeOrigin();
 		echo $this->unit->run($test, 'is_true', $method.' - correct result', 'The attribute displayName was successfully modified');
 		
 		$this->printReturn($rest_return);
@@ -357,11 +380,14 @@ class Ce_Tests extends Test_Controller {
 		$rest_return = $this->rest->get($method, $input, 'serialize');
 			
 		//check to get an array as a return
+		$this->getCodeOrigin();
 		$this->arrayReturn($method, $rest_return);
-			
+
+		$this->getCodeOrigin();
 		$this->checkRestError($method, $rest_return);
 			
 		//check status code == 400
+		$this->getCodeOrigin();
 		$this->check400($method, $rest_return);
 			
 		$this->printReturn($rest_return);
@@ -382,11 +408,14 @@ class Ce_Tests extends Test_Controller {
 		$rest_return = $this->rest->get($method, $input, 'serialize');
 					
 		//check to get an array as a return
+		$this->getCodeOrigin();
 		$this->arrayReturn($method, $rest_return);
 			
+		$this->getCodeOrigin();
 		$this->checkRestError($method, $rest_return);
 			
 		//check status code == 400
+		$this->getCodeOrigin();
 		$this->check400($method, $rest_return);
 			
 		$this->printReturn($rest_return);
@@ -404,12 +433,15 @@ class Ce_Tests extends Test_Controller {
 		$rest_return = $this->rest->get($method, $input, 'serialize');
 		
 		//check to get an array as a return
+		$this->getCodeOrigin();
 		$this->arrayReturn($method, $rest_return);
 		
 		//the filter has not been specified then it should return an error
+		$this->getCodeOrigin();
 		$this->checkRestError($method, $rest_return);
 		
 		//check status code == 400
+		$this->getCodeOrigin();
 		$this->check400($method, $rest_return);
 				
 		$this->printReturn($rest_return);
@@ -430,12 +462,15 @@ class Ce_Tests extends Test_Controller {
 		$rest_return = $this->rest->get($method, $input, 'serialize');
 		
 		//check to get an array as a return
+		$this->getCodeOrigin();
 		$this->arrayReturn($method, $rest_return);
 		
 		//the filter has not been specified then it should return an error
+		$this->getCodeOrigin();
 		$this->checkNoRestError($method, $rest_return);
 		
 		//check status code == 200
+		$this->getCodeOrigin();
 		$this->check200($method, $rest_return);
 		
 		if(is_array($rest_return) and !empty($rest_return['data']))
@@ -447,6 +482,7 @@ class Ce_Tests extends Test_Controller {
 		
 			//check uid is a number
 			$uid = $test = $rest_return['data']['0'];
+			$this->getCodeOrigin();
 			echo $this->unit->run($test, 'is_numeric', $method.' - Integer uid', 'Checking if the returned uid is a number');
 		
 			$this->printReturn($rest_return);
@@ -459,16 +495,20 @@ class Ce_Tests extends Test_Controller {
 			$rest_return = $this->rest->get($method, $input, 'serialize');
 		
 			//check to get an array as a return
+			$this->getCodeOrigin();
 			$this->arrayReturn($method, $rest_return);
 		
 			//the filter has not been specified then it should return an error
+			$this->getCodeOrigin();
 			$this->checkNoRestError($method, $rest_return);
 		
 			//check status code == 200
+			$this->getCodeOrigin();
 			$this->check200($method, $rest_return);
 				
 			//check return is TRUE
 			$result = $rest_return['data']['0'];
+			$this->getCodeOrigin();
 			echo $this->unit->run($result, '1', $method.' - Returns true');
 		
 		
@@ -484,12 +524,15 @@ class Ce_Tests extends Test_Controller {
 		$rest_return = $this->rest->get($method, $input, 'serialize');
 		
 		//check to get an array as a return
+		$this->getCodeOrigin();
 		$this->arrayReturn($method, $rest_return);
 		
 		//the filter has not been specified then it should return an error
+		$this->getCodeOrigin();
 		$this->checkRestError($method, $rest_return);
 		
 		//check status code == 400
+		$this->getCodeOrigin();
 		$this->check400($method, $rest_return);
 		
 		$this->printReturn($rest_return);		
@@ -512,16 +555,20 @@ class Ce_Tests extends Test_Controller {
 		$rest_return = $this->rest->get($method, $input, 'serialize');
 	
 		//check to get an array as a return
+		$this->getCodeOrigin();
 		$this->arrayReturn($method, $rest_return);
 	
 		//the filter has not been specified but it shouldn't get an error 'cause CE will filter on the UID
+		$this->getCodeOrigin();
 		$this->checkNoRestError($method, $rest_return);
 	
 		//check status code == 200
+		$this->getCodeOrigin();
 		$this->check200($method, $rest_return);
 		
 		//check uid is a number
 		$test = $rest_return['data']['0'];
+		$this->getCodeOrigin();
 		echo $this->unit->run($test, 'is_numeric', $method.' - Integer uid', 'Checking if the returned uid is a number');		
 	
 		$this->printReturn($rest_return);
@@ -544,16 +591,20 @@ class Ce_Tests extends Test_Controller {
 		$rest_return = $this->rest->get($method, $input, 'serialize');
 	
 		//check to get an array as a return
+		$this->getCodeOrigin();
 		$this->arrayReturn($method, $rest_return);
 	
 		//the filter has not been specified but it shouldn't get an error 'cause CE will filter on the UID
+		$this->getCodeOrigin();
 		$this->checkNoRestError($method, $rest_return);
 	
 		//check status code == 200
+		$this->getCodeOrigin();
 		$this->check200($method, $rest_return);
 	
 		//check uid is a number
 		$test = $rest_return['data']['0'];
+		$this->getCodeOrigin();
 		echo $this->unit->run($test, 'is_numeric', $method.' - Integer uid', 'Checking if the returned uid is a number');
 	
 		$this->printReturn($rest_return);
@@ -577,12 +628,15 @@ class Ce_Tests extends Test_Controller {
 			
 		//check to get an array as a return
 		$rest_return = $this->rest->get($method, null, 'serialize');
+		$this->getCodeOrigin();
 		$this->arrayReturn($method, $rest_return);
 		
 		//check no REST error in return
+		$this->getCodeOrigin();
 		$this->checkNoRestError($method, $rest_return);
 		
 		//check status code == 200
+		$this->getCodeOrigin();
 		$this->check200($method, $rest_return);
 		
 		$this->printReturn($rest_return);
@@ -598,12 +652,15 @@ class Ce_Tests extends Test_Controller {
 		
 		//check to get an array as a return
 		$rest_return = $this->rest->get($method, null, 'serialize');
+		$this->getCodeOrigin();
 		$this->arrayReturn($method, $rest_return);
 		
 		//the filter has not been specified then it should return an error
+		$this->getCodeOrigin();
 		$this->checkRestError($method, $rest_return);
 		
 		//check status code == 400
+		$this->getCodeOrigin();
 		$this->check400($method, $rest_return);
 		
 		$this->printReturn($rest_return);
@@ -619,12 +676,15 @@ class Ce_Tests extends Test_Controller {
 		$input['filter'] = '(objectClass=*)';
 		//check to get an array as a return
 		$rest_return = $this->rest->get($method, $input, 'serialize');
+		$this->getCodeOrigin();
 		$this->arrayReturn($method, $rest_return);
 		
 		//the filter has not been specified then it should return an error
+		$this->getCodeOrigin();
 		$this->checkNoRestError($method, $rest_return);
 		
 		//check status code == 200
+		$this->getCodeOrigin();
 		$this->check200($method, $rest_return);
 		
 		$this->printReturn($rest_return);
@@ -650,16 +710,20 @@ class Ce_Tests extends Test_Controller {
 		
 		//check to get an array as a return
 		$rest_return = $this->rest->get($method, $input, 'serialize');
+		$this->getCodeOrigin();
 		$this->arrayReturn($method, $rest_return);
 		
 		//the filter has not been specified then it should return an error
+		$this->getCodeOrigin();
 		$this->checkNoRestError($method, $rest_return);
 		
 		//check status code == 200
+		$this->getCodeOrigin();
 		$this->check200($method, $rest_return);
 		
 		//check oid is a number
 		$test = $rest_return['data']['0'];
+		$this->getCodeOrigin();
 		echo $this->unit->run($test, 'is_numeric', $method.' - Integer oid', 'Checking if the returned oid is a number');
 		
 		$this->printReturn($rest_return);
@@ -680,12 +744,15 @@ class Ce_Tests extends Test_Controller {
 		$rest_return = $this->rest->get($method, $input, 'serialize');
 		
 		//check to get an array as a return
+		$this->getCodeOrigin();
 		$this->arrayReturn($method, $rest_return);
 		
 		//the filter has not been specified then it should return an error
+		$this->getCodeOrigin();
 		$this->checkNoRestError($method, $rest_return);
 		
 		//check status code == 200
+		$this->getCodeOrigin();
 		$this->check200($method, $rest_return);
 		
 		$this->printReturn($rest_return);
@@ -698,16 +765,20 @@ class Ce_Tests extends Test_Controller {
 			$rest_return = $this->rest->get($method, $organization, 'serialize');
 		
 			//check to get an array as a return
+			$this->getCodeOrigin();
 			$this->arrayReturn($method, $rest_return);
 		
 			//the filter has not been specified then it should return an error
+			$this->getCodeOrigin();
 			$this->checkNoRestError($method, $rest_return);
 		
-			//check status code == 200
+			//check status code == 200 
+			$this->getCodeOrigin();
 			$this->check200($method, $rest_return);
 		
 			//check uid is a number
 			$oid = $test = $rest_return['data']['0'];
+			$this->getCodeOrigin();
 			echo $this->unit->run($test, 'is_numeric', $method.' - Integer oid', 'Checking if the returned oid is a number');
 		
 			$this->printReturn($rest_return);
@@ -720,12 +791,15 @@ class Ce_Tests extends Test_Controller {
 			$rest_return = $this->rest->get($method, $input, 'serialize');
 		
 			//check to get an array as a return
+			$this->getCodeOrigin();
 			$this->arrayReturn($method, $rest_return);
 		
 			//the filter has not been specified then it should return an error
+			$this->getCodeOrigin();
 			$this->checkNoRestError($method, $rest_return);
 		
 			//check status code == 200
+			$this->getCodeOrigin();
 			$this->check200($method, $rest_return);
 		
 			$this->printReturn($rest_return);
@@ -747,12 +821,15 @@ class Ce_Tests extends Test_Controller {
 		$rest_return = $this->rest->get($method, $input, 'serialize');
 		
 		//check to get an array as a return
+		$this->getCodeOrigin();
 		$this->arrayReturn($method, $rest_return);
 		
 		//the filter has not been specified then it should return an error
+		$this->getCodeOrigin();
 		$this->checkNoRestError($method, $rest_return);
 		
 		//check status code == 200
+		$this->getCodeOrigin();
 		$this->check200($method, $rest_return);
 		
 		if(is_array($rest_return) and !empty($rest_return['data']))
@@ -760,6 +837,7 @@ class Ce_Tests extends Test_Controller {
 			$organization = $rest_return['data'][array_rand($rest_return['data'])];
 			//check oid is a number
 			$oid = $test = $organization['oid'];
+			$this->getCodeOrigin();
 			echo $this->unit->run($test, 'is_numeric', $method.' - Integer oid', 'Checking if the returned oid is a number');
 		
 			$this->printReturn($rest_return);
@@ -772,16 +850,20 @@ class Ce_Tests extends Test_Controller {
 			$rest_return = $this->rest->get($method, $input, 'serialize');
 		
 			//check to get an array as a return
+			$this->getCodeOrigin();
 			$this->arrayReturn($method, $rest_return);
 		
 			//the filter has not been specified then it should return an error
+			$this->getCodeOrigin();
 			$this->checkNoRestError($method, $rest_return);
 		
 			//check status code == 200
+			$this->getCodeOrigin();
 			$this->check200($method, $rest_return);
 		
 			//check return is TRUE
 			$result = $rest_return['data']['0'];
+			$this->getCodeOrigin();
 			echo $this->unit->run($result, '1', $method.' - Returns true');
 		
 			$this->printReturn($rest_return);
@@ -805,16 +887,20 @@ class Ce_Tests extends Test_Controller {
 		$rest_return = $this->rest->get($method, $input, 'serialize');
 	
 		//check to get an array as a return
+		$this->getCodeOrigin();
 		$this->arrayReturn($method, $rest_return);
 	
 		//the filter has not been specified but it shouldn't get an error 'cause CE will filter on the UID
+		$this->getCodeOrigin();
 		$this->checkNoRestError($method, $rest_return);
 	
 		//check status code == 200
+		$this->getCodeOrigin();
 		$this->check200($method, $rest_return);
 	
 		//check uid is a number
 		$test = $rest_return['data']['0'];
+		$this->getCodeOrigin();
 		echo $this->unit->run($test, 'is_numeric', $method.' - Integer oid', 'Checking if the returned oid is a number');
 	
 		$this->printReturn($rest_return);
@@ -838,12 +924,15 @@ class Ce_Tests extends Test_Controller {
 			
 		//check to get an array as a return
 		$rest_return = $this->rest->get($method, null, 'serialize');
+		$this->getCodeOrigin();
 		$this->arrayReturn($method, $rest_return);
 		
 		//check no REST error in return
+		$this->getCodeOrigin();
 		$this->checkNoRestError($method, $rest_return);
 		
 		//check status code == 200
+		$this->getCodeOrigin();
 		$this->check200($method, $rest_return);
 		
 		$this->printReturn($rest_return);
@@ -859,12 +948,15 @@ class Ce_Tests extends Test_Controller {
 		
 		//check to get an array as a return
 		$rest_return = $this->rest->get($method, null, 'serialize');
+		$this->getCodeOrigin();
 		$this->arrayReturn($method, $rest_return);
 		
 		//the filter has not been specified then it should return an error
+		$this->getCodeOrigin();
 		$this->checkRestError($method, $rest_return);
 		
 		//check status code == 400
+		$this->getCodeOrigin();
 		$this->check400($method, $rest_return);
 		
 		$this->printReturn($rest_return);
@@ -880,12 +972,15 @@ class Ce_Tests extends Test_Controller {
 		$rest_return = $this->rest->get($method, $input, 'serialize');
 		
 		//check to get an array as a return
+		$this->getCodeOrigin();
 		$this->arrayReturn($method, $rest_return);
 		
 		//the filter has not been specified then it should return an error
+		$this->getCodeOrigin();
 		$this->checkNoRestError($method, $rest_return);
 		
 		//check status code == 200
+		$this->getCodeOrigin();
 		$this->check200($method, $rest_return);
 		
 		$this->printReturn($rest_return);
@@ -913,16 +1008,20 @@ class Ce_Tests extends Test_Controller {
 		
 		//check to get an array as a return
 		$rest_return = $this->rest->get($method, $input, 'serialize');
+		$this->getCodeOrigin();
 		$this->arrayReturn($method, $rest_return);
 		
 		//the filter has not been specified then it should return an error
+		$this->getCodeOrigin();
 		$this->checkNoRestError($method, $rest_return);
 		
 		//check status code == 200
+		$this->getCodeOrigin();
 		$this->check200($method, $rest_return);
 		
 		//check oid is a number
 		$test = $rest_return['data']['0'];
+		$this->getCodeOrigin();
 		echo $this->unit->run($test, 'is_numeric', $method.' - Integer locId', 'Checking if the returned locId is a number');
 		
 		$this->printReturn($rest_return);
@@ -943,12 +1042,15 @@ class Ce_Tests extends Test_Controller {
 		$rest_return = $this->rest->get($method, $input, 'serialize');
 		
 		//check to get an array as a return
+		$this->getCodeOrigin();
 		$this->arrayReturn($method, $rest_return);
 		
 		//the filter has not been specified then it should return an error
+		$this->getCodeOrigin();
 		$this->checkNoRestError($method, $rest_return);
 		
 		//check status code == 200
+		$this->getCodeOrigin();
 		$this->check200($method, $rest_return);
 		
 		$this->printReturn($rest_return);
@@ -961,16 +1063,20 @@ class Ce_Tests extends Test_Controller {
 			$rest_return = $this->rest->get($method, $location, 'serialize');
 		
 			//check to get an array as a return
+			$this->getCodeOrigin();
 			$this->arrayReturn($method, $rest_return);
 		
 			//the filter has not been specified then it should return an error
+			$this->getCodeOrigin();
 			$this->checkNoRestError($method, $rest_return);
 		
 			//check status code == 200
+			$this->getCodeOrigin();
 			$this->check200($method, $rest_return);
 		
 			//check uid is a number
 			$locId = $test = $rest_return['data']['0'];
+			$this->getCodeOrigin();
 			echo $this->unit->run($test, 'is_numeric', $method.' - Integer locId', 'Checking if the returned locId is a number');
 		
 			$this->printReturn($rest_return);
@@ -983,12 +1089,15 @@ class Ce_Tests extends Test_Controller {
 			$rest_return = $this->rest->get($method, $input, 'serialize');
 		
 			//check to get an array as a return
+			$this->getCodeOrigin();
 			$this->arrayReturn($method, $rest_return);
 		
 			//the filter has not been specified then it should return an error
+			$this->getCodeOrigin();
 			$this->checkNoRestError($method, $rest_return);
 		
 			//check status code == 200
+			$this->getCodeOrigin();
 			$this->check200($method, $rest_return);
 		
 			$this->printReturn($rest_return);
@@ -1012,6 +1121,7 @@ class Ce_Tests extends Test_Controller {
 			$location = $rest_return['data'][array_rand($rest_return['data'])];
 			//check locId is a number
 			$locId = $test = $location['locId']['0'];
+			$this->getCodeOrigin();
 			echo $this->unit->run($test, 'is_numeric', $method.' - Integer locId', 'Checking if the returned locId is a number');
 		
 			$this->printReturn($rest_return);
@@ -1024,16 +1134,20 @@ class Ce_Tests extends Test_Controller {
 			$rest_return = $this->rest->get($method, $input, 'serialize');
 		
 			//check to get an array as a return
+			$this->getCodeOrigin();
 			$this->arrayReturn($method, $rest_return);
 		
 			//the filter has not been specified then it should return an error
+			$this->getCodeOrigin();
 			$this->checkNoRestError($method, $rest_return);
 		
 			//check status code == 200
+			$this->getCodeOrigin();
 			$this->check200($method, $rest_return);
 		
 			//check return is TRUE
 			$result = $rest_return['data']['0'];
+			$this->getCodeOrigin();
 			echo $this->unit->run($result, '1', $method.' - Returns true');
 		
 			$this->printReturn($rest_return);
@@ -1053,12 +1167,15 @@ class Ce_Tests extends Test_Controller {
 		$rest_return = $this->rest->get($method, $input, 'serialize');
 		
 		//check to get an array as a return
+		$this->getCodeOrigin();
 		$this->arrayReturn($method, $rest_return);
 		
 		//the filter has not been specified then it should return an error
+		$this->getCodeOrigin();
 		$this->checkNoRestError($method, $rest_return);
 		
 		//check status code == 200
+		$this->getCodeOrigin();
 		$this->check200($method, $rest_return);
 		
 		$this->printReturn($rest_return);

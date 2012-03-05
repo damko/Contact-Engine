@@ -15,31 +15,6 @@ class Populate_LDAP extends CI_Controller {
 		$this->ldapdn = 'cn=admin,dc=2v,dc=ntw';
 		$this->ldappw = 'Wi7Xkcv300z';
 		$this->version = '3';	
-	}
-	
-	public function delete_all() {
-		$this->benchmark->mark('code_start');
-		$this->rildap = new Ri_Ldap();
-		$baseDN = $this->baseDN;
-		$filter = '(givenName=*)';
-		$attributes = array('uid');
-		if($this->rildap->CEsearch($baseDN, $filter, $attributes)) {
-			$dns = array();
-			$content = $this->rildap->result->data->content;
-			$index = count($content);
-			foreach ($content as $key => $item) {
-				$this->rildap->dn = 'uid='.$item['uid'][0].','.$this->baseDN;
-				$test = $this->rildap->CEdelete();
-				if($test) echo "The entry with dn <i>".$this->rildap->dn."</i> has been deleted.<br/>";
-			}			
-		}		
-		$this->benchmark->mark('code_end');
-		
-		$elapsed_time = $this->benchmark->elapsed_time('code_start', 'code_end');
-		
-		echo '<br/>';
-		echo 'Elapsed time: '.$elapsed_time.' seconds<br/>';
-		if($index > 0) echo 'Each of the '.$index.' operations took: '.$elapsed_time/$index.' seconds.';
 	}	
 	
 	public function index(){
@@ -64,6 +39,31 @@ class Populate_LDAP extends CI_Controller {
 		echo 'Click here to populate LDAP with locations.<br/><br/>';
 		echo '</body></html>';
 	}
+	
+	public function delete_all() {
+		$this->benchmark->mark('code_start');
+		$this->rildap = new Ri_Ldap();
+		$baseDN = $this->baseDN;
+		$filter = '(givenName=*)';
+		$attributes = array('uid');
+		if($this->rildap->CEsearch($baseDN, $filter, $attributes)) {
+			$dns = array();
+			$content = $this->rildap->result->data->content;
+			$index = count($content);
+			foreach ($content as $key => $item) {
+				$this->rildap->dn = 'uid='.$item['uid'][0].','.$this->baseDN;
+				$test = $this->rildap->CEdelete();
+				if($test) echo "The entry with dn <i>".$this->rildap->dn."</i> has been deleted.<br/>";
+			}
+		}
+		$this->benchmark->mark('code_end');
+	
+		$elapsed_time = $this->benchmark->elapsed_time('code_start', 'code_end');
+	
+		echo '<br/>';
+		echo 'Elapsed time: '.$elapsed_time.' seconds<br/>';
+		if($index > 0) echo 'Each of the '.$index.' operations took: '.$elapsed_time/$index.' seconds.';
+	}	
 	
 	public function persons() {
 		

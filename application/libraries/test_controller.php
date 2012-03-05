@@ -4,7 +4,7 @@
 
 class Test_Controller extends CI_Controller {
 
-	public $show_rest_return=true;
+	public $show_return = false;
 	public $count = true;
 	public $failed = array();
 	public $code_file = null;
@@ -18,8 +18,21 @@ class Test_Controller extends CI_Controller {
 		parent::__construct();
 		$this->load->library('unit_test');
 		
-		//load the rest client
-		$this->load->spark('restclient/2.0.0');		
+		//set up a new template for the tests output
+		$this->unit->set_test_items(array('test_name', 'test_datatype', 'res_datatype', 'result', 'notes'));
+		
+		$str  = "\n".'<table style="width:100%; font-size:small; margin:0px 0; border-collapse:collapse; border:1px solid #CCC; background-color: #e8e8e8;">';
+		$str .= '{rows}';
+		$str .= "\n".'</table>';
+		$this->unit->set_template($str);
+		
+		$str = "\n\t".'<tr>';
+		$str .= "\n\t\t".'<th style="text-align: left; border-bottom:1px solid #CCC; width: 20%;">{item}</th>';
+		$str .= "\n\t\t".'<td style="border-bottom:1px solid #CCC; width: 80%">{result}</td>';
+		$str .= "\n\t".'</tr>';
+		$this->unit->set_template_rows($str);		
+		
+		if(isset($_GET['verbose']) && ($_GET['verbose'] == 'on')) $this->show_return = true; 
 		
 		$this->count = 0;
 	}
@@ -70,6 +83,22 @@ class Test_Controller extends CI_Controller {
 	protected function printSummary()
 	{
 		echo '<div id="right">';
+		
+		//verbose button
+		$turn_on = '<input class="button" type="button" onclick=verbose("on") value="turn ON verbose" />';
+		$turn_off = '<input class="button" type="button" onclick=verbose("off") value="turn OFF verbose" />';
+		echo '<p>';
+		if(!isset($_GET['verbose'])) { 
+			echo $turn_on;
+		} else {
+			if($_GET['verbose'] == 'on') {
+				echo $turn_off;
+			} else {
+				echo $turn_on;
+			}
+		}
+		echo '</p>';
+		
 		if(count($this->failed)> 0)
 		{
 			echo '<div style="background-color: white; border: 3px dashed red; padding-left: 5px;">';
@@ -176,7 +205,7 @@ class Test_Controller extends CI_Controller {
 		
 	protected function printReturn($rest_return)
 	{
-		if(!$this->show_rest_return) return;
+		if(!$this->show_return) return;
 		
 		echo '<h3>REST return</h3>';
 		echo '<pre style="font-size: 9px; background-color: #e8e8e8; margin-left: 15px; padding-left: 10px;">';
@@ -186,6 +215,8 @@ class Test_Controller extends CI_Controller {
 	
 	protected function printLdapResult($result)
 	{
+		if(!$this->show_return) return;
+		
 		echo '<h3>LDAP return</h3>';
 		echo '<pre style="font-size: 9px; background-color: #e8e8e8; margin-left: 15px; padding-left: 10px;">';
 		print_r($result);

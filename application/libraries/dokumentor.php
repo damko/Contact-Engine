@@ -53,8 +53,10 @@ class Dokumentor extends CI_Controller {
 // 			if(!$exposedObjects) return false;
 //			if(!isset($exposedObjects[$object])) break; 
 			
-			$tmp_methods = $this->rest->get('methods', array('object' => $object,
-											 			 'format' => 'json'));			
+			$tmp_methods = $this->rest->get('methods', array(
+														 'object' => $object,
+											 			 'format' => 'json')
+											);			
 			$methods->functions = $tmp_methods->functions;
 			$methods->$object->functions = $tmp_methods->$object->functions;
 		}

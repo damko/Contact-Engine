@@ -5,34 +5,37 @@
 // This can be removed if you use __autoload() in config.php OR use Modular Extensions
 require APPPATH.'/libraries/test_controller.php';
 
-class Api_Tests extends Test_Controller {
+class Unit_Tests_Api extends Test_Controller {
 
 	public function __construct()
 	{	
 		parent::__construct();
-		
-		/*  
-	 	//set up a new template for the tests output 		
-		$this->unit->set_test_items(array('test_name', 'result'));
-		$str = '
-		<table border="0" cellpadding="4" cellspacing="1">
-		{rows}
-		<tr>
-		<td>{item}</td>
-		<td>{result}</td>
-		</tr>
-		{/rows}
-		</table>';
-		
-		$this->unit->set_template($str); 
-		*/
 				
+		if(ENVIRONMENT != 'production') {
+			echo '<h2>please set the constant ENVIROMENT in index.php to "production" !</h2>';
+			die();
+		}
+				
+		//load the chartex class
+		$this->load->spark('chartex/0.0.1');
+				
+		//load the rest client
+		$this->load->spark('restclient/2.0.0');	
+		
 		//set the server page
-		$this->rest->initialize(array('server' => $this->config->item('rest_server').'/exposeObj/chartex/'));
+		//$a = $this->config->item('rest_server');
+		$this->rest->initialize(array('server' => $this->config->item('rest_server').'/exposeObj/chartex/'));		
 	}
 
 	public function index()
 	{
+		
+		$this->load->view('unit_tests');
+		
+		echo '<a href="/index.php/unit_tests/">Back</a> to unit-tests front page.<br/>';
+		
+		echo '<div id="left">';
+				
 		//########################################
 		// READ
 		//########################################
@@ -40,17 +43,21 @@ class Api_Tests extends Test_Controller {
 		
 		//check to get an array as a return
 		$rest_return = $this->rest->get($method, null, 'serialize');
+		$this->getCodeOrigin();
 		$this->arrayReturn($method, $rest_return);
 
 		//check no REST error in return
+		$this->getCodeOrigin();
 		$this->checkNoRestError($method, $rest_return);
 
 		//check status code == 200
+		$this->getCodeOrigin();
 		$this->check200($method, $rest_return);
 		
 		//check that data content is valid
 		$expected_result = array('banana' => '2', 'potato' => '3');
 		$test = (array) $rest_return['data'];
+		$this->getCodeOrigin();
 		echo $this->unit->run($test, $expected_result, $method.'- valid data in return ?');
 				
 		$this->printReturn($rest_return);
@@ -62,15 +69,24 @@ class Api_Tests extends Test_Controller {
 		
 		//check to get an array as a return
 		$rest_return = $this->rest->get($method, $post, 'serialize');
+		$this->getCodeOrigin();
 		$this->arrayReturn($method, $rest_return);
 
 		//check no REST error in return
+		$this->getCodeOrigin();
 		$this->checkNoRestError($method, $rest_return);
 		
 		//check status code == 200
+		$this->getCodeOrigin();
 		$this->check200($method, $rest_return);
 		
 		$this->printReturn($rest_return);
+		
+		echo '</div>';
+		
+		$this->printSummary();
+		
+		echo '<div></body></html>';		
 	}		
 }
 

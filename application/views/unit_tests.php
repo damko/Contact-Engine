@@ -91,7 +91,39 @@ div#left{
     border-right: 1px dashed #999;
     padding-right: 15px;    
 } 
+
+.button {
+    padding: 5px 10px;
+    display: inline;
+    background: #777;
+    border: none;
+    color: #fff;
+    cursor: pointer;
+    font-weight: bold;
+    border-radius: 5px;
+    -moz-border-radius: 5px;
+    -webkit-border-radius: 5px;
+    text-shadow: 1px 1px #666;
+}
+
+.button:hover {
+    background-position: 0 -48px;
+}
+
+.button:active {
+    background-position: 0 top;
+    position: relative;
+    top: 1px;
+    padding: 6px 10px 4px;
+}
 </style>
+
+<script type="text/javascript">
+function verbose(value)
+{
+  	location.href="?verbose="+value;
+}
+</script>	
 </head>
 
 <body>
