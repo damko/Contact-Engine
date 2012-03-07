@@ -35,12 +35,12 @@ class Populate_LDAP extends CI_Controller {
 		echo '<h2>Populating the LDAP database</h2>';
 		echo 'Several unit tests need a populated LDAP database to work properly.<br/><br/>';
 		echo 'Click <a href="/index.php/populate_LDAP/persons/" target="_blank">here</a> to populate LDAP with persons.<br/><br/>';
-		echo 'Click here to populate LDAP with organizations.<br/><br/>';
-		echo 'Click here to populate LDAP with locations.<br/><br/>';
+		echo 'Click <a href="/index.php/populate_LDAP/organizations/" target="_blank">here</a> to populate LDAP with organizations.<br/><br/>';
+		echo 'Click <a href="/index.php/populate_LDAP/locations/" target="_blank">here</a> to populate LDAP with locations.<br/><br/>';
 		echo '</body></html>';
 	}
 	
-	public function delete_all() {
+	public function delete_all_persons() {
 		$this->benchmark->mark('code_start');
 		$this->rildap = new Ri_Ldap();
 		$baseDN = $this->baseDN;
@@ -64,6 +64,57 @@ class Populate_LDAP extends CI_Controller {
 		echo 'Elapsed time: '.$elapsed_time.' seconds<br/>';
 		if($index > 0) echo 'Each of the '.$index.' operations took: '.$elapsed_time/$index.' seconds.';
 	}	
+
+	public function delete_all_organizations() {
+		$this->benchmark->mark('code_start');
+		$this->rildap = new Ri_Ldap();
+		$baseDN = $this->baseDN;
+		$filter = '(o=*)';
+		$attributes = array('oid');
+		if($this->rildap->CEsearch($baseDN, $filter, $attributes)) {
+			$dns = array();
+			$content = $this->rildap->result->data->content;
+			$index = count($content);
+			foreach ($content as $key => $item) {
+				$this->rildap->dn = 'oid='.$item['oid'][0].','.$this->baseDN;
+				$test = $this->rildap->CEdelete();
+				if($test) echo "The entry with dn <i>".$this->rildap->dn."</i> has been deleted.<br/>";
+			}
+		}
+		$this->benchmark->mark('code_end');
+	
+		$elapsed_time = $this->benchmark->elapsed_time('code_start', 'code_end');
+	
+		echo '<br/>';
+		echo 'Elapsed time: '.$elapsed_time.' seconds<br/>';
+		if($index > 0) echo 'Each of the '.$index.' operations took: '.$elapsed_time/$index.' seconds.';
+	}
+
+	public function delete_all_locations() {
+		$this->benchmark->mark('code_start');
+		$this->rildap = new Ri_Ldap();
+		$baseDN = $this->baseDN;
+		$filter = '(locId=*)';
+		$attributes = array('locId');
+		if($this->rildap->CEsearch($baseDN, $filter, $attributes)) {
+			$dns = array();
+			$content = $this->rildap->result->data->content;
+			$index = count($content);
+			foreach ($content as $key => $item) {
+				$this->rildap->dn = 'locId='.$item['locId'][0].','.$this->baseDN;
+				$test = $this->rildap->CEdelete();
+				if($test) echo "The entry with dn <i>".$this->rildap->dn."</i> has been deleted.<br/>";
+			}
+		}
+		$this->benchmark->mark('code_end');
+	
+		$elapsed_time = $this->benchmark->elapsed_time('code_start', 'code_end');
+	
+		echo '<br/>';
+		echo 'Elapsed time: '.$elapsed_time.' seconds<br/>';
+		if($index > 0) echo 'Each of the '.$index.' operations took: '.$elapsed_time/$index.' seconds.';
+	}
+	
 	
 	public function persons() {
 		
@@ -98,7 +149,7 @@ class Populate_LDAP extends CI_Controller {
 		
 		echo '<h3>Cleaning the branch</h3>';
 		
-		$this->delete_all();
+		$this->delete_all_persons();
 		
 		$index = 100;
 		echo '<h3>Creation of '.$index.' random persons</h3>';
@@ -128,7 +179,7 @@ class Populate_LDAP extends CI_Controller {
 		$entry['category'] = 'mycategory';
 		$entry['objectClass'] = 'dueviPerson';
 		
-		$dn = 'uid='.$entry['uid'].',ou=users,o=ce,dc=2v,dc=ntw';
+		$dn = 'uid='.$entry['uid'].','.$this->baseDN;
 		
 		$created = $this->ldap->create($entry, $dn);
 		if($created) echo "Person #1 with dn <i>".$dn."</i> successfully created.<br/>";
@@ -154,7 +205,7 @@ class Populate_LDAP extends CI_Controller {
 			$entry['category'] = 'mycategory';
 			$entry['objectClass'] = 'dueviPerson';
 		
-			$dn = 'uid='.$entry['uid'].',ou=users,o=ce,dc=2v,dc=ntw';
+			$dn = 'uid='.$entry['uid'].','.$this->baseDN;
 		
 			$created = $this->ldap->create($entry, $dn);
 			if($created) echo "Person #".$i." with dn <i>".$dn."</i> successfully created.<br/>";
@@ -169,4 +220,195 @@ class Populate_LDAP extends CI_Controller {
 		
 		echo '</body>';
 	}
+	
+	
+	public function organizations() {
+	
+		$this->baseDN = 'ou=organizations,o=ce,dc=2v,dc=ntw';
+	
+		echo '<html><head>
+		<style type="text/css">
+		body {
+		background-color: #fff;
+		margin: 40px;
+		font-family: Lucida Grande, Verdana, Sans-serif;
+		font-size: 11px;
+		color: #4F5155;
+	}
+	i {
+	color: green;
+	}
+	</style>
+	<script type="text/javascript">
+	function show_confirm()
+	{
+	location.href="?startpopulating=true";
+	}
+	</script>
+	</head><body>';
+	
+		echo '<h2>Populating the LDAP branch <i>'.$this->baseDN.'</i></h2>';
+		echo 'This will delete all the data in the branch and will create random entries!  ';
+		echo '<entry type="button" onclick="show_confirm()" value="Continue" />';
+	
+		if(!isset($_GET['startpopulating']) || $_GET['startpopulating'] != true) die();
+	
+		echo '<h3>Cleaning the branch</h3>';
+	
+		$this->delete_all_organizations();
+	
+		$index = 100;
+		echo '<h3>Creation of '.$index.' random organizations</h3>';
+	
+		$this->ldap = new Ldap();
+		$connect = $this->ldap->connect($this->server,$this->ldapdn,$this->ldappw,$this->version);
+	
+		if(!$connect) die('I can not connect to LDAP. Check the settings');
+	
+		$this->benchmark->mark('code_start');
+	
+		//creating an entry with a specific oid that will be used in the tests
+		$random = rand(999999,9999999);
+		$name = 'ACME_'.$random;
+	
+		$entry = array();
+		$entry['oid'] = '10000000';
+		$entry['o'] = $name;
+		$entry['enabled'] = 'TRUE';
+		$entry['entryCreatedBy'] = 'unit_tests';
+		$entry['objectClass'] = 'dueviOrganization';
+		
+		$dn = 'oid='.$entry['oid'].','.$this->baseDN;
+	
+		$created = $this->ldap->create($entry, $dn);
+		if($created) echo "Organization #1 with dn <i>".$dn."</i> successfully created.<br/>";
+	
+		//creating all the other
+		for ($i = 2; $i <= $index; $i++) {
+				
+			$random = rand(999999,9999999);
+			$name = 'ACME_'.$random;
+	
+			//entry fields from the LDAP schema MUST attribute
+			$entry = array();
+			$entry['oid'] = $random;
+			$entry['o'] = $name;
+			$entry['enabled'] = 'TRUE';
+			$entry['entryCreatedBy'] = 'unit_tests';
+			$entry['objectClass'] = 'dueviOrganization';
+			
+			$dn = 'oid='.$entry['oid'].','.$this->baseDN;
+	
+			$created = $this->ldap->create($entry, $dn);
+			if($created) echo "Organization #".$i." with dn <i>".$dn."</i> successfully created.<br/>";
+		}
+		$this->benchmark->mark('code_end');
+	
+		$elapsed_time = $this->benchmark->elapsed_time('code_start', 'code_end');
+	
+		echo '<br/>';
+		echo 'Elapsed time: '.$elapsed_time.'<br/>';
+		if($index > 0) echo 'Each operation took: '.$elapsed_time/$index;
+	
+		echo '</body>';
+	}
+
+	
+	public function locations() {
+	
+		$this->baseDN = 'ou=locations,o=ce,dc=2v,dc=ntw';
+	
+		echo '<html><head>
+		<style type="text/css">
+		body {
+		background-color: #fff;
+		margin: 40px;
+		font-family: Lucida Grande, Verdana, Sans-serif;
+		font-size: 11px;
+		color: #4F5155;
+	}
+	i {
+	color: green;
+	}
+	</style>
+	<script type="text/javascript">
+	function show_confirm()
+	{
+	location.href="?startpopulating=true";
+	}
+	</script>
+	</head><body>';
+	
+		echo '<h2>Populating the LDAP branch <i>'.$this->baseDN.'</i></h2>';
+		echo 'This will delete all the data in the branch and will create random entries!  ';
+		echo '<input type="button" onclick="show_confirm()" value="Continue" />';
+	
+		if(!isset($_GET['startpopulating']) || $_GET['startpopulating'] != true) die();
+	
+		echo '<h3>Cleaning the branch</h3>';
+	
+		$this->delete_all_locations();
+	
+		$index = 100;
+		echo '<h3>Creation of '.$index.' random locations</h3>';
+	
+		$this->ldap = new Ldap();
+		$connect = $this->ldap->connect($this->server,$this->ldapdn,$this->ldappw,$this->version);
+	
+		if(!$connect) die('I can not connect to LDAP. Check the settings');
+	
+		$this->benchmark->mark('code_start');
+	
+		//creating an entry with a specific locId that will be used in the tests
+		$random = rand(999999,9999999);
+		$locDescription = 'MyDescription '.$random;
+		
+	
+		$entry = array();
+		$entry['locId'] = '10000000';
+		$entry['locCity'] = 'MyCity_'.$random;
+		$entry['locCountry'] = 'MyCountry_'.$random;
+		$entry['locDescription'] = 'MyDescription_'.$random;
+		$entry['locState'] = 'MyState_'.$random;
+		$entry['locStreet'] = 'MyStreet_'.$random;
+		$entry['objectClass'] = 'dueviLocation';
+		
+		$dn = 'locId='.$entry['locId'].','.$this->baseDN;
+	
+		$created = $this->ldap->create($entry, $dn);
+		if($created) echo "Location #1 with dn <i>".$dn."</i> successfully created.<br/>";
+	
+		//creating all the other
+		for ($i = 2; $i <= $index; $i++) {
+				
+			$random = rand(999999,9999999);
+			$surname = 'Coyote_'.$random;
+			$name = 'Willy';
+	
+			//entry fields from the LDAP schema MUST attribute
+			$entry = array();
+			$entry['locId'] = $random;
+			$entry['locCity'] = 'MyCity_'.$random;
+			$entry['locCountry'] = 'MyCountry_'.$random;
+			$entry['locDescription'] = 'MyDescription_'.$random;
+			$entry['locState'] = 'MyState_'.$random;
+			$entry['locStreet'] = 'MyStreet_'.$random;
+			$entry['objectClass'] = 'dueviLocation';
+	
+			$dn = 'locId='.$entry['locId'].','.$this->baseDN;
+	
+			$created = $this->ldap->create($entry, $dn);
+			if($created) echo "Location #".$i." with dn <i>".$dn."</i> successfully created.<br/>";
+		}
+		$this->benchmark->mark('code_end');
+	
+		$elapsed_time = $this->benchmark->elapsed_time('code_start', 'code_end');
+	
+		echo '<br/>';
+		echo 'Elapsed time: '.$elapsed_time.'<br/>';
+		if($index > 0) echo 'Each operation took: '.$elapsed_time/$index;
+	
+		echo '</body>';
+	}
+	
 }

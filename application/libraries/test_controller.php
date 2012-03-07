@@ -9,7 +9,7 @@ class Test_Controller extends CI_Controller {
 	public $failed = array();
 	public $code_file = null;
 	public $code_line = null;
-	
+	public $http_status_codes;
 	public function __construct()
 	{
 		//load the embedded unit_test library
@@ -35,6 +35,7 @@ class Test_Controller extends CI_Controller {
 		if(isset($_GET['verbose']) && ($_GET['verbose'] == 'on')) $this->show_return = true; 
 		
 		$this->count = 0;
+		$this->http_status_codes = get_HTTP_status_codes();
 	}
 	
 	protected function getCodeOrigin() {
@@ -132,75 +133,218 @@ class Test_Controller extends CI_Controller {
 	{
 		if(empty($note)) $note = 'I expect an array in return';
 		echo $this->run($rest_return, 'is_array', $method.'- array in return ?', $note);
+		
+		$this->arrayWellFormed($rest_return);
 	}
 	
-	protected function anyError($rest_return)
+	private function arrayWellFormed($rest_return)
 	{
-		$test = (array) $rest_return['status'];
-		return isset($test['error_message']) ? true : false;
+		$test = isset($rest_return['status']);
+		echo $this->run($test, 'is_true', 'Is return[status] set? ');
+		
+		$fake = array(
+						'results_number' => 0,
+						'results_got_number' => 0,
+						'results_pages' => 1,
+						'results_page' => 1,
+						'finished' => null,
+						'duration' => null,
+						'status_code' => null,
+						'message' => null,
+					);
+		$status = $rest_return['status'];
+		$diff = array_diff_key($fake, $status);
+		$test = true;
+		if(count($diff) > 0) $test = false;
+		echo $this->run($test, 'is_true', 'Is the return[status] well formed ? ');
+		
+		$test = isset($rest_return['data']);
+		echo $this->run($test, 'is_true', 'Is return[data] set? ');		
 	}
 	
-	protected function checkNoRestError($method, $rest_return, $note = null)
+	private function meaningfullStatusCode($rest_return) {
+		if(in_array($rest_return['status']['status_code'],array_keys($this->http_status_codes['all']))) {
+			$test = true;
+		} else {
+			$test = false;
+		}
+		
+		echo $this->run($test, 'is_true', 'Is the returned status code a valid REST RETURN ? ');
+	}
+	
+	/**
+	 * Returns TRUE if there are errors
+	 * 
+	 * @access		public
+	 * @param		
+	 * @var			
+	 * @return		
+	 * @example
+	 * @see
+	 * 
+	 * @author 		Damiano Venturin
+	 * @copyright 	2V S.r.l.
+	 * @license		GPL
+	 * @link		http://www.contact-engine.info
+	 * @since		Mar 6, 2012
+	 * 
+	 * @todo		
+	 */
+	private function isThereAnyError($rest_return)
 	{
-		$expected_result = false;
-		$test = $this->anyError($rest_return);
-		if(empty($note)) $note = 'I expect there should be no REST error';
-		echo $this->run($test, $expected_result, $method.' Any REST error ?', $note);
+		$test = $rest_return['status'];
+		if(empty($test['status_code'])) return true;
+		
+		if(in_array($test['status_code'],array_keys($this->http_status_codes['all_errors']))) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+	
+	private function checkError($rest_return, $method, $note, $expect_error) {
+		
+		$this->meaningfullStatusCode($rest_return);
+		
+		if(empty($note)) 
+		{
+			if($expect_error) 
+			{
+				$note = 'I expect there should be a REST error';
+			} else {
+				$note = 'I expect there should be NOT a REST error';
+			}
+		}
+		
+		$test = $this->isThereAnyError($rest_return);
+		
+		echo $this->run($test, $expect_error, $method.' Any REST error ?', $note);
+	}
+	
+	protected function checkNoRestError($method, $rest_return, $note = null) {
+		$this->checkError($rest_return, $method, $note, false);
 	}
 
 	protected function checkRestError($method, $rest_return, $note = null)
 	{
-		$expected_result = true;
-		$test = $this->anyError($rest_return);
-		if(empty($note)) $note = 'I expect a REST error';
-		echo $this->run($test, $expected_result, $method.' Any REST error ?', $note);
+		$this->checkError($rest_return, $method, $note, true);
 	}
+
+	private function check($method, $rest_return, $expected_status_code, $note = null) {
+		if(!isset($rest_return['status']['status_code'])) return false;
 		
+		$test = false;
+		
+		if( $expected_status_code == $rest_return['status']['status_code']) 
+			$test = true;
+		
+		echo $this->run($test, 'is_true', $method, $note.' - I have got: '.$rest_return['status']['status_code']);
+	}
+	
 	protected function check200($method, $rest_return, $note = null)
 	{
-		$expected_result = '200';
-		$test = (array) $rest_return['status'];
-		if(isset($test['status_code'])) 
-		{
-			$test = $test['status_code'];
-		} else {
-			$test = 'UNKNOWN ???';
-			$note = 'UNKNOWN ???';
-		}
-		if(empty($note)) $note = 'I expect a 200';
-		echo $this->run($test, $expected_result, $method.'- status code == 200 ?', $note);
+		$expected_status_code = '200';
+		
+		if(empty($note)) $note = 'I expect 200';
+		
+		$this->check($method, $rest_return, $expected_status_code, $note);
 	}
 
 	protected function check400($method, $rest_return, $note = null)
 	{
-		$expected_result = '400';
-		$test = (array) $rest_return['status'];
-		if(isset($test['status_code'])) 
-		{
-			$test = $test['status_code'];
-		} else {
-			$test = 'UNKNOWN ???';
-			$note = 'UNKNOWN ???';
-		}
-		if(empty($note)) $note = 'I expect a 400';
-		echo $this->run($test, $expected_result, $method.'- status code == 400 ?', $note);
+		$expected_status_code = '400';
+		
+		if(empty($note)) $note = 'I expect 400';
+		
+		$this->check($method, $rest_return, $expected_status_code, $note);
 	}
 
 	protected function check404($method, $rest_return, $note = null)
 	{
-		$expected_result = '404';
-		$test = (array) $rest_return['status'];
+		$expected_status_code = '404';
 		
-		//TODO refactory
-		if(isset($test['status_code'])) 
-		{
-			$test = $test['status_code'];
-		} else {
-			$test = 'UNKNOWN ???';
-			$note = 'UNKNOWN ???';
-		}
-		if(empty($note)) $note = 'I expect a 404';
-		echo $this->run($test, $expected_result, $method.'- status code == 404 ?', $note);
+		if(empty($note)) $note = 'I expect 404';
+		
+		$this->check($method, $rest_return, $expected_status_code, $note);
+	}
+
+	protected function check415($method, $rest_return, $note = null)
+	{
+		$expected_status_code = '415';
+	
+		if(empty($note)) $note = 'I expect 415';
+	
+		$this->check($method, $rest_return, $expected_status_code, $note);
+	}
+		
+	protected function check500($method, $rest_return, $note = null)
+	{
+		$expected_status_code = '500';
+	
+		if(empty($note)) $note = 'I expect 500';
+	
+		$this->check($method, $rest_return, $expected_status_code, $note);
+	}	
+	
+	private function checkResultNumberMatch($method, $rest_return)
+	{
+		$test = false;
+		
+		$count_results = count($rest_return['data']);
+		
+		if($count_results == $rest_return['status']['results_got_number']) $test = true;
+				
+		echo $this->run($test, 'is_true', $method, 'The returned result is equal to the specified "results_got_number" parameter');
+		
+		
+		$test = false;
+		if($rest_return['status']['results_number'] >= $count_results ) $test = true;
+		
+		echo $this->run($test, 'is_true', $method, 'Is the parameter "results_number" &gt;= "results_got_number" ?');
+
+		
+		$test = false;
+		if($rest_return['status']['results_pages'] > 0 ) $test = true;
+		
+		echo $this->run($test, 'is_true', $method, 'Is the parameter "results_pages" &gt; 0 ?');
+
+		
+		$test = false;
+		if($rest_return['status']['results_page'] > 0 ) $test = true;
+		
+		echo $this->run($test, 'is_true', $method, 'Is the parameter "results_page" &gt;= 0 ?');
+
+
+		$test = false;
+		if($rest_return['status']['results_pages'] >= $rest_return['status']['results_page'] ) $test = true;
+		
+		echo $this->run($test, 'is_true', $method, 'Is the parameter "results_pages" &gt;= "results_page" ?');
+	}
+	
+	protected function checkHasData($method, $rest_return, $note = null)
+	{
+		if(empty($note)) $note = 'I expect to have some data';
+	
+		$test = false;
+		$count_results = count($rest_return['data']);
+		if($count_results > 0) $test = true;
+		
+		echo $this->run($test, 'is_true', $method, $note.' - I have got: '.$count_results.' results');
+		
+		$this->checkResultNumberMatch($method, $rest_return);
+	}
+
+	protected function checkHasNoData($method, $rest_return, $note = null)
+	{
+		if(empty($note)) $note = 'I expect to have NO data';
+	
+		$test = false;
+		$count_results = count($rest_return['data']);
+		if($count_results == 0) $test = true;
+	
+		echo $this->run($test, 'is_true', $method, $note.' - I have got: '.$count_results.' results');
+	
+		$this->checkResultNumberMatch($method, $rest_return);
 	}
 		
 	protected function printReturn($rest_return)

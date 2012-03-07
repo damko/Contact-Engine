@@ -36,49 +36,48 @@ class Unit_Tests_Api extends Test_Controller {
 		
 		echo '<div id="left">';
 				
-		//########################################
-		// READ
-		//########################################
 		$method = 'read';
 		
+		$this->testTitle('Use method read of chartex object');
 		//check to get an array as a return
 		$rest_return = $this->rest->get($method, null, 'serialize');
+		$test = false;
+		if(is_array($rest_return)) $test = true;
 		$this->getCodeOrigin();
-		$this->arrayReturn($method, $rest_return);
-
-		//check no REST error in return
-		$this->getCodeOrigin();
-		$this->checkNoRestError($method, $rest_return);
-
-		//check status code == 200
-		$this->getCodeOrigin();
-		$this->check200($method, $rest_return);
+		echo $this->run($test, 'is_true', $method.'- valid data in return ?');
 		
-		//check that data content is valid
+		
+		$this->subTestTitle('Check for valid return');
 		$expected_result = array('banana' => '2', 'potato' => '3');
-		$test = (array) $rest_return['data'];
+		$return_no_status = $rest_return;
+		unset($return_no_status['status']);
 		$this->getCodeOrigin();
-		echo $this->unit->run($test, $expected_result, $method.'- valid data in return ?');
+		echo $this->run($return_no_status, $expected_result, $method.'- valid data in return ?');
 				
 		$this->printReturn($rest_return);
 
-		//########################################
-		// ADD
-		//########################################
-		$method = 'add/watermelon/5';
+
 		
+		
+		
+		$this->testTitle('Use method add of chartex object');
+		$method = 'add/watermelon/5';
 		//check to get an array as a return
 		$rest_return = $this->rest->get($method, $post, 'serialize');
+		$test = false;
+		if(is_array($rest_return)) $test = true;
 		$this->getCodeOrigin();
-		$this->arrayReturn($method, $rest_return);
-
-		//check no REST error in return
-		$this->getCodeOrigin();
-		$this->checkNoRestError($method, $rest_return);
+		echo $this->run($test, 'is_true', $method.'- valid data in return ?');
 		
-		//check status code == 200
+		
+		$this->subTestTitle('Check for valid return');
+		$expected_result = array('banana' => '2', 'potato' => '3', 'watermelon' => '5');
+		$return_no_status = $rest_return;
+		unset($return_no_status['status']);
+		//$test = (array) $return_no_status;
 		$this->getCodeOrigin();
-		$this->check200($method, $rest_return);
+		echo $this->run($return_no_status, $expected_result, $method.'- valid data in return ?');
+		
 		
 		$this->printReturn($rest_return);
 		
