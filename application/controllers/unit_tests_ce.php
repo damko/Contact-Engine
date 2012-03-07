@@ -206,6 +206,11 @@ class Unit_Tests_Ce extends Test_Controller {
 		$this->getCodeOrigin();
 		$this->checkHasData($method, $rest_return);
 		
+		$this->getCodeOrigin();
+		$test = false;
+		if($rest_return['status']['results_number'] > $rest_return['status']['results_got_number']) $test = true;
+		$this->run($test, 'is_true', 'Is results_number &gt; results_got_number ?','I expect to get only part of the available results');
+		
 		$this->printReturn($rest_return);
 
 		
@@ -234,6 +239,11 @@ class Unit_Tests_Ce extends Test_Controller {
 		
 		$this->getCodeOrigin();
 		$this->checkHasData($method, $rest_return);
+
+		$this->getCodeOrigin();
+		$test = false;
+		if($rest_return['status']['results_number'] > $rest_return['status']['results_got_number']) $test = true;
+		$this->run($test, 'is_true', 'Is results_number &gt; results_got_number ?','I expect to get only part of the available results');
 		
 		$this->printReturn($rest_return);		
 		
@@ -263,6 +273,11 @@ class Unit_Tests_Ce extends Test_Controller {
 		$this->getCodeOrigin();
 		$this->checkHasData($method, $rest_return);
 		
+		$this->getCodeOrigin();
+		$test = false;
+		if($rest_return['status']['results_number'] > $rest_return['status']['results_got_number']) $test = true;
+		$this->run($test, 'is_true', 'Is results_number &gt; results_got_number ?','I expect to get only part of the available results');
+		
 		$this->printReturn($rest_return);
 
 		
@@ -271,9 +286,7 @@ class Unit_Tests_Ce extends Test_Controller {
 		
 		
 		
-		//----------------------
-		
-		//read 1 non-existent person
+
 		$this->testTitle('read a non-existent person');
 		$method = 'read';
 		$input = array();
@@ -302,7 +315,7 @@ class Unit_Tests_Ce extends Test_Controller {
 		$this->rest->initialize(array('server' => $this->config->item('rest_server').'exposeObj/person/'));
 
 		//calling the methon CREATE for object person without a filter
-		$this->testTitle('create 1 person');
+		$this->testTitle('creates a person');
 		$method = 'create';
 		$input = array();
 		$random = rand(999,9999);
@@ -1086,7 +1099,7 @@ class Unit_Tests_Ce extends Test_Controller {
 		$this->rest->initialize(array('server' => $this->config->item('rest_server').'exposeObj/organization/'));
 			
 		//calling the methon CREATE for object organization without a filter
-		$this->testTitle('create 1 organization');
+		$this->testTitle('creates an organization');
 		$method = 'create';
 		$input = array();
 		$random = rand(999,9999);

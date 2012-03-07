@@ -80,13 +80,10 @@ class Person extends ObjectCommon
 		$exit_status = $this->ri_ldap->CEcreate($this->toRest(false),$dn);
 		
 		$this->result->importLdapReturnObject($this->ri_ldap->result);
+
+		if($exit_status) $this->result->pushData(array('uid' => $this->getUid()));
 		
-		if($exit_status)
-		{
-			$this->result->data = array('uid' => $this->getUid());			
-		}
-		
-		return $this->result->returnAsArray();
+		return $this->result->returnAsArray();		
  		
 	}
 	
@@ -160,7 +157,7 @@ class Person extends ObjectCommon
 		
 		$this->result->importLdapReturnObject($this->ri_ldap->result);
 
-		if($exit_status) $this->result->data = array('uid' => $this->getUid());
+		if($exit_status) $this->result->pushData(array('uid' => $this->getUid()));
 		
 		return $this->result->returnAsArray();		
 	}

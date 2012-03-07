@@ -20,10 +20,6 @@ class Ce_Return_Object extends CI_Model
 	
 	public function __set($attribute, $value) {
 		$this->$attribute = $value;
-		
-		//If I'm overwriting the data content then I have also to update the other parameters.
-		//It's no more a LDAP result
-		if($attribute == 'data') $this->updateResultsValues(); 
 	}
 	
 	public function __get($attribute) {
@@ -46,6 +42,13 @@ class Ce_Return_Object extends CI_Model
 		return true;
 	}
 
+	public function pushData($data)
+	{
+		//If I'm overwriting the data content then I have also to update the other parameters.
+		$this->data = $data;
+		//It's no more a LDAP result
+		$this->updateResultsValues();		
+	}
 	private function updateResultsValues() {
 		$this->results_number = count($this->data);
 		$this->sent_back_results_number = $this->results_number;

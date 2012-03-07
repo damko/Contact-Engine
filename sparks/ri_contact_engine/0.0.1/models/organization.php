@@ -73,13 +73,10 @@ class Organization extends ObjectCommon
 		$exit_status = $this->ri_ldap->CEcreate($this->toRest(false),$dn);
 		
 		$this->result->importLdapReturnObject($this->ri_ldap->result);
+
+		if($exit_status) $this->result->pushData(array('oid' => $this->oid));
 		
-		if($exit_status)
-		{
-			$this->result->data = array('oid' => $this->oid);
-		}
-		
-		return $this->result->returnAsArray();		
+		return $this->result->returnAsArray();	
 	}
 	
 	public function read(array $input)
@@ -139,10 +136,10 @@ class Organization extends ObjectCommon
 		$exit_status = $this->ri_ldap->CEupdate($entry, $dn);
 		
 		$this->result->importLdapReturnObject($this->ri_ldap->result);
+
+		if($exit_status) $this->result->pushData(array('oid' => $this->oid));
 		
-		if($exit_status) $this->result->data = array('oid' => $this->oid);
-		
-		return $this->result->returnAsArray();		
+		return $this->result->returnAsArray();
 	}
 
 	public function delete($input)

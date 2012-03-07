@@ -79,13 +79,10 @@ class Location extends ObjectCommon
 		$exit_status = $this->ri_ldap->CEcreate($this->toRest(false),$dn);
 		
 		$this->result->importLdapReturnObject($this->ri_ldap->result);
+
+		if($exit_status) $this->result->pushData(array('locId' => $this->locId));
 		
-		if($exit_status)
-		{
-			$this->result->data = array('locId' => $this->locId);
-		}
-		
-		return $this->result->returnAsArray();		
+		return $this->result->returnAsArray();
 	}
 	
 	public function read(array $input)
@@ -132,8 +129,8 @@ class Location extends ObjectCommon
 		$exit_status = $this->ri_ldap->CEupdate($entry, $dn);
 		
 		$this->result->importLdapReturnObject($this->ri_ldap->result);
-		
-		if($exit_status) $this->result->data = array('locId' => $this->locId);
+
+		if($exit_status) $this->result->pushData(array('locId' => $this->locId));
 		
 		return $this->result->returnAsArray();
 		
