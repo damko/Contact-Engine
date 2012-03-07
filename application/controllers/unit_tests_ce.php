@@ -88,7 +88,21 @@ class Unit_Tests_Ce extends Test_Controller {
 		$test = false;
 		if(count($rest_return) > 0) $test = true;
 		$this->run($test, 'is_true', 'Is the result populated ?');
-				
+
+		$rest_return = $this->rest->get($method, $input, 'serialize');
+		$this->getCodeOrigin();
+		$this->arrayReturn($method, $rest_return);
+		
+		//the filter has not been specified then it should return an error
+		$this->getCodeOrigin();
+		$this->checkNoRestError($method, $rest_return);
+		
+		$this->getCodeOrigin();
+		$this->check200($method, $rest_return);
+		
+		$this->getCodeOrigin();
+		$this->checkHasData($method, $rest_return);
+		
 		$this->printReturn($rest_return);
 	}
 
@@ -113,6 +127,7 @@ class Unit_Tests_Ce extends Test_Controller {
 		$this->getCodeOrigin();
 		$this->check200($method, $rest_return);
 		
+		$this->getCodeOrigin();
 		$this->checkHasData($method, $rest_return);
 		
 		$this->printReturn($rest_return);
@@ -160,6 +175,7 @@ class Unit_Tests_Ce extends Test_Controller {
 		$this->getCodeOrigin();
 		$this->check200($method, $rest_return);
 		
+		$this->getCodeOrigin();
 		$this->checkHasData($method, $rest_return);
 		
 		$this->printReturn($rest_return);
@@ -264,6 +280,7 @@ class Unit_Tests_Ce extends Test_Controller {
 		$this->getCodeOrigin();
 		$this->check200($method, $rest_return);
 		
+		$this->getCodeOrigin();
 		$this->checkHasData($method, $rest_return);
 		//$this->printReturn($rest_return);
 		
@@ -309,6 +326,7 @@ class Unit_Tests_Ce extends Test_Controller {
 		$this->getCodeOrigin();
 		$this->check200($method, $rest_return);
 		
+		$this->getCodeOrigin();
 		$this->checkHasData($method, $rest_return);
 		
 		$this->printReturn($rest_return);
@@ -870,6 +888,19 @@ class Unit_Tests_Ce extends Test_Controller {
 		if(count($rest_return) > 0) $test = true;
 		$this->run($test, 'is_true', 'Is the result populated ?');
 		
+		$rest_return = $this->rest->get($method, $input, 'serialize');
+		$this->getCodeOrigin();
+		$this->arrayReturn($method, $rest_return);
+		
+		//the filter has not been specified then it should return an error
+		$this->getCodeOrigin();
+		$this->checkNoRestError($method, $rest_return);
+		
+		$this->getCodeOrigin();
+		$this->check200($method, $rest_return);
+		
+		$this->checkHasData($method, $rest_return);
+				
 		$this->printReturn($rest_return);		
 	}
 
@@ -1240,6 +1271,19 @@ class Unit_Tests_Ce extends Test_Controller {
 		if(count($rest_return) > 0) $test = true;
 		$this->run($test, 'is_true', 'Is the result populated ?');
 		
+		$rest_return = $this->rest->get($method, $input, 'serialize');
+		$this->getCodeOrigin();
+		$this->arrayReturn($method, $rest_return);
+		
+		//the filter has not been specified then it should return an error
+		$this->getCodeOrigin();
+		$this->checkNoRestError($method, $rest_return);
+		
+		$this->getCodeOrigin();
+		$this->check200($method, $rest_return);
+		
+		$this->getCodeOrigin();
+		$this->checkHasData($method, $rest_return);		
 		$this->printReturn($rest_return);		
 	}
 	

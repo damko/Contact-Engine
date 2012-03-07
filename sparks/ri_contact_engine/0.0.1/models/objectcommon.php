@@ -59,10 +59,23 @@ class ObjectCommon extends CI_Model
 		$this->$property_name = $value;
 	}
 		
-	public function getProperties()	{
-		//TODO Actually I'm returning the plain array of properties, which is not in the standard form [status][data].
-		//I'm leaving like this because I think it's useful but I could change idea
-		return $this->properties;
+	public function getProperties(array $input = null)	{
+		if(isset($input[$this->objName])) {
+			//it's an API request
+			$this->result = new Ce_Return_Object();
+			$this->result->data = $this->properties;
+			$this->result->http_status_code = '200';
+			$this->result->http_message = 'OK';
+			$this->result->results_pages = '1';
+			$this->result->results_page = '1';
+			$this->result->results_number = count($this->properties);
+			$this->result->sent_back_results_number = $this->result->results_number;
+			
+			return $this->result->returnAsArray();			
+		} else {
+			return $this->properties;
+		}
+		
 	}
 	
 	public function getRequiredProperties() {
