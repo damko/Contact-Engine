@@ -76,7 +76,7 @@ class Dokumentor extends CI_Controller {
 				}
 			}
 			$methods_html .= '</dl>';
-			$methods_html .= '<h3>Public methods for the exposed objects:</h3>';
+			$methods_html .= '<h3>Exposed objects:</h3>';
 			foreach ($objects as $object) {
 				$methods_html .= $this->objectHTML($methods,$object);
 			}
@@ -87,10 +87,14 @@ class Dokumentor extends CI_Controller {
 	private function objectHTML($methods,$object)
 	{
 			$methods_html = '<h4>Object: '.$object.'</h4>';
-			$methods_html .= '<dl>';
+			$methods_html .= '<p class="obj_pm_title">Public methods:</p><dl>';
 			if(is_object($methods->$object))
 			{
 				foreach ( $methods->$object->functions as  $method) {
+					if($method->function == 'getProperties') 
+					{
+						$url_obj_properties = site_url('api/exposeObj/'.$object.'/'.$method->function.'/format/xml');
+					}
 					if(empty($method->docstring))
 					{
 						$methods_html .= '<dt>'.$method->function.'</dt><dd>No description available</dd>';
@@ -99,7 +103,12 @@ class Dokumentor extends CI_Controller {
 					}
 				}
 			}
-			$methods_html .= '</dl>';	
+			$methods_html .= '</dl>';
+			if(isset($url_obj_properties)) 
+			{
+				$methods_html .= '<p class="obj_pm_title">Object properties:</p>';
+				$methods_html .= '<p class="obj_pm_link"><a href="'.$url_obj_properties.'" target="_blank">Click here</a></p>';
+			}
 			return $methods_html;	
 	}
 }

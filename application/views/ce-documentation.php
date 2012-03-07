@@ -29,6 +29,16 @@ h1 {
 	padding: 5px 0 6px 0;
 }
 
+h4 {
+	color: green;
+	background-color: transparent;
+	font-size: 16px;
+	font-weight: bold;
+	margin-left: 10px;
+	margin-top: 2px;
+	margin-bottom: 0px;
+}
+
 code {
 	font-family: Monaco, Verdana, Sans-serif;
 	font-size: 12px;
@@ -59,6 +69,31 @@ pre {
 	color: black;
 	background-color: #999;
 	padding: 6px;
+}
+
+pre.properties {
+	font-style: italic;
+	margin-left: 30px;
+	font-size: 10px;
+	color: black;
+	background-color: #c8c8c8;
+	padding: 6px;
+}
+
+.obj_pm_title {
+	margin-left: 20px;
+	font-size: 14px;
+	font-weight: bold;
+	margin-bottom: -8px;
+	color: blue;
+}
+
+.obj_pm_link {
+	margin-left: 30px;
+	font-size: 14px;
+	font-weight: bold;
+	margin-bottom: 30px;
+	color: blue;
 }
 </style>
 </head>
