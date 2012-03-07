@@ -57,13 +57,6 @@ class Api extends REST_Controller
 			foreach ($this->exposedObjects as $item => $value) {
 				if(preg_match('/\//i', $value))
 				{
-					/* if($value == 'ri_ldap/0.0.1')
-					{
-						$opts = array('library' => 'ldap_exception');
-						$this->load->spark($value,$opts); //FIXME
-					} else {
-						$this->load->spark($value);
-					} */
 					$this->load->spark($value);
 				}
 			}
@@ -326,10 +319,18 @@ class Api extends REST_Controller
 							$method_name = $method->name;
 							if($method_short_name == $calledMethod)
 							{							
-								$data = array();
+								$output = $this->$model->$method_name($input);
+
+								$this->finished = microtime(true);
+								$this->duration = $this->finished - $this->started;
+
 								
-								$data = $this->$model->$method_name($input);	
-								$this->output($data);
+								$output['status']['finished'] = $this->finished;
+								 
+								$output['status']['duration'] = $this->duration;
+								
+								$this->response($output, $output['status']['status_code']);
+
 							}
 						}
 					}		
@@ -339,71 +340,16 @@ class Api extends REST_Controller
 			//if we are still here than a wrong method has been passed
 			if(!empty($calledMethod))
 			{
-				$this->setReturnStatus('404','The object '.$model.' has no public method called '.$calledMethod);
-				$this->output(false);
-				return;
+				$this->result = new Ce_Return_Object();
+				$this->result->data = array();
+				$this->result->http_status_code = '404';
+				$this->result->http_message = 'The object '.$model.' has no public method called '.$calledMethod;
+				$this->result->results_number = '0';
+				$this->result->sent_back_results_number = 0;
+				
+				return $this->result->returnAsArray();
 			}			
 		}
 		return true;
 	}
-	
-	private function setReturnStatus($http_status, $error_message = null)
-	{
-		$this->finished = microtime(true);
-		$this->duration = $this->finished - $this->started;
-		$this->status_code = $http_status;  //TODO Should I check if the status is in the standard set for REST?
-		if($this->status_code != '200') $this->error_message = $error_message;
-	}
-	
-	private function output($data)
-	{
-		$return = array();
-		
-		
-		 
-		if(!$data)
-		{
-			if(empty($this->status_code) or empty($this->error_message))
-			{
-				$this->setReturnStatus('400','Something went wrong');
-			}
-		} else {
-			if(is_array($data) and !empty($data['error']))
-			{
-				//$this->setReturnStatus('400',(string) $data['error']);
-				$this->setReturnStatus('400', $data['error']);
-				//unset($data['error']); //cleanup data from errors
-			} else {
-				$this->setReturnStatus('200');
-			}
-			
-			if(is_array($data) and !empty($data['RestStatus']))
-			{
-				$return['status'] = $data['RestStatus'];
-				unset($data['RestStatus']);
-			}
-					
- 			$dimension = dimensions($data);
-			switch ($dimension) {
-				case null:
-				case '0':
-					$return['data'] = (array) $data;
-				break;
-		
-				default:
-					$return['data'] = $data;
-				break;
-			} 
-
-		}
-		
-		if(!empty($this->finished)) $return['status']['finished'] = $this->finished;
-		if(!empty($this->duration)) $return['status']['duration'] = $this->duration;
-		if(!empty($this->status_code)) $return['status']['status_code'] = $this->status_code;
-		if(!empty($this->error_message)) $return['status']['error_message'] = $this->error_message;
-
-		$this->response($return, $this->status_code);
-		return true;		
-	}
-
 }
