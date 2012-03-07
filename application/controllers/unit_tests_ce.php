@@ -29,13 +29,13 @@ class Unit_Tests_Ce extends Test_Controller {
 		echo '<a href="/index.php/unit_tests/">Back</a> to unit-tests front page.<br/>';
 
 		echo '<div id="left">';
-		$this->testPerson();
-		$this->testOrganization();
-		$this->testLocation();
+ 		$this->testPerson();
+ 		$this->testOrganization();
+ 		$this->testLocation();
   		$this->testContact();
-		$this->testPersonAssocOrg();
- 		$this->testPersonAssocLoc();
-		$this->testOrganizationAssocLoc();
+ 		$this->testPersonAssocOrg();
+  		$this->testPersonAssocLoc();
+ 		$this->testOrganizationAssocLoc();
 		echo '</div>';
 		
 		$this->printSummary();
@@ -46,11 +46,11 @@ class Unit_Tests_Ce extends Test_Controller {
 	
 	public function testPerson()
 	{
-		$this->testPersonProperties();
-		$this->testPersonCreate();
-		$this->testPersonRead();
-		$this->testPersonUpdate();
-		$this->testPersonDelete();
+ 		$this->testPersonProperties();
+ 		$this->testPersonCreate();
+ 		$this->testPersonRead();
+ 		$this->testPersonUpdate();
+ 		$this->testPersonDelete();
 	}
 	
 	public function testOrganization()
@@ -111,7 +111,7 @@ class Unit_Tests_Ce extends Test_Controller {
 		$this->rest->initialize(array('server' => $this->config->item('rest_server').'exposeObj/person/'));
 		
 		//calling the methon READ for object person with a filter
-		$this->testTitle('read person entry','Sending a request with filter: (uid=10000000)');
+		$this->testTitle('Requests to read a person passing filter: (uid=10000000)');
 		$method = 'read';
 		$input = array();
 		$input['filter'] = '(uid=10000000)';
@@ -136,7 +136,7 @@ class Unit_Tests_Ce extends Test_Controller {
 		//----------------------
 		
 		//calling the methon READ for object person without a filter
-		$this->testTitle('read person entries','Sending a request missing "filter". I expect a failure');
+		$this->testTitle('Requests to read a person without passing a "filter". I expect a failure');
 		$method = 'read';
 		
 		
@@ -158,8 +158,7 @@ class Unit_Tests_Ce extends Test_Controller {
 
 		//----------------------
 		
-		//calling the methon READ for object person with a filter
-		$this->testTitle('read person entries','Sending a request with "filter". I expect to get all persons in the storage');
+		$this->testTitle('Requests to get all the persons in the storage');
 		$method = 'read';
 		$input = array();
 		$input['filter'] = '(objectClass=*)';
@@ -180,6 +179,95 @@ class Unit_Tests_Ce extends Test_Controller {
 		
 		$this->printReturn($rest_return);
 
+		
+		
+		
+		$this->testTitle('Requests to get all the persons in the storage using pagination. I expect 2 results.');
+		$method = 'read';
+		$input = array();
+		$input['filter'] = '(objectClass=*)';
+		$input['flow_order'] = 'asc';
+		$input['wanted_page'] = 3;
+		$input['items_page'] = 2;
+		
+		$rest_return = $this->rest->get($method, $input, 'serialize');
+		$this->getCodeOrigin();
+		$this->arrayReturn($method, $rest_return);
+		
+		//the filter has not been specified then it should return an error
+		$this->getCodeOrigin();
+		$this->checkNoRestError($method, $rest_return);
+		
+		$this->getCodeOrigin();
+		$this->check200($method, $rest_return);
+		
+		$this->getCodeOrigin();
+		$this->checkHasData($method, $rest_return);
+		
+		$this->printReturn($rest_return);
+
+		
+		
+		
+
+		
+		$this->testTitle('Same test as before but wrapping the input values with single quotes');
+		$method = 'read';
+		$input = array();
+		$input['filter'] = '(objectClass=*)';
+		$input['flow_order'] = 'asc';
+		$input['wanted_page'] = '3';
+		$input['items_page'] = '2';
+		
+		$rest_return = $this->rest->get($method, $input, 'serialize');
+		$this->getCodeOrigin();
+		$this->arrayReturn($method, $rest_return);
+		
+		//the filter has not been specified then it should return an error
+		$this->getCodeOrigin();
+		$this->checkNoRestError($method, $rest_return);
+		
+		$this->getCodeOrigin();
+		$this->check200($method, $rest_return);
+		
+		$this->getCodeOrigin();
+		$this->checkHasData($method, $rest_return);
+		
+		$this->printReturn($rest_return);		
+		
+		
+
+		
+		
+		$this->testTitle('Same test as before but wrapping the input values with double quotes');
+		$method = 'read';
+		$input = array();
+		$input['filter'] = '(objectClass=*)';
+		$input['flow_order'] = 'asc';
+		$input['wanted_page'] = "3";
+		$input['items_page'] = "2";
+		
+		$rest_return = $this->rest->get($method, $input, 'serialize');
+		$this->getCodeOrigin();
+		$this->arrayReturn($method, $rest_return);
+		
+		//the filter has not been specified then it should return an error
+		$this->getCodeOrigin();
+		$this->checkNoRestError($method, $rest_return);
+		
+		$this->getCodeOrigin();
+		$this->check200($method, $rest_return);
+		
+		$this->getCodeOrigin();
+		$this->checkHasData($method, $rest_return);
+		
+		$this->printReturn($rest_return);
+
+		
+		
+		
+		
+		
 		
 		//----------------------
 		
@@ -1554,7 +1642,7 @@ class Unit_Tests_Ce extends Test_Controller {
 	{
 		$this->rest->initialize(array('server' => $this->config->item('rest_server').'exposeObj/contact/'));
 		
-		
+	
 		//calling the methon READ for object contact with a filter
 		$this->testTitle('Testing CONTACT: get contacts using this filter: (|(givenName=Willy*)(o=A*))');
 		$method = 'read';
@@ -1579,7 +1667,7 @@ class Unit_Tests_Ce extends Test_Controller {
 
 		
 		
-		//calling the methon READ for object contact with a filter
+		
 		$this->testTitle('Testing CONTACT: get contact using this filter: array(|(givenName=Willy*)(o=A*))');
 		$method = 'read';
 		$input = array();
@@ -1600,5 +1688,33 @@ class Unit_Tests_Ce extends Test_Controller {
 		$this->getCodeOrigin();
 		$this->checkHasNoData($method, $rest_return);
 		$this->printReturn($rest_return);		
+
+		
+		
+		
+		$this->testTitle('Testing CONTACT: get contact using filter: (|(givenName=Willy*)(o=A*)) and pagination');
+		$method = 'read';
+		$input = array();
+		$input['filter'] = '(|(givenName=Willy*)(o=A*))';
+		$input['flow_order'] = 'asc';
+		$input['wanted_page'] = 3;
+		$input['items_page'] = 15;
+		
+		$rest_return = $this->rest->get($method, $input, 'serialize');
+		
+		$this->getCodeOrigin();
+		$this->arrayReturn($method, $rest_return);
+		
+		//the filter has not been specified then it should return an error
+		$this->getCodeOrigin();
+		$this->checkNoRestError($method, $rest_return);
+		
+		$this->getCodeOrigin();
+		$this->check200($method, $rest_return);
+		
+		$this->getCodeOrigin();
+		$this->checkHasData($method, $rest_return);
+		$this->printReturn($rest_return);
+				
 	}
 }

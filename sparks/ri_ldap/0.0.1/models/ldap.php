@@ -705,21 +705,21 @@ class Ldap extends CI_Model {
 			return false;
 		}
 		
-		if(is_null($wanted_page)) $wanted_page = 0;
-		if(!is_int($wanted_page))
+		if(is_null($wanted_page)) $wanted_page = '1';
+		if(!ctype_digit($wanted_page))
 		{
 			$this->report('trigger', __FUNCTION__.': The wanted page should be an integer.','415');
 			return false;
 		}
 
-		if(is_null($items_page)) $items_page = 0;
-		if(!is_int($items_page))
+		if(is_null($items_page)) $items_page = '1';
+		if(!ctype_digit($items_page))
 		{
 			$this->report('trigger', __FUNCTION__.': The number of items per page should be an integer.','415');
 			return false;
 		}
 				
-		if ( $wanted_page === 0 || $items_page === 0 )
+		if ( $wanted_page == '1' || $items_page == '0' )
 		{
 			# fetch all in one page
 			$iStart = 0;
