@@ -30,12 +30,12 @@ class Unit_Tests_Ce extends Test_Controller {
 
 		echo '<div id="left">';
  		$this->testPerson();
- 		$this->testOrganization();
- 		$this->testLocation();
-  		$this->testContact();
- 		$this->testPersonAssocOrg();
-  		$this->testPersonAssocLoc();
- 		$this->testOrganizationAssocLoc();
+  		$this->testOrganization();
+  		$this->testLocation();
+   		$this->testContact();
+  		$this->testPersonAssocOrg();
+   		$this->testPersonAssocLoc();
+  		$this->testOrganizationAssocLoc();
 		echo '</div>';
 		
 		$this->printSummary();
@@ -46,10 +46,10 @@ class Unit_Tests_Ce extends Test_Controller {
 	
 	public function testPerson()
 	{
- 		$this->testPersonProperties();
- 		$this->testPersonCreate();
- 		$this->testPersonRead();
- 		$this->testPersonUpdate();
+  		$this->testPersonProperties();
+  		$this->testPersonCreate();
+  		$this->testPersonRead();
+		$this->testPersonUpdate();
  		$this->testPersonDelete();
 	}
 	
@@ -83,10 +83,12 @@ class Unit_Tests_Ce extends Test_Controller {
 
 		$test = false;
 		if(is_array($rest_return)) $test = true;
+		$this->getCodeOrigin();
 		$this->run($test, 'is_true', 'Is the result an array ?');
 
 		$test = false;
 		if(count($rest_return) > 0) $test = true;
+		$this->getCodeOrigin();
 		$this->run($test, 'is_true', 'Is the result populated ?');
 
 		$rest_return = $this->rest->get($method, $input, 'serialize');
@@ -496,7 +498,8 @@ class Unit_Tests_Ce extends Test_Controller {
 		$this->testTitle('update the same person sending an input array without any field but the uid. It means: nothing to update');
 			
 		$method = 'update';
-		$input = array( 'uid' => $uid);
+		//$input = array( 'uid' => $uid);
+		$input = array( 'uid' => '10000000');
 			
 		$rest_return = $this->rest->get($method, $input, 'serialize');
 			

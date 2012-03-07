@@ -43,12 +43,14 @@ class Ldap_Data_Object extends CI_Model {
 		
 			$http_status_codes = get_HTTP_status_codes();
 		
-			if(!in_array($this->http_status_code, array_keys($http_status_codes['success'])))
-			{
-				$this->http_status_code = '200';
-			}
+			$this->http_status_code = $value;
+			
+ 			if(!in_array($this->http_status_code, array_keys($http_status_codes['all'])))
+ 			{
+ 				$this->http_status_code = '500';  //internal server error
+ 			}
 		
-			$this->http_status_message = $http_status_codes['success'][$this->http_status_code];
+			$this->http_status_message = $http_status_codes['all'][$this->http_status_code];
 		}		
 	}
 	

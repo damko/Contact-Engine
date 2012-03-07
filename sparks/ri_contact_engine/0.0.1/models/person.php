@@ -159,9 +159,9 @@ class Person extends ObjectCommon
 		$exit_status = $this->ri_ldap->CEupdate($entry, $dn);
 		
 		$this->result->importLdapReturnObject($this->ri_ldap->result);
-		
-		if($exit_status) $this->result->data = array('uid' => $this->getUid());
 
+		if($exit_status) $this->result->data = array('uid' => $this->getUid());
+		
 		return $this->result->returnAsArray();		
 	}
 

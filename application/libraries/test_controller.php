@@ -389,11 +389,18 @@ class Test_Controller extends CI_Controller {
 		$test = true;
 		if(!isset($lro->data->http_status_code)) $test = false;
 		if(!isset($lro->data->http_status_message)) $test = false;
+		if(!isset($lro->data->results_number)) $test = false;
+		if(!isset($lro->data->results_pages)) $test = false;
+		if(!isset($lro->data->results_page)) $test = false;
+		if(!isset($lro->data->sent_back_results_number)) $test = false;
+		
 		if(!isset($lro->data->content)) $test = false;
 		echo $this->run($test, 'is_true', 'Are the LdapReturnObject->data mandatory attributes all set ?', '');
 
 		$test = $lro->data->content;
 		echo $this->run($test, 'is_array', 'Is the LdapReturnObject->data->content an array ?', '');
+
+		
 	}
 	
 	protected function checkLdapReturnObjectHasContent($lro) {
@@ -402,7 +409,36 @@ class Test_Controller extends CI_Controller {
 		
 		$test = empty($lro->data->content);
 		echo $this->run($test, 'is_false', 'Does the LdapReturnObject have data ?', '');
+		
+		
+		
+		$test = false;
+		if($lro->data->results_number >= 1) $test = true;		
+		echo $this->run($test, 'is_true', 'Is results_number &gt;= 1 ?', '');
 
+		$test = false;
+		if($lro->data->sent_back_results_number >= 1) $test = true;
+		echo $this->run($test, 'is_true', 'Is sent_back_results_number &gt;= 1 ?', '');
+		
+		$test = false;
+		if($lro->data->sent_back_results_number <= $lro->data->results_number) $test = true;
+		echo $this->run($test, 'is_true', 'Is sent_back_results_number <= $lro->data->results_number ?', '');
+		
+		
+		
+		
+		$test = false;
+		if($lro->data->results_pages >= 1) $test = true; 
+		echo $this->run($test, 'is_true', 'Is results_pages &gt;= 1 ?', '');
+		
+		$test = false;
+		if($lro->data->results_page >= 1) $test = true;
+		echo $this->run($test, 'is_true', 'Is results_page &gt;= 1 ?', '');	
+
+		$test = false;
+		if($lro->data->results_page <= $lro->data->results_pages) $test = true;
+		echo $this->run($test, 'is_true', 'Is results_page &lt;= $lro->data->results_page ?', '');
+				
 	}
 
 	protected function checkLdapReturnObjectHasNoContent($lro) {
@@ -412,6 +448,15 @@ class Test_Controller extends CI_Controller {
 		$test = count($lro->data->content);
 		$test = ($test > 0) ? true : false;
 		echo $this->run($test, 'is_false', 'Does the LdapReturnObject have NO data ?', '');
+		
+		echo $this->run($lro->data->results_number, '0', 'Is results_number == 0 ?', '');
+		
+		echo $this->run($lro->data->results_pages, '1', 'Is results_pages == 1 ?', '');
+		
+		echo $this->run($lro->data->results_page, '1', 'Is results_page == 1 ?', '');
+		
+		echo $this->run($lro->data->sent_back_results_number, '0', 'Is sent_back_results_number == 0 ?', '');
+		
 	}
 		
 	protected function checkLdapReturnObjectHasError($lro) {
@@ -449,6 +494,17 @@ class Test_Controller extends CI_Controller {
 			if(empty($error->file)) $test = false;
 			if(empty($error->line)) $test = false;
 			echo $this->run($test, 'is_true', 'Are the main LdapReturnObject->error['.$key.'] attributes populated ?', '');
+		}	
+		
+		//check that the returned status_code contained in "data" is equal 
+		//to the status code of the last error in the errors list
+
+		if(count($lro->errors) > 0 && isset($lro->data->http_status_code))
+		{
+			$errors = $lro->errors;
+			$error = array_pop($errors);
+			
+			$this->run($error->http_status_code, $lro->data->http_status_code, 'Is the http_status_code of the last error equal to the code reported in data? ', '');
 		}		
 	}
 

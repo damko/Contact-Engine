@@ -63,6 +63,7 @@ class Unit_Tests_RiLdap extends Test_Controller {
 	
 	public function test_Ri_Ldap_create()
 	{
+
 		$this->testTitle('Testing the Ri_LDAP Object create() method');
 	
 	
@@ -470,7 +471,9 @@ class Unit_Tests_RiLdap extends Test_Controller {
 		
 		$this->getCodeOrigin();
 		$this->checkLdapReturnObjectHasNoContent($this->rildap->result);
-		$this->printLdapResult($this->rildap->result);		
+		$this->printLdapResult($this->rildap->result);
+		
+				
 	}
 
 	public function test_Ri_Ldap_search()
@@ -740,21 +743,6 @@ class Unit_Tests_RiLdap extends Test_Controller {
 		
 		
 		$this->getCodeOrigin();
-		$test = isset($this->rildap->result->data->results_number);
-		echo $this->run($test, 'is_true', 'Is the results_number set ?', '');
-		
-		
-		
-
-		$this->getCodeOrigin();
-		$test = isset($this->rildap->result->data->sent_back_results_number);
-		echo $this->run($test, 'is_true', 'Is the sent_back_results_number set ?', '');
-		
-		
-		
-		
-		
-		$this->getCodeOrigin();
 		echo $this->run($this->rildap->result->data->results_pages, '1', 'Is the total number of pages equal to 1 ?', '');
 		
 		
@@ -775,7 +763,7 @@ class Unit_Tests_RiLdap extends Test_Controller {
 		$this->getCodeOrigin();
 		$this->rildap = new Ri_Ldap();
 		$baseDN = $this->baseDN;
-		$filter = '(givenName=Willy)';
+		$filter = '(givenName=Willy*)';
 		$attributes = array('uid','cn','sn','giveName');
 		$sort_by = array('sn','givenName');
 		$wanted_page = 1;
@@ -798,20 +786,7 @@ class Unit_Tests_RiLdap extends Test_Controller {
 		
 		$this->getCodeOrigin();
 		$this->checkLdapReturnObjectHasContent($this->rildap->result);
-		
-		
-		
-		
-		$this->getCodeOrigin();
-		$test = isset($this->rildap->result->data->results_number);
-		echo $this->run($test, 'is_true', 'Is the results_number set ?', '');
-		
-		
-		
-		
-		$this->getCodeOrigin();
-		$test = isset($this->rildap->result->data->sent_back_results_number);
-		echo $this->run($test, 'is_true', 'Is the sent_back_results_number set ?', '');
+
 		
 		
 		
@@ -910,18 +885,18 @@ class Unit_Tests_RiLdap extends Test_Controller {
 		
 		
 		
-		$this->subTestTitle('Performing a good search with a wildcard filter and wrong pagination parameter (items per page not integer)');
+		$this->subTestTitle('Performing a good search with a wildcard filter and wrong pagination parameter (like "$wanted_page = 1;" instead of $wanted_page = \'1\';)');
 		$this->getCodeOrigin();
 		$this->rildap = new Ri_Ldap();
 		$baseDN = $this->baseDN;
-		$filter = '(uid=10*)';
+		$filter = '(givenName=Willy*)';
 		$attributes = array('uid','cn','sn','giveName');
 		$sort_by = array('sn','givenName');
 		$wanted_page = 1;
-		$items_per_page = '3';
+		$items_per_page = 3;
 		$order = 'asc';
 		$test = $this->rildap->CEsearch($baseDN, $filter, $attributes, 0, null, $sort_by, $order, $wanted_page, $items_per_page);
-		echo $this->run($test, 'is_false', 'Is the exit status false ?', '');
+		echo $this->run($test, 'is_true', 'Is the exit status true ?', 'I expect it works');
 		
 		
 		
@@ -931,12 +906,12 @@ class Unit_Tests_RiLdap extends Test_Controller {
 		
 		
 		$this->getCodeOrigin();
-		$this->checkLdapReturnObjectHasError($this->rildap->result);
+		$this->checkLdapReturnObjectHasNoError($this->rildap->result);
 		
 		
 		
 		$this->getCodeOrigin();
-		$this->checkLdapReturnObjectHasNoContent($this->rildap->result);
+		$this->checkLdapReturnObjectHasContent($this->rildap->result);
 		$this->printLdapResult($this->rildap->result);		
 	}
 	

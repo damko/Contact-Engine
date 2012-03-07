@@ -41,6 +41,11 @@ class Contact extends ObjectCommon
 			if($status_people['status_code'] == '200')
 			{
 				$people = $return['data'];
+//TODO I don't know if it's a good idea to specify the object type. It can be recognized by "uid and oid" and by the objectClass				
+// 				foreach ($people as $key => $item)
+// 				{
+// 					$people[$key]['objName'] = 'person';
+// 				}
 			} else {
 				$this->result->importLdapReturnObject($this->ri_ldap->result);	
 				return $this->result->returnAsArray();
@@ -51,6 +56,10 @@ class Contact extends ObjectCommon
 			if($status_organizations['status_code'] == '200')
 			{
 				$organizations  = $return['data'];
+// 				foreach ($organizations as $key => $item)
+// 				{
+// 					$organizations[$key]['objName'] = 'organization';
+// 				}				
 			} else {
 				$this->result->importLdapReturnObject($this->ri_ldap->result);
 				return $this->result->returnAsArray();
@@ -66,18 +75,7 @@ class Contact extends ObjectCommon
 			//TODO what to do with the page numbers?
 			
 			return $this->result->returnAsArray();
-				
-// 			foreach ($statuses['0'] as $key => $value) {
-// 				$statuses['final'][$key] = $value + $statuses['1'][$key];
-// 			}
-// 			!empty($statuses['0']['results_number']) ? $statuses['final']['result_number_people'] = $statuses['0']['results_number'] : $statuses['final']['result_number_people'] = 0;
-// 			!empty($statuses['1']['results_number']) ? $statuses['final']['result_number_orgs'] = $statuses['1']['results_number'] : $statuses['final']['result_number_orgs'] = 0;
-			
-// 			$data['RestStatus'] = $statuses['final'];
+
 		}
-		
-		
-//		return $data;
 	}
-	
 }

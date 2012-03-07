@@ -136,5 +136,40 @@ class Ldap_Return_Object extends CI_Model {
 		if(empty($this->data->sent_back_results_number)) $this->data->sent_back_results_number = $this->data->results_number;
 	}
 
-
+	/**
+	 * This method is called whenever a RiLdap method performs one of the LDAP class methods. If the exit status is false
+	 * it means that there are errors thrown and then the result contained by the LDAP Data Object should report the most
+	 * meaningful information provided by the errors
+	 * 
+	 * @access		public
+	 * @param		
+	 * @var			
+	 * @return		
+	 * @example
+	 * @see
+	 * 
+	 * @author 		Damiano Venturin
+	 * @copyright 	2V S.r.l.
+	 * @license		GPL
+	 * @link		http://www.contact-engine.info
+	 * @since		Mar 7, 2012
+	 * 
+	 * @todo		
+	 */
+	public function fillDataOnError()
+	{
+		$errors = $this->errors;
+		
+		//Takes the last error because it's generally the most meaningful (thrown with error type OutOfRangeException)
+		$error = array_pop($errors);
+		
+		$this->data = new Ldap_Data_Object();
+		$this->data->http_status_code = $error->http_status_code;
+		$this->data->http_status_message = $error->http_status_message;
+		$this->data->content = array();
+		$this->data->results_number = 0;
+		$this->data->results_pages = 1;
+		$this->data->results_page = 1;
+		$this->data->sent_back_results_number = 0;
+	}
 }

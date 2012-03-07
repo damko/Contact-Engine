@@ -244,6 +244,8 @@ class Ri_Ldap extends Ldap {
 		
 		if(!$this->initialize()) return $this->restReturn($this->result);
 		
+		$this->reset_result(); //cleaning $this->result from what initialize wrote inside 
+		
 		$this->connection = $this->WrConnection;
 		
 		return $this->restReturn($this->create($entry, $dn));
@@ -283,6 +285,8 @@ class Ri_Ldap extends Ldap {
 		
 		if(!$this->initialize()) return $this->restReturn($this->result);
 		
+		$this->reset_result(); //cleaning $this->result from what initialize wrote inside
+		
 		$this->connection = $this->RoConnection;
 		
 		return $this->restReturn($this->search($baseDn, $filter, $attributes, $attributesOnly, null, null, $deref, $sort_by, $flow_order, $wanted_page, $items_page));
@@ -314,6 +318,8 @@ class Ri_Ldap extends Ldap {
 	
 		if(!$this->initialize()) return $this->restReturn($this->result);
 	
+		$this->reset_result(); //cleaning $this->result from what initialize wrote inside
+		
 		$this->connection = $this->RoConnection;
 	
 		return $this->restReturn($this->read($dn = null, $sizeLimit = null, $timeLimit = null, $defer = null));
@@ -343,6 +349,8 @@ class Ri_Ldap extends Ldap {
 		
 		if(!$this->initialize()) return $this->restReturn($this->result);
 		
+		$this->reset_result(); //cleaning $this->result from what initialize wrote inside
+		
 		$this->connection = $this->WrConnection;
 		
 		return $this->restReturn($this->update($entry, $dn));
@@ -370,6 +378,8 @@ class Ri_Ldap extends Ldap {
 	public function CEdelete($dn = null) {
 		
 		if(!$this->initialize()) return $this->restReturn($this->result);
+		
+		$this->reset_result(); //cleaning $this->result from what initialize wrote inside
 		
 		$this->connection = $this->WrConnection;
 		
@@ -461,6 +471,8 @@ class Ri_Ldap extends Ldap {
 			$this->data->http_status_code = '200';
 			$this->result->storeData($this->data);
 			return true;
+		} else {
+			$this->result->fillDataOnError();
 		}
 		return false;
 	}	

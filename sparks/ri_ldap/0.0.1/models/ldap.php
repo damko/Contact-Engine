@@ -53,12 +53,17 @@ class Ldap extends CI_Model {
 		
 		set_error_handler(array(&$this, 'LdapErrorHandler'));
 		
-		//this is what will be returned
-		$this->result = new Ldap_Return_Object();
-		$this->data = new Ldap_Data_Object();
+		$this->reset_result();
+		//$this->data = new Ldap_Data_Object();
 		
 		log_message('debug', 'Ldap class has been loaded');
 		
+	}
+	
+	protected function reset_result() {
+		//this is what will be returned beside the exit status
+		$this->result = new Ldap_Return_Object();
+		$this->data = new Ldap_Data_Object();
 	}
 
 	/**
@@ -433,7 +438,7 @@ class Ldap extends CI_Model {
 	{
 		if(isset($this->result->errors))
 		{
-			if (count($this->result->errors) >= 1) 
+			if (count($this->result->errors) > 0) 
 				return false;
 		}
 		if($this->service_unavailable) return false;
@@ -668,7 +673,7 @@ class Ldap extends CI_Model {
 	 * 
 	 * @todo		
 	 */
-	private function sort_paginate($resource, array $sort_by = null, $flow_order = "asc", $wanted_page = 0, $items_page = 0 )
+	private function sort_paginate($resource, array $sort_by = null, $flow_order = "asc", $wanted_page = '0', $items_page = 0 )
 	{				
 		if($resource == 0) {
 			$this->data->content = array();
@@ -705,21 +710,21 @@ class Ldap extends CI_Model {
 			return false;
 		}
 		
-		if(is_null($wanted_page)) $wanted_page = '1';
-		if(!ctype_digit($wanted_page))
+		if(is_null($wanted_page)) $wanted_page = '0'; //means "give me all the content"
+		if(!is_numeric($wanted_page))
 		{
 			$this->report('trigger', __FUNCTION__.': The wanted page should be an integer.','415');
 			return false;
 		}
 
-		if(is_null($items_page)) $items_page = '1';
-		if(!ctype_digit($items_page))
+		if(is_null($items_page)) $items_page = '0'; //means "give me all the content"
+		if(!is_numeric($items_page))
 		{
 			$this->report('trigger', __FUNCTION__.': The number of items per page should be an integer.','415');
 			return false;
 		}
 				
-		if ( $wanted_page == '1' || $items_page == '0' )
+		if ( $wanted_page == '0' || $items_page == '0' )
 		{
 			# fetch all in one page
 			$iStart = 0;

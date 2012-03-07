@@ -9,7 +9,7 @@ class Ce_Return_Object extends CI_Model
 	protected $results_pages = null; //number of pages necessary to display all the data
 	protected $results_page = null; //page number of the current set	
 	protected $sent_back_results_number = null; //number of items contained in the current set
-		
+	
 	public function __construct(){
 		parent::__construct();
 	}
@@ -20,6 +20,10 @@ class Ce_Return_Object extends CI_Model
 	
 	public function __set($attribute, $value) {
 		$this->$attribute = $value;
+		
+		//If I'm overwriting the data content then I have also to update the other parameters.
+		//It's no more a LDAP result
+		if($attribute == 'data') $this->updateResultsValues(); 
 	}
 	
 	public function __get($attribute) {
@@ -31,34 +35,23 @@ class Ce_Return_Object extends CI_Model
 		$obj_name = get_class($lro);
 		if($obj_name != 'Ldap_Return_Object') return false;
 		
-		if(count($lro->errors) > 0)
-		{
-			$errors = $lro->errors;
-			$error = array_pop($errors); //$error is a ldap error object
-
-			$obj_name = get_class($error);
-			if($obj_name != 'Ldap_Error_Object') return false;
-						
-			$this->http_status_code = $error->http_status_code;
-			$this->http_message = $error->message;
-			$this->data = array();
-			
-		} else {	
-
-			$obj_name = get_class($lro->data);
-			if($obj_name != 'Ldap_Data_Object') return false;
-				
-			$this->http_status_code = $lro->data->http_status_code;
-			$this->http_message = $lro->data->http_status_message;
-			$this->data = $lro->data->content;
-		}
-		
+		$this->http_status_code = $lro->data->http_status_code;
+		$this->http_message = $lro->data->http_status_message;
+		$this->data = $lro->data->content;		
 		$this->results_number = $lro->data->results_number; 
-		$this->results_pages = $lro->data->results_pages; 
-		$this->results_page = $lro->data->results_page; 
 		$this->sent_back_results_number = $lro->data->sent_back_results_number;
+		$this->results_pages = $lro->data->results_pages;
+		$this->results_page = $lro->data->results_page;		
 		
 		return true;
+	}
+
+	private function updateResultsValues() {
+		$this->results_number = count($this->data);
+		$this->sent_back_results_number = $this->results_number;
+		
+		$this->results_pages = '1';
+		$this->results_page = '1';		
 	}
 	
 	public function returnAsArray() {
