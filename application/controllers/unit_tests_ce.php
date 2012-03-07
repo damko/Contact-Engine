@@ -12,12 +12,12 @@ class Unit_Tests_Ce extends Test_Controller {
 	public function __construct()
 	{
 		parent::__construct();
-
+ 
 		if(ENVIRONMENT != 'production') {
 			echo '<h2>please set the constant ENVIROMENT in index.php to "production" !</h2>';
 			die();
 		}
-				
+			 
 		//load the rest client
 		$this->load->spark('restclient/2.0.0');
 	}	
@@ -32,9 +32,9 @@ class Unit_Tests_Ce extends Test_Controller {
 		$this->testPerson();
 		$this->testOrganization();
 		$this->testLocation();
-		$this->testContact();
+  		$this->testContact();
 		$this->testPersonAssocOrg();
-		$this->testPersonAssocLoc();
+ 		$this->testPersonAssocLoc();
 		$this->testOrganizationAssocLoc();
 		echo '</div>';
 		
@@ -53,29 +53,42 @@ class Unit_Tests_Ce extends Test_Controller {
 		$this->testPersonDelete();
 	}
 	
+	public function testOrganization()
+	{
+		$this->testOrganizationProperties();
+		$this->testOrganizationCreate();
+		$this->testOrganizationRead();
+		$this->testOrganizationUpdate();
+		$this->testOrganizationDelete();
+	}	
+	
+	public function testLocation()
+	{
+		$this->testLocationProperties();
+		$this->testLocationCreate();
+		$this->testLocationRead();
+		$this->testLocationUpdate();
+		$this->testLocationDelete();
+	}	
+	
 	public function testPersonProperties()
 	{
 		$this->rest->initialize(array('server' => $this->config->item('rest_server').'exposeObj/person/'));
-		
-		//########################################
-		// GET PROPERTIES
-		//########################################
-		$this->testTitle('Test: get person properties</h3>');
+
+		$this->testTitle('get person properties</h3>');
 		$method = 'getProperties';
 		
-		//check to get an array as a return
+		
 		$rest_return = $this->rest->get($method, null, 'serialize');
-		$this->getCodeOrigin();
-		$this->arrayReturn($method, $rest_return);
-		
-		//check no REST error in return
-		$this->getCodeOrigin();
-		$this->checkNoRestError($method, $rest_return);
-		
-		//check status code == 200
-		$this->getCodeOrigin();
-		$this->check200($method, $rest_return);
-		
+
+		$test = false;
+		if(is_array($rest_return)) $test = true;
+		$this->run($test, 'is_true', 'Is the result an array ?');
+
+		$test = false;
+		if(count($rest_return) > 0) $test = true;
+		$this->run($test, 'is_true', 'Is the result populated ?');
+				
 		$this->printReturn($rest_return);
 	}
 
@@ -84,11 +97,11 @@ class Unit_Tests_Ce extends Test_Controller {
 		$this->rest->initialize(array('server' => $this->config->item('rest_server').'exposeObj/person/'));
 		
 		//calling the methon READ for object person with a filter
-		$this->testTitle('Test: read person entry','Sending a request with filter: (uid=10000000). I expect to get the person: Demo Person ');
+		$this->testTitle('read person entry','Sending a request with filter: (uid=10000000)');
 		$method = 'read';
 		$input = array();
 		$input['filter'] = '(uid=10000000)';
-		//check to get an array as a return
+		
 		$rest_return = $this->rest->get($method, $input, 'serialize');
 		$this->getCodeOrigin();
 		$this->arrayReturn($method, $rest_return);
@@ -97,21 +110,21 @@ class Unit_Tests_Ce extends Test_Controller {
 		$this->getCodeOrigin();
 		$this->checkNoRestError($method, $rest_return);
 		
-		//check status code == 200
 		$this->getCodeOrigin();
 		$this->check200($method, $rest_return);
 		
+		$this->checkHasData($method, $rest_return);
+		
 		$this->printReturn($rest_return);
 
-		return;
-		
+
 		//----------------------
 		
 		//calling the methon READ for object person without a filter
-		$this->testTitle('Test: read person entries','Sending a request missing "filter". I expect a failure');
+		$this->testTitle('read person entries','Sending a request missing "filter". I expect a failure');
 		$method = 'read';
 		
-		//check to get an array as a return
+		
 		$rest_return = $this->rest->get($method, null, 'serialize');
 		$this->getCodeOrigin();
 		$this->arrayReturn($method, $rest_return);
@@ -120,20 +133,22 @@ class Unit_Tests_Ce extends Test_Controller {
 		$this->getCodeOrigin();
 		$this->checkRestError($method, $rest_return);
 		
-		//check status code == 400
 		$this->getCodeOrigin();
-		$this->check400($method, $rest_return);
-		
+		$this->check415($method, $rest_return);
+
+		$this->checkHasNoData($method, $rest_return);
+				
 		$this->printReturn($rest_return);
-		
+
+
 		//----------------------
 		
 		//calling the methon READ for object person with a filter
-		$this->testTitle('Test: read person entries','Sending a request with "filter". I expect to get all persons in the storage');
+		$this->testTitle('read person entries','Sending a request with "filter". I expect to get all persons in the storage');
 		$method = 'read';
 		$input = array();
 		$input['filter'] = '(objectClass=*)';
-		//check to get an array as a return
+		
 		$rest_return = $this->rest->get($method, $input, 'serialize');
 		$this->getCodeOrigin();
 		$this->arrayReturn($method, $rest_return);
@@ -142,33 +157,36 @@ class Unit_Tests_Ce extends Test_Controller {
 		$this->getCodeOrigin();
 		$this->checkNoRestError($method, $rest_return);
 		
-		//check status code == 200
 		$this->getCodeOrigin();
 		$this->check200($method, $rest_return);
 		
+		$this->checkHasData($method, $rest_return);
+		
 		$this->printReturn($rest_return);
-	
+
+		
 		//----------------------
 		
-		//read 1 non-existant person
-		$this->testTitle('Test: read a non-existant person');
+		//read 1 non-existent person
+		$this->testTitle('read a non-existent person');
 		$method = 'read';
 		$input = array();
 		$input['filter'] = '(uid=1293813238g9238479832)';
 		
 		$rest_return = $this->rest->get($method, $input, 'serialize');
 		
-		//check to get an array as a return
+		
 		$this->getCodeOrigin();
 		$this->arrayReturn($method, $rest_return);
 		
 		//the filter has not been specified then it should return an error
 		$this->getCodeOrigin();
-		$this->checkRestError($method, $rest_return);
+		$this->checkNoRestError($method, $rest_return);
 		
-		//check status code == 400
 		$this->getCodeOrigin();
-		$this->check400($method, $rest_return);
+		$this->check200($method, $rest_return);
+		
+		$this->checkHasNoData($method, $rest_return);
 		
 		$this->printReturn($rest_return);
 	}
@@ -178,7 +196,7 @@ class Unit_Tests_Ce extends Test_Controller {
 		$this->rest->initialize(array('server' => $this->config->item('rest_server').'exposeObj/person/'));
 
 		//calling the methon CREATE for object person without a filter
-		$this->testTitle('Test: create 1 person');
+		$this->testTitle('create 1 person');
 		$method = 'create';
 		$input = array();
 		$random = rand(999,9999);
@@ -197,7 +215,7 @@ class Unit_Tests_Ce extends Test_Controller {
 		//uid is automatically set, so not needed
 		$input['userPassword'] = 'mypassword';
 		
-		//check to get an array as a return
+		
 		$rest_return = $this->rest->get($method, $input, 'serialize');
 		$this->getCodeOrigin();
 		$this->arrayReturn($method, $rest_return);
@@ -206,36 +224,35 @@ class Unit_Tests_Ce extends Test_Controller {
 		$this->getCodeOrigin();
 		$this->checkNoRestError($method, $rest_return);
 		
-		//check status code == 200
+		
 		$this->check200($method, $rest_return);
 		
 		//check uid is a number
-		$test = $rest_return['data']['0'];
+		$test = $rest_return['data']['uid'];
 		$this->getCodeOrigin();
-		echo $this->unit->run($test, 'is_numeric', $method.' - Integer uid', 'Checking if the returned uid is a number');
+		echo $this->run($test, 'is_numeric', $method.' - Integer uid', 'Checking if the returned uid is a number');
 		
 		$this->printReturn($rest_return);
 		
-		return $test;
+		return $rest_return['data']['uid'];
 	}
 
 	public function testPersonUpdate()
 	{	
 		$this->rest->initialize(array('server' => $this->config->item('rest_server').'exposeObj/person/'));
 
-		
-		
+	
 	
 		
 		//calling the methon READ for object person with a filter
-		$this->testTitle('Test: get the list of person with givenName starting with Willy8');
+		$this->testTitle('get the list of person with givenName starting with Willy*');
 		$method = 'read';
 		$input = array();
-		$input['filter'] = '(givenName=Willy8*)';
+		$input['filter'] = '(givenName=Willy*)';
 		
 		$rest_return = $this->rest->get($method, $input, 'serialize');
 		
-		//check to get an array as a return
+		
 		$this->getCodeOrigin();
 		$this->arrayReturn($method, $rest_return);
 		
@@ -243,19 +260,17 @@ class Unit_Tests_Ce extends Test_Controller {
 		$this->getCodeOrigin();
 		$this->checkNoRestError($method, $rest_return);
 		
-		//check status code == 200
+		
 		$this->getCodeOrigin();
 		$this->check200($method, $rest_return);
 		
-		$this->printReturn($rest_return);
-		
-		
-		
+		$this->checkHasData($method, $rest_return);
+		//$this->printReturn($rest_return);
 		
 		
 		
 		//pick uid
-		$this->testTitle('Test: pick a random uid from the list');
+		$this->testTitle('pick a random uid from the list');
 		$method = 'read';
 		if(is_array($rest_return) and !empty($rest_return['data']))
 		{
@@ -267,25 +282,22 @@ class Unit_Tests_Ce extends Test_Controller {
 		 	
 		 	$uid = $uids[array_rand($uids,1)];
 		 	$this->getCodeOrigin();
-		 	echo $this->unit->run($uid, 'is_numeric', $method.' - Integer uid', 'Checking if the returned uid is a number');
+		 	echo $this->run($uid, 'is_numeric', $method.' - Integer uid', 'Checking if the returned uid is a number');
 		 	
 		 	if(!$uid) return false;
 		}
 		
-		
-		
-		
-
-		
-		//check that the chosen entry exists
-		$this->testTitle('Test: check that the chosen uid is a real entry (uid='.$uid.')');
+				
+	
+		//show the choosen entry
+		$this->testTitle('show the chosen entry (uid='.$uid.')');
 		$method = 'read';
 		$input = array();
 		$input['filter'] = '(uid='.$uid.')';
 		
 		$rest_return = $this->rest->get($method, $input, 'serialize');
 		
-		//check to get an array as a return
+		
 		$this->getCodeOrigin();
 		$this->arrayReturn($method, $rest_return);
 		
@@ -293,28 +305,29 @@ class Unit_Tests_Ce extends Test_Controller {
 		$this->getCodeOrigin();
 		$this->checkNoRestError($method, $rest_return);
 		
-		//check status code == 200
+		
 		$this->getCodeOrigin();
 		$this->check200($method, $rest_return);
+		
+		$this->checkHasData($method, $rest_return);
 		
 		$this->printReturn($rest_return);
 			
 		
 		
 		
-		
+
 		
 		//update person 
 		$method = 'update';
 		$input = array();
 		$input['uid'] = $uid;
-		$input['displayName'] = 'Willy Test'.rand(100, 999);
-		$new_displayName = $input['displayName'];
-		$this->testTitle('Test: update person with uid='.$uid.' : setting the displayName='.$input['displayName']);
+		$new_displayName = $input['displayName'] = 'This is updated to '.$input['displayName'].' '.rand(100, 999);
+		$this->testTitle('update person with uid='.$uid.' : setting the displayName='.$input['displayName']);
 		
 		$rest_return = $this->rest->get($method, $input, 'serialize');
 		
-		//check to get an array as a return
+		
 		$this->getCodeOrigin();
 		$this->arrayReturn($method, $rest_return);
 
@@ -322,30 +335,29 @@ class Unit_Tests_Ce extends Test_Controller {
 		$this->getCodeOrigin();
 		$this->checkNoRestError($method, $rest_return);
 
-		//check status code == 200
+		
 		$this->getCodeOrigin();
 		$this->check200($method, $rest_return);
 		
 		//check uid is a number
- 		$uid = $test = $rest_return['data']['0'];
+ 		$uid = $test = $rest_return['data']['uid'];
  		$this->getCodeOrigin();
-		echo $this->unit->run($test, 'is_numeric', $method.' - Integer uid', 'Checking if the returned uid is a number');
+		echo $this->run($test, 'is_numeric', $method.' - Integer uid', 'Checking if the returned uid is a number');
  
 		$this->printReturn($rest_return);
 		
 		
 		
 		
-		
 		//show the updated entry
-		$this->testTitle('Test: show the updated entry (uid='.$uid.')');
+		$this->testTitle('show the updated entry (uid='.$uid.')');
 		$method = 'read';
 		$input = array();
 		$input['filter'] = '(uid='.$uid.')';
 		
 		$rest_return = $this->rest->get($method, $input, 'serialize');
 		
-		//check to get an array as a return
+		
 		$this->getCodeOrigin();
 		$this->arrayReturn($method, $rest_return);
 		
@@ -353,16 +365,19 @@ class Unit_Tests_Ce extends Test_Controller {
 		$this->getCodeOrigin();
 		$this->checkNoRestError($method, $rest_return);
 		
-		//check status code == 200
+		
 		$this->getCodeOrigin();
 		$this->check200($method, $rest_return);
+		
+		$this->getCodeOrigin();
+		$this->checkHasData($method, $rest_return);
 		
 		//chech that displayName has been modified correctly
 		$displayName = $test = $rest_return['data']['0']['displayName'];
 		$test = false;
 		if($displayName == $new_displayName) $test = true;
 		$this->getCodeOrigin();
-		echo $this->unit->run($test, 'is_true', $method.' - correct result', 'The attribute displayName was successfully modified');
+		echo $this->run($test, 'is_true', $method.' - correct result', 'The attribute displayName was successfully modified');
 		
 		$this->printReturn($rest_return);
 
@@ -372,34 +387,38 @@ class Unit_Tests_Ce extends Test_Controller {
 		
 
 		//update person with wrong filter
-		$this->testTitle('Test: update the same person sending an input array without any field but uid)');
+		$this->testTitle('update the same person sending an input array without any field but the uid. It means: nothing to update');
 			
 		$method = 'update';
 		$input = array( 'uid' => $uid);
 			
 		$rest_return = $this->rest->get($method, $input, 'serialize');
 			
-		//check to get an array as a return
+		
 		$this->getCodeOrigin();
 		$this->arrayReturn($method, $rest_return);
 
 		$this->getCodeOrigin();
-		$this->checkRestError($method, $rest_return);
+		$this->checkNoRestError($method, $rest_return);
 			
-		//check status code == 400
+		
 		$this->getCodeOrigin();
-		$this->check400($method, $rest_return);
-			
+		$this->check200($method, $rest_return);
+
+		
+		$this->getCodeOrigin();
+		$this->checkHasData($method, $rest_return);
+		
 		$this->printReturn($rest_return);
 				
 		
 		
 		
-		
+
 		
 		
 		//update person with wrong filter
-		$this->testTitle('Test: update the same person sending an input array with a wrong field)');
+		$this->testTitle('update the same person sending an input array with a wrong field)');
 			
 		$method = 'update';
 		$input = array( 'uid' => $uid,
@@ -407,32 +426,33 @@ class Unit_Tests_Ce extends Test_Controller {
 					
 		$rest_return = $this->rest->get($method, $input, 'serialize');
 					
-		//check to get an array as a return
+		
 		$this->getCodeOrigin();
 		$this->arrayReturn($method, $rest_return);
 			
 		$this->getCodeOrigin();
 		$this->checkRestError($method, $rest_return);
 			
-		//check status code == 400
 		$this->getCodeOrigin();
-		$this->check400($method, $rest_return);
-			
+		$this->check415($method, $rest_return);
+		
+		$this->getCodeOrigin();
+		$this->checkHasNoData($method, $rest_return);
 		$this->printReturn($rest_return);
 				
 		
-		
+
 		
 		
 		//update person without the filter
-		$this->testTitle('Test: try to update a person without setting up the filter uid');
+		$this->testTitle('try to update a person without setting up the filter uid');
 		//$input = $rest_return['data'][array_rand($rest_return['data'])];
 		$input=array();
 		$input['displayName'] = 'Willy Test';
 		$method = 'update';
 		$rest_return = $this->rest->get($method, $input, 'serialize');
 		
-		//check to get an array as a return
+		
 		$this->getCodeOrigin();
 		$this->arrayReturn($method, $rest_return);
 		
@@ -440,10 +460,11 @@ class Unit_Tests_Ce extends Test_Controller {
 		$this->getCodeOrigin();
 		$this->checkRestError($method, $rest_return);
 		
-		//check status code == 400
 		$this->getCodeOrigin();
-		$this->check400($method, $rest_return);
-				
+		$this->check415($method, $rest_return);
+
+		$this->getCodeOrigin();
+		$this->checkHasNoData($method, $rest_return);
 		$this->printReturn($rest_return);
 		
 	
@@ -454,14 +475,14 @@ class Unit_Tests_Ce extends Test_Controller {
 		$this->rest->initialize(array('server' => $this->config->item('rest_server').'exposeObj/person/'));
 
 		//calling the methon READ for object person with a filter
-		$this->testTitle('Test: delete 1 person taken randomly but starting with Willy*');
+		$this->testTitle('delete 1 person taken randomly but having first name Willy*');
 		$method = 'read';
 		$input = array();
 		$input['filter'] = '(givenName=Willy*)';
 		
 		$rest_return = $this->rest->get($method, $input, 'serialize');
 		
-		//check to get an array as a return
+		
 		$this->getCodeOrigin();
 		$this->arrayReturn($method, $rest_return);
 		
@@ -469,32 +490,28 @@ class Unit_Tests_Ce extends Test_Controller {
 		$this->getCodeOrigin();
 		$this->checkNoRestError($method, $rest_return);
 		
-		//check status code == 200
+		
 		$this->getCodeOrigin();
 		$this->check200($method, $rest_return);
 		
 		if(is_array($rest_return) and !empty($rest_return['data']))
 		{
 			$person = $rest_return['data'][array_rand($rest_return['data'])];
-			$person['displayName'] = 'Test Update';
-			$method = 'update';
-			$rest_return = $this->rest->get($method, $person, 'serialize');
 		
 			//check uid is a number
-			$uid = $test = $rest_return['data']['0'];
+			$uid = $person['uid']['0'];
 			$this->getCodeOrigin();
-			echo $this->unit->run($test, 'is_numeric', $method.' - Integer uid', 'Checking if the returned uid is a number');
+			echo $this->run($uid, 'is_numeric', $method.' - Integer uid', 'Checking if the returned uid is a number');
 		
-			$this->printReturn($rest_return);
-		
-			//gets the person updated
+			//delete person
+			$this->testTitle('Delete entry with uid: '.$uid);
 			$method = 'delete';
 			$input = array();
 			$input['uid'] = $uid;
 		
 			$rest_return = $this->rest->get($method, $input, 'serialize');
 		
-			//check to get an array as a return
+			
 			$this->getCodeOrigin();
 			$this->arrayReturn($method, $rest_return);
 		
@@ -502,40 +519,116 @@ class Unit_Tests_Ce extends Test_Controller {
 			$this->getCodeOrigin();
 			$this->checkNoRestError($method, $rest_return);
 		
-			//check status code == 200
+			
 			$this->getCodeOrigin();
 			$this->check200($method, $rest_return);
 				
-			//check return is TRUE
-			$result = $rest_return['data']['0'];
 			$this->getCodeOrigin();
-			echo $this->unit->run($result, '1', $method.' - Returns true');
-		
+			$this->checkHasNoData($method, $rest_return);
 		
 			$this->printReturn($rest_return);
+			
+			
+			//check the entry has been really deleted
+			$this->testTitle('Check if the entry with uid: '.$uid.' has been really deleted.');
+			$method = 'read';
+			$input = array();
+			$input['filter'] = '(uid='.$uid.')';
+			
+			$rest_return = $this->rest->get($method, $input, 'serialize');
+			$this->getCodeOrigin();
+			$this->arrayReturn($method, $rest_return);
+			
+			//the filter has not been specified then it should return an error
+			$this->getCodeOrigin();
+			$this->checkNoRestError($method, $rest_return);
+			
+			$this->getCodeOrigin();
+			$this->check200($method, $rest_return);
+			
+			$this->getCodeOrigin();
+			$this->checkHasNoData($method, $rest_return);
+			
+			$this->printReturn($rest_return);			
 		}
+		
+		
+		
+		
 				
-		//delete 1 non-existant person
-		$this->testTitle('Test: delete 1 non-existant person');
+		//delete a non-existent person
 		$method = 'delete';
 		$input = array();
-		$input['uid'] = '129381@lr91\/3238g9238479832';
+//		$input['uid'] = '129381@lr91\/3238g9238479832';
+		$input['uid'] = '1293813238g9238479832';
+		$this->testTitle('Delete a non-existent person having uid: '.$input['uid']);
 		
 		$rest_return = $this->rest->get($method, $input, 'serialize');
 		
-		//check to get an array as a return
+		
 		$this->getCodeOrigin();
 		$this->arrayReturn($method, $rest_return);
 		
-		//the filter has not been specified then it should return an error
+		$this->getCodeOrigin();
+		$this->checkRestError($method, $rest_return);
+	
+		$this->getCodeOrigin();
+		$this->check415($method, $rest_return);
+		
+		$this->getCodeOrigin();
+		$this->checkHasNoData($method, $rest_return);
+		
+		$this->printReturn($rest_return);
+
+		
+		
+		//delete a person passing a wrong uid
+		$method = 'delete';
+		$input = array();
+		$input['uid'] = '129381@lr91\/3238g9238479832';
+		$this->testTitle('Delete a person passing a wrong uid: '.$input['uid']);
+		
+		$rest_return = $this->rest->get($method, $input, 'serialize');
+		
+		
+		$this->getCodeOrigin();
+		$this->arrayReturn($method, $rest_return);
+		
 		$this->getCodeOrigin();
 		$this->checkRestError($method, $rest_return);
 		
-		//check status code == 400
 		$this->getCodeOrigin();
-		$this->check400($method, $rest_return);
+		$this->check500($method, $rest_return);
 		
-		$this->printReturn($rest_return);		
+		$this->getCodeOrigin();
+		$this->checkHasNoData($method, $rest_return);
+		
+		$this->printReturn($rest_return);
+
+		
+		
+		$method = 'delete';
+		$input = array();
+		$input['uid'] = array('129381@lr91\/3238g9238479832');
+		$this->testTitle('Delete a person passing a wrong uid [array]');
+		
+		$rest_return = $this->rest->get($method, $input, 'serialize');
+		
+		
+		$this->getCodeOrigin();
+		$this->arrayReturn($method, $rest_return);
+		
+		$this->getCodeOrigin();
+		$this->checkRestError($method, $rest_return);
+		
+		$this->getCodeOrigin();
+		$this->check415($method, $rest_return);
+		
+		$this->getCodeOrigin();
+		$this->checkHasNoData($method, $rest_return);
+		
+		$this->printReturn($rest_return);
+		
 	}
 	
 	public function testPersonAssocOrg($loadview = true, $getInfo = false)
@@ -543,6 +636,7 @@ class Unit_Tests_Ce extends Test_Controller {
 		$this->rest->initialize(array('server' => $this->config->item('rest_server').'exposeObj/person/'));
 	
 		$oid = $this->testOrganizationCreate();
+		
 		$uid = $this->testPersonCreate();
 			
 		$this->testTitle('Testing the association of a person to an organization');
@@ -554,7 +648,7 @@ class Unit_Tests_Ce extends Test_Controller {
 	
 		$rest_return = $this->rest->get($method, $input, 'serialize');
 	
-		//check to get an array as a return
+		
 		$this->getCodeOrigin();
 		$this->arrayReturn($method, $rest_return);
 	
@@ -562,95 +656,286 @@ class Unit_Tests_Ce extends Test_Controller {
 		$this->getCodeOrigin();
 		$this->checkNoRestError($method, $rest_return);
 	
-		//check status code == 200
+		
 		$this->getCodeOrigin();
 		$this->check200($method, $rest_return);
 		
-		//check uid is a number
-		$test = $rest_return['data']['0'];
 		$this->getCodeOrigin();
-		echo $this->unit->run($test, 'is_numeric', $method.' - Integer uid', 'Checking if the returned uid is a number');		
+		$this->checkHasData($method, $rest_return);
+		
+		//check uid is a number
+		$test = $rest_return['data']['uid'];
+		$this->getCodeOrigin();
+		echo $this->run($test, 'is_numeric', $method.' - Integer uid', 'Checking if the returned uid is a number');		
 	
 		$this->printReturn($rest_return);
+		
+		
+		
+		
+		
+		$this->testTitle('Associates another organization to the same person');
+		
+		$method = 'associate';
+		$this->getCodeOrigin();
+		$this->subTestTitle('Creates a new organization');
+		$locId = $this->testOrganizationCreate();
+		
+		//do not remove this. the previous test initialize the rest server to the object location
+		$this->rest->initialize(array('server' => $this->config->item('rest_server').'exposeObj/person/'));
+		
+		$input = array();
+		$input['uid'] = $uid;
+		$input['oid'] = $oid;
+		$input['to'] = 'organization';
+		
+		$rest_return = $this->rest->get($method, $input, 'serialize');
+		
+		$this->getCodeOrigin();
+		$this->arrayReturn($method, $rest_return);
+		
+		//the filter has not been specified but it shouldn't get an error 'cause CE will filter on the UID
+		$this->getCodeOrigin();
+		$this->checkNoRestError($method, $rest_return);
+			
+		$this->getCodeOrigin();
+		$this->check200($method, $rest_return);
+		
+		$this->getCodeOrigin();
+		$this->checkHasData($method, $rest_return);
+		
+		//check uid is a number
+		$test = $rest_return['data']['uid'];
+		$this->getCodeOrigin();
+		echo $this->run($test, 'is_numeric', $method.' - Integer uid', 'Checking if the returned uid is a number');
+		
+		$this->printReturn($rest_return);		
+
+		
+		
+		
+		//show the updated entry
+		$this->testTitle('show the updated entry (uid='.$uid.')');
+		$method = 'read';
+		$input = array();
+		$input['filter'] = '(uid='.$uid.')';
+		
+		$rest_return = $this->rest->get($method, $input, 'serialize');
+		
+		
+		$this->getCodeOrigin();
+		$this->arrayReturn($method, $rest_return);
+		
+		//the filter has been specified then it should not return an error
+		$this->getCodeOrigin();
+		$this->checkNoRestError($method, $rest_return);
+		
+		
+		$this->getCodeOrigin();
+		$this->check200($method, $rest_return);
+		
+		$this->getCodeOrigin();
+		$this->checkHasData($method, $rest_return);
+		$this->printReturn($rest_return);		
 	}
 	
 	public function testPersonAssocLoc($loadview = true, $getInfo = false)
 	{
+		
 		$this->rest->initialize(array('server' => $this->config->item('rest_server').'exposeObj/person/'));
-	
+
+		$this->getCodeOrigin();
+		$this->subTestTitle('Creates a new location');
 		$locId = $this->testLocationCreate();
+
+		$this->getCodeOrigin();
+		$this->subTestTitle('Creates a new person');
 		$uid = $this->testPersonCreate();
 			
-		$this->testTitle('Testing the association of a person to a location');
+		$this->testTitle('Testing the association of a person to an organization');
 		$method = 'associate';
 		$input = array();
 		$input['uid'] = $uid;
 		$input['locId'] = $locId;
 		$input['to'] = 'location';
-	
-		$rest_return = $this->rest->get($method, $input, 'serialize');
-	
-		//check to get an array as a return
+		
+		$rest_return = $this->rest->get($method, $input, 'serialize');		
+
 		$this->getCodeOrigin();
+ 		
 		$this->arrayReturn($method, $rest_return);
 	
 		//the filter has not been specified but it shouldn't get an error 'cause CE will filter on the UID
 		$this->getCodeOrigin();
 		$this->checkNoRestError($method, $rest_return);
-	
-		//check status code == 200
+					
 		$this->getCodeOrigin();
 		$this->check200($method, $rest_return);
 	
-		//check uid is a number
-		$test = $rest_return['data']['0'];
 		$this->getCodeOrigin();
-		echo $this->unit->run($test, 'is_numeric', $method.' - Integer uid', 'Checking if the returned uid is a number');
+		$this->checkHasData($method, $rest_return);
+		
+		//check uid is a number
+		$test = $rest_return['data']['uid'];
+		$this->getCodeOrigin();
+		echo $this->run($test, 'is_numeric', $method.' - Integer uid', 'Checking if the returned uid is a number');
 	
 		$this->printReturn($rest_return);
+		
+	
+		
+		
+		$this->testTitle('Associates another location to the same person');
+		
+		$method = 'associate';
+		$this->getCodeOrigin();
+		$this->subTestTitle('Creates a new location');
+		$locId = $this->testLocationCreate();
+		
+		//do not remove this. the previous test initialize the rest server to the object location
+		$this->rest->initialize(array('server' => $this->config->item('rest_server').'exposeObj/person/'));	
+		
+		$input = array();
+		$input['uid'] = $uid;
+		$input['locId'] = $locId;
+		$input['to'] = 'location';
+		
+		$rest_return = $this->rest->get($method, $input, 'serialize');		
+		
+		
+		
+		$this->getCodeOrigin();
+		$this->arrayReturn($method, $rest_return);
+		
+		//the filter has not been specified but it shouldn't get an error 'cause CE will filter on the UID
+		$this->getCodeOrigin();
+		$this->checkNoRestError($method, $rest_return);
+			
+		$this->getCodeOrigin();
+		$this->check200($method, $rest_return);
+		
+		$this->getCodeOrigin();
+		$this->checkHasData($method, $rest_return);
+		
+		//check uid is a number
+		$test = $rest_return['data']['uid'];
+		$this->getCodeOrigin();
+		echo $this->run($test, 'is_numeric', $method.' - Integer uid', 'Checking if the returned uid is a number');
+		
+		$this->printReturn($rest_return);
+		
+		
+		
+		//show the updated entry
+		$this->testTitle('show the updated entry (uid='.$uid.')');
+		$method = 'read';
+		$input = array();
+		$input['filter'] = '(uid='.$uid.')';
+		
+		$rest_return = $this->rest->get($method, $input, 'serialize');
+		
+		
+		$this->getCodeOrigin();
+		$this->arrayReturn($method, $rest_return);
+		
+		//the filter has been specified then it should not return an error
+		$this->getCodeOrigin();
+		$this->checkNoRestError($method, $rest_return);
+		
+		
+		$this->getCodeOrigin();
+		$this->check200($method, $rest_return);
+		
+		$this->getCodeOrigin();
+		$this->checkHasData($method, $rest_return);
+		$this->printReturn($rest_return);		
 	}	
 		
-	public function testOrganization()
-	{
-		$this->testOrganizationProperties();
-		$this->testOrganizationCreate();
-		$this->testOrganizationRead();
-		$this->testOrganizationUpdate();
-		$this->testOrganizationDelete();
-	}
 
 	public function testOrganizationProperties()
 	{
 		$this->rest->initialize(array('server' => $this->config->item('rest_server').'exposeObj/organization/'));	
 
-		$this->testTitle('Test: get organization properties</h3>');
+		$this->testTitle('get organization properties</h3>');
+
 		$method = 'getProperties';
-			
-		//check to get an array as a return
+				
 		$rest_return = $this->rest->get($method, null, 'serialize');
-		$this->getCodeOrigin();
-		$this->arrayReturn($method, $rest_return);
 		
-		//check no REST error in return
-		$this->getCodeOrigin();
-		$this->checkNoRestError($method, $rest_return);
+		$test = false;
+		if(is_array($rest_return)) $test = true;
+		$this->run($test, 'is_true', 'Is the result an array ?');
 		
-		//check status code == 200
-		$this->getCodeOrigin();
-		$this->check200($method, $rest_return);
+		$test = false;
+		if(count($rest_return) > 0) $test = true;
+		$this->run($test, 'is_true', 'Is the result populated ?');
 		
-		$this->printReturn($rest_return);
+		$this->printReturn($rest_return);		
 	}
 
 	public function testOrganizationRead()
 	{
 		$this->rest->initialize(array('server' => $this->config->item('rest_server').'exposeObj/organization/'));
+
+		
+		
+		
+		//calling the methon READ for object organization with a filter
+		$this->testTitle('Org: Reading entry with oid: 10000000');
+		$method = 'read';
+		$input = array();
+		$input['filter'] = '(oid=10000000)';
+		
+		$rest_return = $this->rest->get($method, $input, 'serialize');
+		$this->getCodeOrigin();
+		$this->arrayReturn($method, $rest_return);
+		
+		//the filter has not been specified then it should return an error
+		$this->getCodeOrigin();
+		$this->checkNoRestError($method, $rest_return);
+		
+		
+		$this->getCodeOrigin();
+		$this->check200($method, $rest_return);
+
+		$this->getCodeOrigin();
+		$this->checkHasData($method, $rest_return);
+		$this->printReturn($rest_return);
+
+		
+		
+		
+		//calling the methon READ for object organization with a filter
+		$this->testTitle('read organization entries','Sending a request with "filter". I expect to get all organizations in the storage');
+		$method = 'read';
+		$input = array();
+		$input['filter'] = '(objectClass=*)';
+		
+		$rest_return = $this->rest->get($method, $input, 'serialize');
+		$this->getCodeOrigin();
+		$this->arrayReturn($method, $rest_return);
+		
+		//the filter has not been specified then it should return an error
+		$this->getCodeOrigin();
+		$this->checkNoRestError($method, $rest_return);
+		
+		
+		$this->getCodeOrigin();
+		$this->check200($method, $rest_return);
+		
+		$this->getCodeOrigin();
+		$this->checkHasData($method, $rest_return);
+		
+		$this->printReturn($rest_return);		
+		
+	
+		
 		
 		//calling the methon READ for object organization without a filter
-		$this->testTitle('Test: read organization entries','Sending a request missing "filter". I expect a failure');
+		$this->testTitle('read organization entries','Sending a request missing "filter". I expect a failure');
 		$method = 'read';
 		
-		//check to get an array as a return
+		
 		$rest_return = $this->rest->get($method, null, 'serialize');
 		$this->getCodeOrigin();
 		$this->arrayReturn($method, $rest_return);
@@ -659,35 +944,18 @@ class Unit_Tests_Ce extends Test_Controller {
 		$this->getCodeOrigin();
 		$this->checkRestError($method, $rest_return);
 		
-		//check status code == 400
-		$this->getCodeOrigin();
-		$this->check400($method, $rest_return);
 		
+		$this->getCodeOrigin();
+		$this->check415($method, $rest_return);
+		
+		$this->getCodeOrigin();
+		$this->checkHasNoData($method, $rest_return);
 		$this->printReturn($rest_return);
 	
-		
+	
 		//-------------------------
 		
-		
-		//calling the methon READ for object organization with a filter
-		$this->testTitle('Test: read organization entries','Sending a request with "filter". I expect to get all organizations in the storage');
-		$method = 'read';
-		$input = array();
-		$input['filter'] = '(objectClass=*)';
-		//check to get an array as a return
-		$rest_return = $this->rest->get($method, $input, 'serialize');
-		$this->getCodeOrigin();
-		$this->arrayReturn($method, $rest_return);
-		
-		//the filter has not been specified then it should return an error
-		$this->getCodeOrigin();
-		$this->checkNoRestError($method, $rest_return);
-		
-		//check status code == 200
-		$this->getCodeOrigin();
-		$this->check200($method, $rest_return);
-		
-		$this->printReturn($rest_return);
+	
 		
 	}
 
@@ -696,11 +964,11 @@ class Unit_Tests_Ce extends Test_Controller {
 		$this->rest->initialize(array('server' => $this->config->item('rest_server').'exposeObj/organization/'));
 			
 		//calling the methon CREATE for object organization without a filter
-		$this->testTitle('Test: create 1 organization');
+		$this->testTitle('create 1 organization');
 		$method = 'create';
 		$input = array();
 		$random = rand(999,9999);
-		$orgname = 'ACME'.$random;
+		$orgname = 'ACME_'.$random;
 		
 		//required fields
 		$input['enabled'] = 'TRUE';
@@ -708,7 +976,7 @@ class Unit_Tests_Ce extends Test_Controller {
 		$input['o'] = $orgname;
 		//oid is automatically set, so not needed
 		
-		//check to get an array as a return
+		
 		$rest_return = $this->rest->get($method, $input, 'serialize');
 		$this->getCodeOrigin();
 		$this->arrayReturn($method, $rest_return);
@@ -717,18 +985,17 @@ class Unit_Tests_Ce extends Test_Controller {
 		$this->getCodeOrigin();
 		$this->checkNoRestError($method, $rest_return);
 		
-		//check status code == 200
-		$this->getCodeOrigin();
+		
 		$this->check200($method, $rest_return);
 		
-		//check oid is a number
-		$test = $rest_return['data']['0'];
+		//check uid is a number
+		$test = $rest_return['data']['oid'];
 		$this->getCodeOrigin();
-		echo $this->unit->run($test, 'is_numeric', $method.' - Integer oid', 'Checking if the returned oid is a number');
+		echo $this->run($test, 'is_numeric', $method.' - Integer oid', 'Checking if the returned uid is a number');
 		
-		$this->printReturn($rest_return);
-		
-		return $test; //oid
+		$this->printReturn($rest_return);	
+
+		return $rest_return['data']['oid'];
 	}
 		
 	public function testOrganizationUpdate()
@@ -736,14 +1003,14 @@ class Unit_Tests_Ce extends Test_Controller {
 		$this->rest->initialize(array('server' => $this->config->item('rest_server').'exposeObj/organization/'));		
 		
 		//calling the methon READ for object organization with a filter
-		$this->testTitle('Test: update 1 organization taken randomly but starting with Acme*');
+		$this->testTitle('update 1 organization taken randomly but starting with Acme*');
 		$method = 'read';
 		$input = array();
 		$input['filter'] = '(o=Acme*)';
 		
 		$rest_return = $this->rest->get($method, $input, 'serialize');
 		
-		//check to get an array as a return
+		
 		$this->getCodeOrigin();
 		$this->arrayReturn($method, $rest_return);
 		
@@ -751,11 +1018,14 @@ class Unit_Tests_Ce extends Test_Controller {
 		$this->getCodeOrigin();
 		$this->checkNoRestError($method, $rest_return);
 		
-		//check status code == 200
+		
 		$this->getCodeOrigin();
 		$this->check200($method, $rest_return);
 		
+		$this->getCodeOrigin();
+		$this->checkHasData($method, $rest_return);
 		$this->printReturn($rest_return);
+		
 		
 		if(is_array($rest_return) and !empty($rest_return['data']))
 		{
@@ -763,8 +1033,7 @@ class Unit_Tests_Ce extends Test_Controller {
 			$organization['o'] = 'Acme Test';
 			$method = 'update';
 			$rest_return = $this->rest->get($method, $organization, 'serialize');
-		
-			//check to get an array as a return
+				
 			$this->getCodeOrigin();
 			$this->arrayReturn($method, $rest_return);
 		
@@ -772,25 +1041,31 @@ class Unit_Tests_Ce extends Test_Controller {
 			$this->getCodeOrigin();
 			$this->checkNoRestError($method, $rest_return);
 		
-			//check status code == 200 
+			 
 			$this->getCodeOrigin();
 			$this->check200($method, $rest_return);
 		
-			//check uid is a number
-			$oid = $test = $rest_return['data']['0'];
 			$this->getCodeOrigin();
-			echo $this->unit->run($test, 'is_numeric', $method.' - Integer oid', 'Checking if the returned oid is a number');
+			$this->checkHasData($method, $rest_return);
+			
+			//check uid is a number
+			$oid = $test = $rest_return['data']['oid'];
+			$this->getCodeOrigin();
+			echo $this->run($test, 'is_numeric', $method.' - Integer oid', 'Checking if the returned oid is a number');
 		
 			$this->printReturn($rest_return);
 		
-			//gets the organization updated
+			
+			
+			
+			//gets the updated organization
 			$method = 'read';
 			$input = array();
 			$input['filter'] = '(oid='.$oid.')';
 		
 			$rest_return = $this->rest->get($method, $input, 'serialize');
 		
-			//check to get an array as a return
+			
 			$this->getCodeOrigin();
 			$this->arrayReturn($method, $rest_return);
 		
@@ -798,10 +1073,13 @@ class Unit_Tests_Ce extends Test_Controller {
 			$this->getCodeOrigin();
 			$this->checkNoRestError($method, $rest_return);
 		
-			//check status code == 200
+			
 			$this->getCodeOrigin();
 			$this->check200($method, $rest_return);
 		
+			
+			$this->getCodeOrigin();
+			$this->checkHasData($method, $rest_return);
 			$this->printReturn($rest_return);
 		}
 	}
@@ -809,47 +1087,54 @@ class Unit_Tests_Ce extends Test_Controller {
 	public function testOrganizationDelete()
 	{
 		$this->rest->initialize(array('server' => $this->config->item('rest_server').'exposeObj/organization/'));	
-		//########################################
-		// DELETE
-		//########################################
+	
 		//calling the methon READ for object organization with a filter
-		$this->testTitle('Test: delete 1 organization taken randomly but starting with Acme*');
+		$this->testTitle('delete an organization taken randomly but starting with Acme*');
+		$this->subTestTitle('gets all the organizations: (objectClass=*)');
 		$method = 'read';
 		$input = array();
-		$input['filter'] = '(o=Acme*)';
+		$input['filter'] = '(objectClass=*)';
 		
-		$rest_return = $this->rest->get($method, $input, 'serialize');
+		$rest_return = $this->rest->get($method, $input, 'serialize');		
+
 		
-		//check to get an array as a return
 		$this->getCodeOrigin();
 		$this->arrayReturn($method, $rest_return);
-		
+				
 		//the filter has not been specified then it should return an error
 		$this->getCodeOrigin();
 		$this->checkNoRestError($method, $rest_return);
 		
-		//check status code == 200
 		$this->getCodeOrigin();
 		$this->check200($method, $rest_return);
+
+		$this->getCodeOrigin();
+		$this->checkHasData($method, $rest_return);
 		
+		
+	
 		if(is_array($rest_return) and !empty($rest_return['data']))
 		{
+			$this->subTestTitle('gets organization oid');
 			$organization = $rest_return['data'][array_rand($rest_return['data'])];
 			//check oid is a number
 			$oid = $test = $organization['oid'];
 			$this->getCodeOrigin();
-			echo $this->unit->run($test, 'is_numeric', $method.' - Integer oid', 'Checking if the returned oid is a number');
-		
-			$this->printReturn($rest_return);
+			echo $this->run($test, 'is_numeric', $method.' - Integer oid', 'Checking if the returned oid is a number');
+	
+			
+			
+			
 		
 			//gets the organization updated
+			$this->subTestTitle('deletes the organization with oid: '.$oid);
 			$method = 'delete';
 			$input = array();
 			$input['oid'] = $oid;
 		
 			$rest_return = $this->rest->get($method, $input, 'serialize');
 		
-			//check to get an array as a return
+			
 			$this->getCodeOrigin();
 			$this->arrayReturn($method, $rest_return);
 		
@@ -857,25 +1142,53 @@ class Unit_Tests_Ce extends Test_Controller {
 			$this->getCodeOrigin();
 			$this->checkNoRestError($method, $rest_return);
 		
-			//check status code == 200
+			
 			$this->getCodeOrigin();
 			$this->check200($method, $rest_return);
 		
 			//check return is TRUE
-			$result = $rest_return['data']['0'];
 			$this->getCodeOrigin();
-			echo $this->unit->run($result, '1', $method.' - Returns true');
-		
+			$this->checkHasNoData($method, $rest_return);		
 			$this->printReturn($rest_return);
+			
+			
+			
+			
+			$this->subTestTitle('checks if the organization with oid: '.$oid.' has been deleted.');
+			$method = 'read';
+			$input = array();
+			$input['filter'] = '(oid='.$oid.')';
+			
+			$rest_return = $this->rest->get($method, $input, 'serialize');
+			
+			
+			$this->getCodeOrigin();
+			$this->arrayReturn($method, $rest_return);
+			
+			//the filter has not been specified then it should return an error
+			$this->getCodeOrigin();
+			$this->checkNoRestError($method, $rest_return);
+			
+			$this->getCodeOrigin();
+			$this->check200($method, $rest_return);
+			
+			$this->getCodeOrigin();
+			$this->checkHasNoData($method, $rest_return);			
 		}
 	}
 
 	public function testOrganizationAssocLoc($loadview = true, $getInfo = false)
 	{
-		$this->rest->initialize(array('server' => $this->config->item('rest_server').'exposeObj/organization/'));
-	
+		$this->rest->initialize(array('server' => $this->config->item('rest_server').'exposeObj/organization/'));	
+		
+		$this->getCodeOrigin();
+		$this->subTestTitle('Creates a new location');
 		$locId = $this->testLocationCreate();
+		
+		$this->getCodeOrigin();
+		$this->subTestTitle('Creates a new organization');
 		$oid = $this->testOrganizationCreate();
+		
 			
 		$this->testTitle('Testing the association of an organization to a location');
 		$method = 'associate';
@@ -886,7 +1199,7 @@ class Unit_Tests_Ce extends Test_Controller {
 	
 		$rest_return = $this->rest->get($method, $input, 'serialize');
 	
-		//check to get an array as a return
+		
 		$this->getCodeOrigin();
 		$this->arrayReturn($method, $rest_return);
 	
@@ -894,59 +1207,104 @@ class Unit_Tests_Ce extends Test_Controller {
 		$this->getCodeOrigin();
 		$this->checkNoRestError($method, $rest_return);
 	
-		//check status code == 200
+		
 		$this->getCodeOrigin();
 		$this->check200($method, $rest_return);
 	
-		//check uid is a number
-		$test = $rest_return['data']['0'];
 		$this->getCodeOrigin();
-		echo $this->unit->run($test, 'is_numeric', $method.' - Integer oid', 'Checking if the returned oid is a number');
+		$this->checkHasData($method, $rest_return);
+				
+		$test = $rest_return['data']['oid'];
+		$this->getCodeOrigin();
+		echo $this->run($test, 'is_numeric', $method.' - Integer oid', 'Checking if the returned oid is a number');
 	
 		$this->printReturn($rest_return);
 	}
 	
-	public function testLocation()
-	{
-		$this->testLocationProperties();
-		$this->testLocationCreate();
-		$this->testLocationRead();
-		$this->testLocationUpdate();
-		$this->testLocationDelete();
-	}
 		
 	public function testLocationProperties()
 	{		
 		$this->rest->initialize(array('server' => $this->config->item('rest_server').'exposeObj/location/'));
 		
-		$this->testTitle('Test: get location properties</h3>');
+		$this->testTitle('get location properties</h3>');
 		$method = 'getProperties';
-			
-		//check to get an array as a return
+		
+		
 		$rest_return = $this->rest->get($method, null, 'serialize');
-		$this->getCodeOrigin();
-		$this->arrayReturn($method, $rest_return);
 		
-		//check no REST error in return
-		$this->getCodeOrigin();
-		$this->checkNoRestError($method, $rest_return);
+		$test = false;
+		if(is_array($rest_return)) $test = true;
+		$this->run($test, 'is_true', 'Is the result an array ?');
 		
-		//check status code == 200
-		$this->getCodeOrigin();
-		$this->check200($method, $rest_return);
+		$test = false;
+		if(count($rest_return) > 0) $test = true;
+		$this->run($test, 'is_true', 'Is the result populated ?');
 		
-		$this->printReturn($rest_return);
+		$this->printReturn($rest_return);		
 	}
 	
 	public function testLocationRead()
 	{
 		$this->rest->initialize(array('server' => $this->config->item('rest_server').'exposeObj/location/'));
 
+		
+		
+		$this->testTitle('read location entry','Sending a request with filter: (locId=10000000)');
+		$method = 'read';
+		$input = array();
+		$input['filter'] = '(locId=10000000)';
+		
+		$rest_return = $this->rest->get($method, $input, 'serialize');
+		
+		
+		$this->getCodeOrigin();
+		$this->arrayReturn($method, $rest_return);
+		
+		//the filter has not been specified then it should return an error
+		$this->getCodeOrigin();
+		$this->checkNoRestError($method, $rest_return);
+		
+		
+		$this->getCodeOrigin();
+		$this->check200($method, $rest_return);
+		
+		$this->getCodeOrigin();
+		$this->checkHasData($method, $rest_return);
+		$this->printReturn($rest_return);
+		
+		
+
+		//calling the methon READ for object location with a filter
+		$this->testTitle('read location entries','Sending a request with "filter". I expect to get all locations in the storage');
+		$method = 'read';
+		$input = array();
+		$input['filter'] = '(objectClass=*)';
+		
+		$rest_return = $this->rest->get($method, $input, 'serialize');
+		
+		$this->getCodeOrigin();
+		$this->arrayReturn($method, $rest_return);
+		
+		//the filter has not been specified then it should return an error
+		$this->getCodeOrigin();
+		$this->checkNoRestError($method, $rest_return);
+		
+		
+		$this->getCodeOrigin();
+		$this->check200($method, $rest_return);
+
+		$this->getCodeOrigin();
+		$this->checkHasData($method, $rest_return);		
+		$this->printReturn($rest_return);		
+
+		
+		
+		
 		//calling the methon READ for object location without a filter
-		$this->testTitle('Test: read location entries','Sending a request missing "filter". I expect a failure');
+		$this->testTitle('read location entries','Sending a request missing "filter". I expect a failure');
 		$method = 'read';
 		
-		//check to get an array as a return
+		
 		$rest_return = $this->rest->get($method, null, 'serialize');
 		$this->getCodeOrigin();
 		$this->arrayReturn($method, $rest_return);
@@ -955,35 +1313,17 @@ class Unit_Tests_Ce extends Test_Controller {
 		$this->getCodeOrigin();
 		$this->checkRestError($method, $rest_return);
 		
-		//check status code == 400
-		$this->getCodeOrigin();
-		$this->check400($method, $rest_return);
 		
+		$this->getCodeOrigin();
+		$this->check415($method, $rest_return);
+		
+		$this->getCodeOrigin();
+		$this->checkHasNoData($method, $rest_return);		
 		$this->printReturn($rest_return);
 		
 		//----------------------
 		
-		//calling the methon READ for object location with a filter
-		$this->testTitle('Test: read location entries','Sending a request with "filter". I expect to get all locations in the storage');
-		$method = 'read';
-		$input = array();
-		$input['filter'] = '(objectClass=*)';
-		
-		$rest_return = $this->rest->get($method, $input, 'serialize');
-		
-		//check to get an array as a return
-		$this->getCodeOrigin();
-		$this->arrayReturn($method, $rest_return);
-		
-		//the filter has not been specified then it should return an error
-		$this->getCodeOrigin();
-		$this->checkNoRestError($method, $rest_return);
-		
-		//check status code == 200
-		$this->getCodeOrigin();
-		$this->check200($method, $rest_return);
-		
-		$this->printReturn($rest_return);
+
 	}
 	
 	public function testLocationCreate()
@@ -991,7 +1331,7 @@ class Unit_Tests_Ce extends Test_Controller {
 		$this->rest->initialize(array('server' => $this->config->item('rest_server').'exposeObj/location/'));	
 
 		//calling the methon CREATE for object location without a filter
-		$this->testTitle('Test: create 1 location');
+		$this->testTitle('creates a location');
 		$method = 'create';
 		$input = array();
 		$random = rand(999,9999);
@@ -1006,7 +1346,7 @@ class Unit_Tests_Ce extends Test_Controller {
 		$input['locStreet'] = 'MyStreet '.$random;
 		//locId is automatically set, so not needed
 		
-		//check to get an array as a return
+		
 		$rest_return = $this->rest->get($method, $input, 'serialize');
 		$this->getCodeOrigin();
 		$this->arrayReturn($method, $rest_return);
@@ -1015,18 +1355,18 @@ class Unit_Tests_Ce extends Test_Controller {
 		$this->getCodeOrigin();
 		$this->checkNoRestError($method, $rest_return);
 		
-		//check status code == 200
+		
 		$this->getCodeOrigin();
 		$this->check200($method, $rest_return);
 		
 		//check oid is a number
-		$test = $rest_return['data']['0'];
+		$test = $rest_return['data']['locId'];
 		$this->getCodeOrigin();
-		echo $this->unit->run($test, 'is_numeric', $method.' - Integer locId', 'Checking if the returned locId is a number');
+		echo $this->run($test, 'is_numeric', $method.' - Integer locId', 'Checking if the returned locId is a number');
 		
 		$this->printReturn($rest_return);
 		
-		return $test; //locId
+		return $rest_return['data']['locId'];
 	}
 
 	public function testLocationUpdate()
@@ -1034,14 +1374,16 @@ class Unit_Tests_Ce extends Test_Controller {
 		$this->rest->initialize(array('server' => $this->config->item('rest_server').'exposeObj/location/'));	
 		
 		//calling the methon READ for object location with a filter
-		$this->testTitle('Test: update 1 location taken randomly but starting with MyDescription*');
+		$this->testTitle('update a location taken randomly but starting with MyDescription*');
+		
+		$this->subTestTitle('gets the locations list');
 		$method = 'read';
 		$input = array();
 		$input['filter'] = '(locDescription=MyDescription*)';
 		
 		$rest_return = $this->rest->get($method, $input, 'serialize');
 		
-		//check to get an array as a return
+		
 		$this->getCodeOrigin();
 		$this->arrayReturn($method, $rest_return);
 		
@@ -1049,20 +1391,23 @@ class Unit_Tests_Ce extends Test_Controller {
 		$this->getCodeOrigin();
 		$this->checkNoRestError($method, $rest_return);
 		
-		//check status code == 200
+		
 		$this->getCodeOrigin();
 		$this->check200($method, $rest_return);
 		
-		$this->printReturn($rest_return);
+		$this->getCodeOrigin();
+		$this->checkHasData($method, $rest_return);
 		
+
 		if(is_array($rest_return) and !empty($rest_return['data']))
 		{
 			$location = $rest_return['data'][array_rand($rest_return['data'])];
+			$this->subTestTitle('updates the location');
 			$location['locDescription'] = 'MyDescription TEST';
 			$method = 'update';
 			$rest_return = $this->rest->get($method, $location, 'serialize');
 		
-			//check to get an array as a return
+			
 			$this->getCodeOrigin();
 			$this->arrayReturn($method, $rest_return);
 		
@@ -1070,25 +1415,30 @@ class Unit_Tests_Ce extends Test_Controller {
 			$this->getCodeOrigin();
 			$this->checkNoRestError($method, $rest_return);
 		
-			//check status code == 200
+			
 			$this->getCodeOrigin();
 			$this->check200($method, $rest_return);
 		
-			//check uid is a number
-			$locId = $test = $rest_return['data']['0'];
 			$this->getCodeOrigin();
-			echo $this->unit->run($test, 'is_numeric', $method.' - Integer locId', 'Checking if the returned locId is a number');
+			$this->checkHasData($method, $rest_return);
+				
+			//check uid is a number
+			$locId = $test = $rest_return['data']['locId'];
+			$this->getCodeOrigin();
+			echo $this->run($test, 'is_numeric', $method.' - Integer locId', 'Checking if the returned locId is a number');
 		
 			$this->printReturn($rest_return);
-		
+
+
 			//gets the location updated
+			$this->subTestTitle('gets the updated location');
 			$method = 'read';
 			$input = array();
 			$input['filter'] = '(locId='.$locId.')';
 		
 			$rest_return = $this->rest->get($method, $input, 'serialize');
 		
-			//check to get an array as a return
+			
 			$this->getCodeOrigin();
 			$this->arrayReturn($method, $rest_return);
 		
@@ -1096,10 +1446,12 @@ class Unit_Tests_Ce extends Test_Controller {
 			$this->getCodeOrigin();
 			$this->checkNoRestError($method, $rest_return);
 		
-			//check status code == 200
+			
 			$this->getCodeOrigin();
 			$this->check200($method, $rest_return);
-		
+
+			$this->getCodeOrigin();
+			$this->checkHasData($method, $rest_return);
 			$this->printReturn($rest_return);
 		}
 	}
@@ -1108,8 +1460,11 @@ class Unit_Tests_Ce extends Test_Controller {
 	{
 		$this->rest->initialize(array('server' => $this->config->item('rest_server').'exposeObj/location/'));	
 
+		
+		
+		
 		//calling the methon READ for object location with a filter
-		$this->testTitle('Test: delete 1 location taken randomly but starting with MyDescription*');
+		$this->testTitle('deletes a location taken randomly but starting with MyDescription*');
 		$method = 'read';
 		$input = array();
 		$input['filter'] = '(locDescription=MyDescription*)';
@@ -1119,21 +1474,21 @@ class Unit_Tests_Ce extends Test_Controller {
 		if(is_array($rest_return) and !empty($rest_return['data']))
 		{
 			$location = $rest_return['data'][array_rand($rest_return['data'])];
-			//check locId is a number
-			$locId = $test = $location['locId']['0'];
+			
+			$this->subTestTitle('Picks a  locId: '.$locId);
+			$locId = $test = $location['locId'];
 			$this->getCodeOrigin();
-			echo $this->unit->run($test, 'is_numeric', $method.' - Integer locId', 'Checking if the returned locId is a number');
+			echo $this->run($test, 'is_numeric', $method.' - Integer locId', 'Checking if the returned locId is a number');
 		
-			$this->printReturn($rest_return);
 		
-			//gets the location updated
+			$this->subTestTitle('Deletes the entry with locId: '.$locId);
 			$method = 'delete';
 			$input = array();
 			$input['locId'] = $locId;
 		
 			$rest_return = $this->rest->get($method, $input, 'serialize');
 		
-			//check to get an array as a return
+			
 			$this->getCodeOrigin();
 			$this->arrayReturn($method, $rest_return);
 		
@@ -1141,15 +1496,12 @@ class Unit_Tests_Ce extends Test_Controller {
 			$this->getCodeOrigin();
 			$this->checkNoRestError($method, $rest_return);
 		
-			//check status code == 200
+
 			$this->getCodeOrigin();
 			$this->check200($method, $rest_return);
 		
-			//check return is TRUE
-			$result = $rest_return['data']['0'];
 			$this->getCodeOrigin();
-			echo $this->unit->run($result, '1', $method.' - Returns true');
-		
+			$this->checkHasNoData($method, $rest_return);
 			$this->printReturn($rest_return);
 		}
 	}
@@ -1158,15 +1510,15 @@ class Unit_Tests_Ce extends Test_Controller {
 	{
 		$this->rest->initialize(array('server' => $this->config->item('rest_server').'exposeObj/contact/'));
 		
+		
 		//calling the methon READ for object contact with a filter
-		$this->testTitle('Testing CONTACT: get a contact using this filter: (|(givenName=Willy*)(o=A*))');
+		$this->testTitle('Testing CONTACT: get contacts using this filter: (|(givenName=Willy*)(o=A*))');
 		$method = 'read';
 		$input = array();
 		$input['filter'] = '(|(givenName=Willy*)(o=A*))';
 		
 		$rest_return = $this->rest->get($method, $input, 'serialize');
 		
-		//check to get an array as a return
 		$this->getCodeOrigin();
 		$this->arrayReturn($method, $rest_return);
 		
@@ -1174,11 +1526,35 @@ class Unit_Tests_Ce extends Test_Controller {
 		$this->getCodeOrigin();
 		$this->checkNoRestError($method, $rest_return);
 		
-		//check status code == 200
 		$this->getCodeOrigin();
 		$this->check200($method, $rest_return);
-		
+
+		$this->getCodeOrigin();
+		$this->checkHasData($method, $rest_return);
 		$this->printReturn($rest_return);
+
 		
+		
+		//calling the methon READ for object contact with a filter
+		$this->testTitle('Testing CONTACT: get contact using this filter: array(|(givenName=Willy*)(o=A*))');
+		$method = 'read';
+		$input = array();
+		$input['filter'] = 'array(|(givenName=Willy*)(o=A*))';
+		
+		$rest_return = $this->rest->get($method, $input, 'serialize');
+		
+		$this->getCodeOrigin();
+		$this->arrayReturn($method, $rest_return);
+		
+		//the filter has not been specified then it should return an error
+		$this->getCodeOrigin();
+		$this->checkRestError($method, $rest_return);
+		
+		$this->getCodeOrigin();
+		$this->check415($method, $rest_return);
+
+		$this->getCodeOrigin();
+		$this->checkHasNoData($method, $rest_return);
+		$this->printReturn($rest_return);		
 	}
 }
