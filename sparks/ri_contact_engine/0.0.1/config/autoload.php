@@ -9,4 +9,4 @@ $autoload['helpers'] = array('ce_helper');
 $autoload['libraries'] = array('ce');
 
 # Load a contact-engine model
-$autoload['model'] = array('objectcommon', 'person', 'organization', 'location', 'contact');
+$autoload['model'] = array('ce_return_object', 'objectcommon', 'person', 'organization', 'location', 'contact');

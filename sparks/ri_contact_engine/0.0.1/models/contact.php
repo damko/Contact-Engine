@@ -26,28 +26,58 @@ class Contact extends ObjectCommon
 		$data = array();
 		if(!is_array($input) || empty($input)) 
 		{
-			$data['error'] = 'The input should be a populated array'; 
-		} else {
-			$people = $this->person->read($input);
-			$statuses[] = $people['RestStatus'];
-			unset($people['RestStatus']);
+			$this->result = new Ce_Return_Object();
+			$this->result->data = array();
+			$this->result->http_status_code = '415';
+			$this->result->http_message = 'The method read for the object '.$this->objName.' requires an array in input.';
+			$this->result->results_number = '0';
+			$this->result->sent_back_results_number = 0;
+				
+			return $this->result->returnAsArray(); 
 			
-			$organizations = $this->organization->read($input);
-			$statuses[] = $organizations['RestStatus'];
-			unset($organizations['RestStatus']);
+		} else {
+			$return = $this->person->read($input);
+			$status_people = $return['status'];
+			if($status_people['status_code'] == '200')
+			{
+				$people = $return['data'];
+			} else {
+				$this->result->importLdapReturnObject($this->ri_ldap->result);	
+				return $this->result->returnAsArray();
+			}
+			
+			$return = $this->organization->read($input);
+			$status_organizations = $return['status'];
+			if($status_organizations['status_code'] == '200')
+			{
+				$organizations  = $return['data'];
+			} else {
+				$this->result->importLdapReturnObject($this->ri_ldap->result);
+				return $this->result->returnAsArray();
+			}			
 			
 			$data = array_merge($people,$organizations);
-			foreach ($statuses['0'] as $key => $value) {
-				$statuses['final'][$key] = $value + $statuses['1'][$key];
-			}
-			!empty($statuses['0']['results_number']) ? $statuses['final']['result_number_people'] = $statuses['0']['results_number'] : $statuses['final']['result_number_people'] = 0;
-			!empty($statuses['1']['results_number']) ? $statuses['final']['result_number_orgs'] = $statuses['1']['results_number'] : $statuses['final']['result_number_orgs'] = 0;
+			$this->result = new Ce_Return_Object();
+			$this->result->data = $data;
+			$this->result->http_status_code = '200';
+			$this->result->http_message = 'OK';
+			$this->result->results_number = $status_people['results_number'] + $status_organizations['results_number'];
+			$this->result->sent_back_results_number = $status_people['results_got_number'] + $status_organizations['results_got_number'];
+			//TODO what to do with the page numbers?
 			
-			$data['RestStatus'] = $statuses['final'];
+			return $this->result->returnAsArray();
+				
+// 			foreach ($statuses['0'] as $key => $value) {
+// 				$statuses['final'][$key] = $value + $statuses['1'][$key];
+// 			}
+// 			!empty($statuses['0']['results_number']) ? $statuses['final']['result_number_people'] = $statuses['0']['results_number'] : $statuses['final']['result_number_people'] = 0;
+// 			!empty($statuses['1']['results_number']) ? $statuses['final']['result_number_orgs'] = $statuses['1']['results_number'] : $statuses['final']['result_number_orgs'] = 0;
+			
+// 			$data['RestStatus'] = $statuses['final'];
 		}
 		
 		
-		return $data;
+//		return $data;
 	}
 	
 }

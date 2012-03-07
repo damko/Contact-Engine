@@ -24,7 +24,6 @@ class Location extends ObjectCommon
 		parent::__destruct();
 	}
 
-	
 	// ================================= CRUD ================================
 	
 	private function set_locId()
@@ -49,88 +48,116 @@ class Location extends ObjectCommon
 		return true;
 	}
 		
-	private function getLocId()
-	{
-		return !empty($this->locId['0']) ? $this->locId['0'] : FALSE;
-	}
+// 	private function getLocId()
+// 	{
+// 		return !empty($this->locId['0']) ? $this->locId['0'] : FALSE;
+// 	}
 		
 	public function create(array $input)
 	{
-		if(!$this->set_locId()) return false;
+		if(!$this->set_locId())
+		{
+			$this->result = new Ce_Return_Object();
+			$this->result->data = array();
+			$this->result->http_status_code = '500';
+			$this->result->http_message = 'I can not set a unique dn for the new '.$this->objName.' entry.';
+			$this->result->results_number = '0';
+			$this->result->sent_back_results_number = 0;
+		
+			return $this->result->returnAsArray();
+		}
+		
 		$input['locId'] = $this->locId;
 		
-		if(!$this->bindLdapValuesWithClassProperties($input,true)) return false;
+		if(!$this->bindDataWithClassProperties($input,true))  return $this->result->returnAsArray();
 		
 		//save the entry on the LDAP server
 		$dn = 'locId='.$this->locId.','.$this->baseDn;
 		if(empty($this->objectClass)) $this->objectClass = $this->conf['objectClass'];
-		return $this->ri_ldap->CEcreate($dn,$this->toRest(false)) ? $this->locId : false;
+		
+		//$entry = $this->toRest(false); //TODO delme
+		$exit_status = $this->ri_ldap->CEcreate($this->toRest(false),$dn);
+		
+		$this->result->importLdapReturnObject($this->ri_ldap->result);
+		
+		if($exit_status)
+		{
+			$this->result->data = array('locId' => $this->locId);
+		}
+		
+		return $this->result->returnAsArray();		
 	}
 	
 	public function read(array $input)
-	{	
-		if(!empty($input['filter'])) 
+	{			
+		extract($input,$extract_type = EXTR_OVERWRITE);
+		
+		if(!empty($input['filter']))
 		{
 			$filter = $input['filter'];
 		} else {
 			if(!empty($input['locId'])) $filter = '(locId='.$input['locId'].')';
-			if(!empty($input['dbId'])) $filter = '(dbId='.$input['dbId'].')';
+			if(!empty($input['dbId'])) $filter = '(dbId='.$input['dbId'].')'; //TODO maybe I can remove this
 		}
 		
-// 		$wanted_attributes = array();
-// 		if(!empty($input['attributes']) and is_array($input['attributes'])) 
-// 		{
-// 			$wanted_attributes = $input['attributes'];
-// 		} 
+		$output = array();
+		if(isset($filter)) $output['filter'] = $filter;
+		if(isset($wanted_attributes)) $output['wanted_attributes'] = $wanted_attributes;
+		if(isset($sort_by)) $output['sort_by'] = $sort_by;
+		if(isset($flow_order)) $output['flow_order'] = $flow_order;
+		if(isset($wanted_page)) $output['wanted_page'] = $wanted_page;
+		if(isset($items_page)) $output['items_page'] = $items_page;
 		
-		//TODO why this switch?
-		switch ($input['emptyfields']) {
-			case true:
-				$empty_fields = TRUE;
-			break;
-			
-			case false:
-				$empty_fields = FALSE;
-			break;
-						
-			default:
-				$empty_fields = TRUE;
-			break;
-		}		
+		return parent::read($output);
 		
-		//if(empty($filter)) return false;
-		
-		return parent::read($input); //, $filter, $wanted_attributes, $sort_by, $flow_order, $wanted_page, $items_page);		
 	}
 
 	public function update(array $input)
 	{
-		//FIXME This method is fragile atm. It requires more attention. For ex. what happens if I try to change the locId or the dn or the objectClass?
+		//FIXME This method requires more attention. For ex. what happens if I try to change the locId or the dn or the objectClass?
 		
-		if(empty($input['locId'])) return false;
-
-		//TODO Should I perform a search over the given locId to be sure the contact exists?
-		//unset($input['filter']);
-		//$this->read($input);
+		$return = $this->read($input);
+		if(count($return['data']) == 0) return $this->result->returnAsArray();
 		
-		if(!$this->bindLdapValuesWithClassProperties($input, false, true)) return false;
+		if(!$this->bindDataWithClassProperties($input, false, true)) return $this->result->returnAsArray();
 		
-		if(empty($this->locLatitude) or empty($this->locLongitude)) $this->getLatitudeLongitude();
+		//$this->validate();
 		
 		//save the entry on the LDAP server
-		$dn = 'locId='.$this->getLocId().','.$this->baseDn;
+		$dn = 'locId='.$this->locId.','.$this->baseDn;
 		$entry = $this->toRest(false);
 		unset($entry['locId']); //never mess with the id during an update cause it has to do with dn
-		return $this->ri_ldap->CEupdate($dn,$entry) ? $this->locId : false;
+		unset($entry['dn']);
+		
+		$exit_status = $this->ri_ldap->CEupdate($entry, $dn);
+		
+		$this->result->importLdapReturnObject($this->ri_ldap->result);
+		
+		if($exit_status) $this->result->data = array('locId' => $this->locId);
+		
+		return $this->result->returnAsArray();
+		
 	}
 
 	public function delete($input)
 	{
-		if(empty($input['locId'])) return false;
-		$dn = 'locId='.$input['locId'].','.$this->baseDn;
-		return $this->ri_ldap->CEdelete($dn);
-	}
+		if(!is_array($input) || empty($input['locId']))
+		{
+			$this->result = new Ce_Return_Object();
+			$this->result->data = array();
+			$this->result->http_status_code = '415';
+			$this->result->http_message = 'A valid locId is required to delete a '.$this->objName.' entry.';
+			$this->result->results_number = '0';
+			$this->result->sent_back_results_number = 0;
 	
+			return $this->result->returnAsArray();
+		}
+	
+		$dn = 'locId='.$input['locId'].','.$this->baseDn;
+	
+		return parent::delete($dn);
+	}
+		
 	private function getLatitudeLongitude()
 	{	
 		//a bit of validation

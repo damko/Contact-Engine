@@ -5,6 +5,6 @@
  */
 
 //configuration for the organization objec
-$config['organization']['baseDn'] = "ou=organizations,o=2v,dc=2v,dc=ntw";
+$config['organization']['baseDn'] = "ou=organizations,o=ce,dc=2v,dc=ntw";
 $config['organization']['objectClass'] = "dueviOrganization"; //ldap objectClass representing the organization class
 $config['organization']['refreshPeriod'] = ""; //seconds

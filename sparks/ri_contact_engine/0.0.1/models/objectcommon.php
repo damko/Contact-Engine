@@ -20,14 +20,15 @@ class ObjectCommon extends CI_Model
 	protected $properties;
 	protected $baseDn;
 	public $conf;
-	protected $return;
+	protected $result;
 		
 	public function __construct() {
 		parent::__construct();
+		$this->result = new Ce_Return_Object();
 	}
 	
 	public function __destruct() {
-		parent::__destruct();
+		
 	}
 		
 	protected function loadAttrs($object_class) {
@@ -40,7 +41,6 @@ class ObjectCommon extends CI_Model
 	public function _initialize($attribute_name, array $values){
 		$this->properties[$attribute_name] = $values;
 	}
-
 	
 	public function __get($property_name) {
 		//workaround to deal with the multivalue field for uid
@@ -60,6 +60,8 @@ class ObjectCommon extends CI_Model
 	}
 		
 	public function getProperties()	{
+		//TODO Actually I'm returning the plain array of properties, which is not in the standard form [status][data].
+		//I'm leaving like this because I think it's useful but I could change idea
 		return $this->properties;
 	}
 	
@@ -72,71 +74,73 @@ class ObjectCommon extends CI_Model
 		}
 		return $output;
 	}
-	
+		
+		
 	public function read(array $input) { 
 		//input fields: $filter, array $wanted_attributes, $sort_by = null,  $flow_order = null, $wanted_page = null, $items_page = null) {
+		
+		extract($input);
 		
 		$pagination_settings = pagination_setup($input);
 		
 		if(is_array($pagination_settings)) extract($pagination_settings);	
 
-		if(!empty($input['wanted_attributes']) and is_array($input['wanted_attributes'])) 
+		if(empty($wanted_attributes) || !is_array($wanted_attributes)) 
 		{
-			$wanted_attributes = $input['wanted_attributes'];
-		} else {
 			$wanted_attributes = array();
 		}
 		
-		if(empty($input['filter']) || is_array($input['filter'])) 
-		{
-			//TODO this should be a RI function handling the error
-			$return = array();
-			$return['error'] = 'Method "'.__FUNCTION__.'" requires a filter in input';
-			return $return;
-		} else {
-			$filter = $input['filter'];
-		}
+		if(!isset($filter)) $filter = ''; //this will thrown an error in RI_LDAP
 		
 		//perform the search
-		if($this->errorReturn($ldap_result = $this->ri_ldap->CEsearch($this->baseDn, $filter, $wanted_attributes, 0, null, $sort_by,  $flow_order, $wanted_page, $items_page)))
+		$search_exit_status = $this->ri_ldap->CEsearch($this->baseDn, $filter, $wanted_attributes, 0, null, $sort_by,  $flow_order, $wanted_page, $items_page);
+
+		$this->result->importLdapReturnObject($this->ri_ldap->result);
+		
+ 		if($search_exit_status)
 		{
-			return $ldap_result;
+			$ldap_result = $this->ri_ldap->result->data->content;
+			
+			$output = array();
+			if(!isset($strict)) $strict = false;
+			if(is_array($ldap_result))
+			{
+				foreach ($ldap_result as $ldap_item) {
+					//removing the count item
+					unset($ldap_item['count']);
+					
+					if(!$this->bindDataWithClassProperties($ldap_item,$strict, false, false)) return $this->result->returnAsArray();
+					
+					$output[] = $this->toRest($empty_fields);
+				}
+			}
+
+			$this->result->data = $output;
 		}
 
-		if(!$ldap_result) return $this->result;
-		
-		//saving and removing info about the ldap query
-		if(!empty($ldap_result['RestStatus']))
-		{
-			$rest_status = $ldap_result['RestStatus'];
-			unset($ldap_result['RestStatus']);
-		} 
-		
-		//removing the count item
-		unset($ldap_result['count']);
-		
-		$output = array();
-		if(!isset($strict)) $strict = false;
-		foreach ($ldap_result as $ldap_item) {
-			
-			//TODO probably it would be wiser to return the whole result without parsing everysingle entry. Don't know yet
-			$this->bindLdapValuesWithClassProperties($ldap_item,$strict);
-			
-			$output[] = $this->toRest($empty_fields);
-		}
-		
-		//adding saved info about the ldap query
-		if(isset($rest_status)) $output['RestStatus'] = $rest_status;
-			
-		return $output;		
+		$output = $this->result->returnAsArray();
+		return $output;		 
 	}	
 	
+	
+	public function delete($dn)
+	{			
+		$this->ri_ldap->CEdelete($dn);
+	
+		$this->result->importLdapReturnObject($this->ri_ldap->result);
+	
+		return $this->result->returnAsArray();
+	}
+		
 	private function unsetProperties() {
 		foreach ($this->properties as $property => $value) {
 			unset($this->$property);
 		}
 	}
-	protected function bindLdapValuesWithClassProperties($data,$strict = false, $avoid_clean = false) {
+	
+	protected function bindDataWithClassProperties($data,$strict = false, $avoid_clean = false, $validate = true) {
+		
+		$not_processed = $data;
 		
 		//clean everything already stored
 		if(!$avoid_clean) $this->unsetProperties();
@@ -148,10 +152,12 @@ class ObjectCommon extends CI_Model
 			//$data can come as input from a POST or GET request so I have to consider both cases
 			unset($value);
 			if(isset($data[strtolower($key)][0])) $value = $data[strtolower($key)]; //from ldap_search
-			if(isset($data[$key])) $value = $data[$key]; //from POST, GET
+			if(isset($data[$key])) $value = $data[$key]; //from POST, GET, whatever
 			
 			if(isset($value))
 			{
+				unset($not_processed[$key]);
+				
 				if(is_array($value)) 
 				{
 					unset($value['count']);
@@ -159,7 +165,7 @@ class ObjectCommon extends CI_Model
 					if($key == 'uid') $value = array($value);
 				}
 
-				//TODO add lenght checks
+				//TODO add lenght checks and validation stuff
 				
 				//schema says that a string is needed for the current attribute
 				if($this->properties[$key]['single-value'] == '1')
@@ -169,15 +175,37 @@ class ObjectCommon extends CI_Model
 					$this->$key = $value; //array;
 				}
 			} else {
-				//if it's required by the schema 
-				if($strict)
+				 
+				if($strict) //check that all attributs required by the schema [MUST] are filled
 				{
 					if($this->properties[$key]['required'] == 1) 
 					{
-						return false;   //TODO add something meaninful in the RestStatus
+						$this->result = new Ce_Return_Object();
+						$this->result->data = array();
+						$this->result->http_status_code = '415';
+						$this->result->http_message = 'The attribute '.$key.' is mandatory for the object '.$this->objName;
+						$this->result->results_number = '0';
+						$this->result->sent_back_results_number = 0;
+
+						return false;
 					}
 				}
 			}
+		}
+		
+		unset($not_processed[$this->objName]); //the key "$this->objectName is set by the rest client to pass the method to call
+		
+		//let's look which data weren't processed
+		if($validate && count($not_processed) > 0)
+		{
+			$this->result = new Ce_Return_Object();
+			$this->result->data = array();
+			$this->result->http_status_code = '415';
+			$this->result->http_message = 'The attributes '.implode(',', array_keys($not_processed)).' are not attributes for the object '.$this->objName;
+			$this->result->results_number = '0';
+			$this->result->sent_back_results_number = 0;
+			
+			return false;
 		}
 		return true;
 	}
@@ -200,11 +228,11 @@ class ObjectCommon extends CI_Model
 	{
 		if(empty($input['attribute'])) return false;
 		$attribute = $input['attribute'];
-		if(empty($input[$attribute])) return false;
 		
 		$search['filter'] = '('.$attribute.'='.$input[$attribute].')';
-		$found = $this->read($search);
-		return count($found)== 0 ? TRUE : FALSE;
+		$return = $this->read($search);
+		$found = count($return['data']);
+		return $found== 0 ? TRUE : FALSE;
 	}
 	
 	protected function validate()
@@ -265,27 +293,6 @@ class ObjectCommon extends CI_Model
 		
 		return;
 	}
-	
-	protected function errorReturn($return){
-/* 		if(is_object($return))
-		{
-			if(get_class($return) == 'OutOfRangeException')
-			{	
-				//it's an exception for sure
-				$this->return = array();
-				$this->return['error'] = $return->getMessage();
-				return false;
-			}
-		}
-		//if(is_bool($return) and $return === true) return true;
-		return $return; */
-		if(is_array($return) && isset($return['error']))
-		{
-			return true;
-		}
-		return false;
-	}
-
 }
 
 /* End of objectcommon.php */

@@ -5,6 +5,6 @@
  */
 
 //configuration for the location objec
-$config['location']['baseDn'] = "ou=locations,o=2v,dc=2v,dc=ntw";
+$config['location']['baseDn'] = "ou=locations,o=ce,dc=2v,dc=ntw";
 $config['location']['objectClass'] = "dueviLocation"; //ldap objectClass representing the location class
 $config['location']['refreshPeriod'] = ""; //seconds

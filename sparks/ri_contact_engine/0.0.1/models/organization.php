@@ -48,23 +48,45 @@ class Organization extends ObjectCommon
 	}
 		
 	public function create(array $input)
-	{
-		if(!$this->set_oid()) return false;
+	{		
+		if(!$this->set_oid())
+		{
+			$this->result = new Ce_Return_Object();
+			$this->result->data = array();
+			$this->result->http_status_code = '500';
+			$this->result->http_message = 'I can not set a unique dn for the new '.$this->objName.' entry.';
+			$this->result->results_number = '0';
+			$this->result->sent_back_results_number = 0;
+		
+			return $this->result->returnAsArray();
+		}
+		
 		$input['oid'] = $this->oid;
 		
-		if(!$this->bindLdapValuesWithClassProperties($input,true)) return false;
+		if(!$this->bindDataWithClassProperties($input,true))  return $this->result->returnAsArray();
 		
 		//save the entry on the LDAP server
 		$dn = 'oid='.$this->oid.','.$this->baseDn;
 		if(empty($this->objectClass)) $this->objectClass = $this->conf['objectClass'];
-		return $this->ri_ldap->CEcreate($dn,$this->toRest(false)) ? $this->oid : false;
+		
+		//$entry = $this->toRest(false); //TODO delme
+		$exit_status = $this->ri_ldap->CEcreate($this->toRest(false),$dn);
+		
+		$this->result->importLdapReturnObject($this->ri_ldap->result);
+		
+		if($exit_status)
+		{
+			$this->result->data = array('oid' => $this->oid);
+		}
+		
+		return $this->result->returnAsArray();		
 	}
 	
 	public function read(array $input)
 	{	
 		extract($input,$extract_type = EXTR_OVERWRITE);
 		
-		if(!empty($input['filter'])) 
+		if(!empty($input['filter']))
 		{
 			$filter = $input['filter'];
 		} else {
@@ -72,60 +94,147 @@ class Organization extends ObjectCommon
 			if(!empty($input['dbId'])) $filter = '(dbId='.$input['dbId'].')'; //TODO maybe I can remove this
 		}
 		
-		//TODO why this switch?
-/* 		switch ($input['emptyfields']) {
-			case true:
-				$empty_fields = TRUE;
-			break;
-			
-			case false:
-				$empty_fields = FALSE;
-			break;
-						
-			default:
-				$empty_fields = TRUE;
-			break;
-		}		 */
-		
 		$output = array();
-		$output['filter'] = $filter;
-		$output['wanted_attributes'] = $wanted_attributes;
-		$output['sort_by'] = $sort_by;
-		$output['flow_order'] = $flow_order;
-		$output['wanted_page'] = $wanted_page;
-		$output['items_page'] = $items_page;
+		if(isset($filter)) $output['filter'] = $filter;
+		if(isset($wanted_attributes)) $output['wanted_attributes'] = $wanted_attributes;
+		if(isset($sort_by)) $output['sort_by'] = $sort_by;
+		if(isset($flow_order)) $output['flow_order'] = $flow_order;
+		if(isset($wanted_page)) $output['wanted_page'] = $wanted_page;
+		if(isset($items_page)) $output['items_page'] = $items_page;
 		
-		return parent::read($output);
+		return parent::read($output);		
 	}
 
-	public function update(array $input)
+	public function update(array $input = null)
 	{
-		//FIXME This method is fragile atm. It requires more attention. For ex. what happens if I try to change the oid or the dn or the objectClass?
+		//FIXME This method requires more attention. For ex. what happens if I try to change the uid or the dn or the objectClass?
+				
+		if(!is_null($input)) {
+			$return = $this->read($input);
+				
+			if(count($return['data']) == 0) return $this->result->returnAsArray();
+				
+			if(!$this->bindDataWithClassProperties($input, false, true)) return $this->result->returnAsArray();
+		}
 		
-		if(empty($input['oid'])) return false;
-
-		//TODO Should I perform a search over the given oid to be sure the contact exists?
-		//unset($input['filter']);
-		//$this->read($input);
+		if(empty($this->oid)) {
+			$this->result = new Ce_Return_Object();
+			$this->result->data = array();
+			$this->result->http_status_code = '415';
+			$this->result->http_message = 'The '.$this->objName.' entry can not be identified.';
+			$this->result->results_number = '0';
+			$this->result->sent_back_results_number = 0;
+				
+			return $this->result->returnAsArray();
+		}		
 		
-		if(!$this->bindLdapValuesWithClassProperties($input, false, true)) return false;
+		//$this->validate();
 		
 		//save the entry on the LDAP server
 		$dn = 'oid='.$this->oid.','.$this->baseDn;
 		$entry = $this->toRest(false);
 		unset($entry['oid']); //never mess with the id during an update cause it has to do with dn
-		return $this->ri_ldap->CEupdate($dn,$entry) ? $this->oid : false;
+		unset($entry['dn']);
+		
+		$exit_status = $this->ri_ldap->CEupdate($entry, $dn);
+		
+		$this->result->importLdapReturnObject($this->ri_ldap->result);
+		
+		if($exit_status) $this->result->data = array('oid' => $this->oid);
+		
+		return $this->result->returnAsArray();		
 	}
 
 	public function delete($input)
 	{
-		if(empty($input['oid'])) return false;
+		if(!is_array($input) || empty($input['oid']))
+		{
+			$this->result = new Ce_Return_Object();
+			$this->result->data = array();
+			$this->result->http_status_code = '415';
+			$this->result->http_message = 'A valid oid is required to delete a '.$this->objName.' entry.';
+			$this->result->results_number = '0';
+			$this->result->sent_back_results_number = 0;
+		
+			return $this->result->returnAsArray();
+		}
+				
 		$dn = 'oid='.$input['oid'].','.$this->baseDn;
-		return $this->ri_ldap->CEdelete($dn);
+		 		
+		return parent::delete($dn);
 	}
-			
+		
 	public function associate(array $input) {
 		
+		$errors = array();
+	
+		if(empty($input['to'])) $errors[] = 'Missing input "to". Possible values: organization, location';
+	
+		if(empty($input['oid'])) $errors[] = 'Missing input "oid"';
+	
+		if(count($errors) > 0) {
+			$this->result = new Ce_Return_Object();
+			$this->result->data = array();
+			$this->result->http_status_code = '415';
+			$this->result->http_message = implode(', ', $errors);
+			$this->result->results_number = '0';
+			$this->result->sent_back_results_number = 0;
+	
+			return $this->result->returnAsArray();
+		}
+	
+		unset($input['filter']); //we need to get a precise person not a set of people
+	
+		$return = $this->read($input);
+		if(count($return['data']) == 0) return $this->result->returnAsArray();
+	
+		//let's add the new location
+		$to = $input['to'];
+		switch ($to) {
+			case 'location':
+				if(empty($input['locId']) or is_array($input['locId']))
+					$errors[] = 'Missing input "locId".';
+	
+				if(isset($this->locRDN) && is_array($this->locRDN)) {
+					if(!in_array($input['locId'], $this->locRDN))
+					{
+						array_push($this->locRDN, $input['locId']);  //add location to the previous locations
+					}
+				} else {
+					$this->locRDN = array($input['locId']);
+				}
+	
+			break;
+		
+	
+			default:
+				$errors[] = 'Unknown association-type for parameter "to". Possible values: organization, location';
+			break;
+		}
+	
+		if(count($errors) > 0) {
+			$this->result = new Ce_Return_Object();
+			$this->result->data = array();
+			$this->result->http_status_code = '415';
+			$this->result->http_message = implode(', ', $errors);
+			$this->result->results_number = '0';
+			$this->result->sent_back_results_number = 0;
+	
+			return $this->result->returnAsArray();
+		}
+	
+		return $this->update();		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+/* /* 		
 		$data = array();
 		 
 		if(empty($input['to'])) $data['error'] = 'Missing input "to". Possible values: organization, location';
@@ -170,7 +279,7 @@ class Organization extends ObjectCommon
 		}
 		
 		$data['oid'] = $this->oid;
-		return $this->update($data);
+		return $this->update($data); */ 
 	}	
 }
 

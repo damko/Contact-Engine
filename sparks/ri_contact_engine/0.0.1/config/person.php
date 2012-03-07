@@ -5,6 +5,6 @@
  */
 
 //configuration for the person objec
-$config['person']['baseDn'] = "ou=users,o=2v,dc=2v,dc=ntw";
+$config['person']['baseDn'] = "ou=users,o=ce,dc=2v,dc=ntw";
 $config['person']['objectClass'] = "dueviPerson"; //ldap objectClass representing the person class
 $config['person']['refreshPeriod'] = ""; //seconds
