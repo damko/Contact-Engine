@@ -41,6 +41,8 @@ class Contact extends ObjectCommon
 			if($status_people['status_code'] == '200')
 			{
 				$people = $return['data'];
+				$results_pages_people = $return['status']['results_pages'];
+				$results_page_people = $return['status']['results_page'];						
 			} else {
 				$this->result->importLdapReturnObject($this->ri_ldap->result);	
 				return $this->result->returnAsArray();
@@ -50,12 +52,14 @@ class Contact extends ObjectCommon
 			$status_organizations = $return['status'];
 			if($status_organizations['status_code'] == '200')
 			{
-				$organizations  = $return['data'];		
+				$organizations  = $return['data'];
+				$results_pages_organizations = $return['status']['results_pages'];
+				$results_page_organizations = $return['status']['results_page'];
 			} else {
 				$this->result->importLdapReturnObject($this->ri_ldap->result);
 				return $this->result->returnAsArray();
 			}			
-			
+				
 			$data = array_merge($people,$organizations);
 			$this->result = new Ce_Return_Object();
 			$this->result->data = $data;
@@ -63,7 +67,17 @@ class Contact extends ObjectCommon
 			$this->result->http_message = 'OK';
 			$this->result->results_number = $status_people['results_number'] + $status_organizations['results_number'];
 			$this->result->sent_back_results_number = $status_people['results_got_number'] + $status_organizations['results_got_number'];
-			//TODO what to do with the page numbers?
+			
+			//with pages now is a big deal. I return the highest value
+			$diff = $results_pages_people - $results_pages_organizations;
+			if($diff >= 0)
+			{
+				$this->result->results_pages = $results_pages_people;
+				$this->result->results_page = $results_page_people;
+			} else {
+				$this->result->results_pages = $results_pages_organizations;
+				$this->result->results_page = $results_page_organizations;
+			}
 			
 			return $this->result->returnAsArray();
 

@@ -130,10 +130,10 @@ class Ldap_Return_Object extends CI_Model {
 		$this->data = $data;
 		
 		//TODO I am not sure about this
-		if(empty($this->data->results_number)) $this->data->results_number = count($this->data->content);
-		if(empty($this->data->results_pages)) $this->data->results_pages = '1';
-		if(empty($this->data->results_page)) $this->data->results_page = '1';
-		if(empty($this->data->sent_back_results_number)) $this->data->sent_back_results_number = $this->data->results_number;
+		if(!isset($this->data->results_number)) $this->data->results_number = count($this->data->content);
+		if(!isset($this->data->results_pages)) $this->data->results_pages = '1';
+		if(!isset($this->data->results_page)) $this->data->results_page = '1';
+		if(!isset($this->data->sent_back_results_number)) $this->data->sent_back_results_number = $this->data->results_number;
 	}
 
 	/**

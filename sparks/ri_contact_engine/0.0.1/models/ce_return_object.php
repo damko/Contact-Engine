@@ -73,17 +73,17 @@ class Ce_Return_Object extends CI_Model
 		);		
 		
 		//REST info
-		if(!empty($this->http_status_code)) $output['status']['status_code'] = $this->http_status_code;
-		if(!empty($this->http_message)) $output['status']['message'] = $this->http_message;
+		if(isset($this->http_status_code)) $output['status']['status_code'] = $this->http_status_code;
+		if(isset($this->http_message)) $output['status']['message'] = $this->http_message;
 		
 		//pagination
-		if(!empty($this->results_number)) $output['status']['results_number'] = $this->results_number;
-		if(!empty($this->results_pages)) $output['status']['results_pages'] = $this->results_pages;
-		if(!empty($this->results_page)) $output['status']['results_page'] = $this->results_page;
-		if(!empty($this->sent_back_results_number)) $output['status']['results_got_number'] = $this->sent_back_results_number;
+		if(isset($this->results_number)) $output['status']['results_number'] = $this->results_number;
+		if(isset($this->results_pages)) $output['status']['results_pages'] = $this->results_pages;
+		if(isset($this->results_page)) $output['status']['results_page'] = $this->results_page;
+		if(isset($this->sent_back_results_number)) $output['status']['results_got_number'] = $this->sent_back_results_number;
 		
 		//content
-		if(!empty($this->data)) $output['data'] = $this->data;
+		if(isset($this->data)) $output['data'] = $this->data;
 		
 		return $output;
 	}

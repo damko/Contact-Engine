@@ -774,11 +774,15 @@ class Ldap extends CI_Model {
 		//adding RESTinfo
 		$this->data->sent_back_results_number = count($content);
 		
-		$items_page == 0 ? $this->data->results_pages = '1' : $this->data->results_pages =  ceil( $this->data->results_number / $items_page );
+		if($items_page == '0') {
+			$this->data->results_pages = '0';
+		} else {
+			$this->data->results_pages =  ceil( $this->data->results_number / $items_page );
+		}
 				
 		if($this->data->sent_back_results_number == $this->data->results_number) 
 		{
-			$this->data->results_page = '1';
+			$this->data->results_page = '0';
 		} else {
 			$this->data->results_page = $wanted_page;
 		}
