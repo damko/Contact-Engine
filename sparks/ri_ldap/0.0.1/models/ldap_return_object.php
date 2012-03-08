@@ -131,8 +131,8 @@ class Ldap_Return_Object extends CI_Model {
 		
 		//TODO I am not sure about this
 		if(empty($this->data->results_number)) $this->data->results_number = count($this->data->content);
-		if(empty($this->data->results_pages)) $this->data->results_pages = 1;
-		if(empty($this->data->results_page)) $this->data->results_page = 1;
+		if(empty($this->data->results_pages)) $this->data->results_pages = '1';
+		if(empty($this->data->results_page)) $this->data->results_page = '1';
 		if(empty($this->data->sent_back_results_number)) $this->data->sent_back_results_number = $this->data->results_number;
 	}
 
@@ -167,9 +167,9 @@ class Ldap_Return_Object extends CI_Model {
 		$this->data->http_status_code = $error->http_status_code;
 		$this->data->http_status_message = $error->http_status_message;
 		$this->data->content = array();
-		$this->data->results_number = 0;
-		$this->data->results_pages = 1;
-		$this->data->results_page = 1;
-		$this->data->sent_back_results_number = 0;
+		$this->data->results_number = '0';
+		$this->data->results_pages = '1';
+		$this->data->results_page = '1';
+		$this->data->sent_back_results_number = '0';
 	}
 }

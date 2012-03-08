@@ -143,10 +143,10 @@ class Test_Controller extends CI_Controller {
 		echo $this->run($test, 'is_true', 'Is return[status] set? ');
 		
 		$fake = array(
-						'results_number' => 0,
-						'results_got_number' => 0,
-						'results_pages' => 1,
-						'results_page' => 1,
+						'results_number' => '0',
+						'results_got_number' => '0',
+						'results_pages' => '1',
+						'results_page' => '1',
 						'finished' => null,
 						'duration' => null,
 						'status_code' => null,
@@ -304,15 +304,15 @@ class Test_Controller extends CI_Controller {
 
 		
 		$test = false;
-		if($rest_return['status']['results_pages'] > 0 ) $test = true;
+		if($rest_return['status']['results_pages'] >= 1 ) $test = true;
 		
-		echo $this->run($test, 'is_true', $method, 'Is the parameter "results_pages" &gt; 0 ?');
+		echo $this->run($test, 'is_true', $method, 'Is the parameter "results_pages" &gt;= 1 ?');
 
 		
 		$test = false;
-		if($rest_return['status']['results_page'] > 0 ) $test = true;
+		if($rest_return['status']['results_page'] >= 1 ) $test = true;
 		
-		echo $this->run($test, 'is_true', $method, 'Is the parameter "results_page" &gt;= 0 ?');
+		echo $this->run($test, 'is_true', $method, 'Is the parameter "results_page" &gt;= 1 ?');
 
 
 		$test = false;

@@ -62,8 +62,8 @@ class Ce_Return_Object extends CI_Model
 				'status' => array(
 						'results_number' => 0,
 						'results_got_number' => 0,
-						'results_pages' => 1,
-						'results_page' => 1,
+						'results_pages' => '1',
+						'results_page' => '1',
 						'finished' => null,
 						'duration' => null,
 						'status_code' => null,

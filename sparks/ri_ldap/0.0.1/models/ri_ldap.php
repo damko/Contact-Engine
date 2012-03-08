@@ -266,7 +266,7 @@ class Ri_Ldap extends Ldap {
 	 * @param		$deref			integer		Search param. It specifies how aliases should be handled during the search. http://www.php.net/ldap_list
 	 * @param		$sort_by		array		Server side pagination parameter. A simple array containing the LDAP attributes order like "array('sn','givenName');". This will make results ordered by lastname and firstname.
 	 * @param		$flow_order		string		Server side pagination parameter. It could be "asc" or "desc". "asc" -> from A to Z or from smaller numbers to bigger. Viceversa for "desc".
-	 * @param		$wanted_page	integer		Server side pagination parameter. The page number to send back. Let's say that a search with 5 items per pages makes a 13 pages result. With "$wanted_page = 3" I get back items from 10 to 14.
+	 * @param		$wanted_page	integer		Server side pagination parameter. The page number to send back. Let's say that a search with 5 items per pages makes a 13 pages result. With "$wanted_page = 3" I get back items from 14 to 19.
 	 * @param		$items_page		integer		Server side pagination parameter. The number of items for page.
 	 * @var
 	 * @return

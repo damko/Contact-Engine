@@ -766,8 +766,8 @@ class Unit_Tests_RiLdap extends Test_Controller {
 		$filter = '(givenName=Willy*)';
 		$attributes = array('uid','cn','sn','giveName');
 		$sort_by = array('sn','givenName');
-		$wanted_page = 1;
-		$items_per_page = 3;
+		$wanted_page = '1';
+		$items_per_page = '3';
 		$test = $this->rildap->CEsearch($baseDN, $filter, $attributes, 0, null, $sort_by, 'desc', $wanted_page, $items_per_page);
 		//$attributesOnly = 0, $deref = null, array $sort_by = null, $flow_order = null, $wanted_page = null, $items_page = null
 		echo $this->run($test, 'is_true', 'Is the exit status true ?', '');

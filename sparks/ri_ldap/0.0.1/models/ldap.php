@@ -309,7 +309,7 @@ class Ldap extends CI_Model {
 	 * @param		$deref			integer		Search param. It specifies how aliases should be handled during the search. http://www.php.net/ldap_list
 	 * @param		$sort_by		array		Server side pagination parameter. A simple array containing the LDAP attributes order like "array('sn','givenName');". This will make results ordered by lastname and firstname.
 	 * @param		$flow_order		string		Server side pagination parameter. It could be "asc" or "desc". "asc" -> from A to Z or from smaller numbers to bigger. Viceversa for "desc".
-	 * @param		$wanted_page	integer		Server side pagination parameter. The page number to send back. Let's say that a search with 5 items per pages makes a 13 pages result. With "$wanted_page = 3" I get back items from 10 to 14.
+	 * @param		$wanted_page	integer		Server side pagination parameter. The page number to send back. Let's say that a search with 5 items per pages makes a 13 pages result. With "$wanted_page = 3" I get back items from 14 to 19.
 	 * @param		$items_page		integer		Server side pagination parameter. The number of items for page.
 	 * @var			
 	 * @return		
@@ -658,7 +658,7 @@ class Ldap extends CI_Model {
 	 * @param 		$resource 		resource	The LDAP resource got from ldap_list()
 	 * @param 		$sort_by		array		A simple array containing the LDAP attributes order like "array('sn','givenName');". This will make results ordered by lastname and firstname.
 	 * @param		$flow_order		string		It could be "asc" or "desc". "asc" -> from A to Z or from smaller numbers to bigger. Viceversa for "desc".
-	 * @param		$wanted_page	integer		The page number to send back. Let's say that a search with 5 items per pages makes a 13 pages result. With "$wanted_page = 3" I get back items from 10 to 14.
+	 * @param		$wanted_page	integer		The page number to send back. Let's say that a search with 5 items per pages makes a 13 pages result. With "$wanted_page = 3" I get back items from 14 to 19.
 	 * @param		$items_page		integer		The number of items for page.	
 	 * @var			
 	 * @return		boolean
@@ -673,13 +673,13 @@ class Ldap extends CI_Model {
 	 * 
 	 * @todo		
 	 */
-	private function sort_paginate($resource, array $sort_by = null, $flow_order = "asc", $wanted_page = '0', $items_page = 0 )
+	private function sort_paginate($resource, array $sort_by = null, $flow_order = "asc", $wanted_page = 0, $items_page = 0 )
 	{				
 		if($resource == 0) {
 			$this->data->content = array();
 			$this->data->sent_back_results_number = 0;
-			$this->data->results_pages = 1;
-			$this->data->results_page = 1;
+			$this->data->results_pages = '1';
+			$this->data->results_page = '1';
 			return true;
 		}
 		
@@ -724,39 +724,45 @@ class Ldap extends CI_Model {
 			return false;
 		}
 				
-		if ( $wanted_page == '0' || $items_page == '0' )
+		//get the range of item equivalent to the searched page
+		
+		//if($wanted_page == '0' && $items_page != '0') $wanted_page = '1'; //do the pagination and return the 1st page
+		
+		if ($items_page == '0' )
 		{
 			# fetch all in one page
-			$iStart = 0;
-			$iEnd = $this->data->results_number - 1;
+			$item_start = 0;
+			$item_end = $this->data->results_number - 1;
 		}
 		else
 		{
 			# calculate range of page
-			$iStart = $items_page * $wanted_page;
-			$iEnd = $iStart + $items_page - 1;
+			$item_start = $items_page * $wanted_page;
+			$item_end = $item_start + $items_page - 1;
 			if ( $flow_order === "desc" )
 			{
 				# revert range
-				$iStart = $this->data->results_number - 1 - $iEnd;
-				$iEnd = $iStart + $items_page - 1;
+				$item_start = $this->data->results_number - 1 - $item_end;
+				$item_end = $item_start + $items_page - 1;
 			}
 		}
 		
-		# fetch entries
-		foreach ($sort_by as $sField) {
-			ldap_sort( $this->connection, $resource, $sField );
+		# sort ldap entries
+		foreach ($sort_by as $field) {
+			ldap_sort( $this->connection, $resource, $field );
 		}
 		
+		//get the selected range of items
 		$content = array();
 		for (
-	        	$iCurrent = 0, $rEntry = ldap_first_entry( $this->connection, $resource );
-				$iCurrent <= $iEnd && is_resource( $rEntry );
-				$iCurrent++, $rEntry = ldap_next_entry( $this->connection, $rEntry )
-			) {
-			if ( $iCurrent >= $iStart )
+	        	$current_item = 0, $current_entry = ldap_first_entry( $this->connection, $resource );
+				$current_item <= $item_end && is_resource( $current_entry );
+				$current_item++, $current_entry = ldap_next_entry( $this->connection, $current_entry )
+			) 
+		{
+			if ( $current_item >= $item_start )
 			{
-				array_push( $content, ldap_get_attributes( $this->connection, $rEntry ) );
+				array_push( $content, ldap_get_attributes( $this->connection, $current_entry ) );
 			}
 		}
 		
@@ -768,11 +774,11 @@ class Ldap extends CI_Model {
 		//adding RESTinfo
 		$this->data->sent_back_results_number = count($content);
 		
-		$items_page == 0 ? $this->data->results_pages = 1 : $this->data->results_pages =  ceil( $this->data->results_number / $items_page );
-		
+		$items_page == 0 ? $this->data->results_pages = '1' : $this->data->results_pages =  ceil( $this->data->results_number / $items_page );
+				
 		if($this->data->sent_back_results_number == $this->data->results_number) 
 		{
-			$this->data->results_page = 1;
+			$this->data->results_page = '1';
 		} else {
 			$this->data->results_page = $wanted_page;
 		}

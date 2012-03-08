@@ -41,11 +41,6 @@ class Contact extends ObjectCommon
 			if($status_people['status_code'] == '200')
 			{
 				$people = $return['data'];
-//TODO I don't know if it's a good idea to specify the object type. It can be recognized by "uid and oid" and by the objectClass				
-// 				foreach ($people as $key => $item)
-// 				{
-// 					$people[$key]['objName'] = 'person';
-// 				}
 			} else {
 				$this->result->importLdapReturnObject($this->ri_ldap->result);	
 				return $this->result->returnAsArray();
@@ -55,11 +50,7 @@ class Contact extends ObjectCommon
 			$status_organizations = $return['status'];
 			if($status_organizations['status_code'] == '200')
 			{
-				$organizations  = $return['data'];
-// 				foreach ($organizations as $key => $item)
-// 				{
-// 					$organizations[$key]['objName'] = 'organization';
-// 				}				
+				$organizations  = $return['data'];		
 			} else {
 				$this->result->importLdapReturnObject($this->ri_ldap->result);
 				return $this->result->returnAsArray();

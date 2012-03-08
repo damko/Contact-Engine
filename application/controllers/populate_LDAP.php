@@ -178,6 +178,12 @@ class Populate_LDAP extends CI_Controller {
 		$entry['entryCreatedBy'] = 'unit tests';
 		$entry['category'] = 'mycategory';
 		$entry['objectClass'] = 'dueviPerson';
+		$entry['mozillaHomeLocalityName'] = 'Varese';
+		$entry['mozillaHomeCountryName'] = 'Italy';
+		$entry['mail'] = strtolower($name.'@'.$surname.'.com');
+		$entry['labeledURI'] = strtolower('http://www.'.$surname.'.com');
+		$entry['mobile'] = '+1'.($random*2);
+		$entry['homePhone'] = '+39'.($random*3);		
 		
 		$dn = 'uid='.$entry['uid'].','.$this->baseDN;
 		
@@ -204,6 +210,12 @@ class Populate_LDAP extends CI_Controller {
 			$entry['entryCreatedBy'] = 'unit tests';
 			$entry['category'] = 'mycategory';
 			$entry['objectClass'] = 'dueviPerson';
+			$entry['mozillaHomeLocalityName'] = 'Varese';
+			$entry['mozillaHomeCountryName'] = 'Italy';
+			$entry['mail'] = strtolower($name.'@'.$surname.'.com');
+			$entry['labeledURI'] = strtolower('http://www.'.$surname.'.com');
+			$entry['mobile'] = '+1'.($random*2);
+			$entry['homePhone'] = '+39'.($random*3);			
 		
 			$dn = 'uid='.$entry['uid'].','.$this->baseDN;
 		
@@ -249,7 +261,7 @@ class Populate_LDAP extends CI_Controller {
 	
 		echo '<h2>Populating the LDAP branch <i>'.$this->baseDN.'</i></h2>';
 		echo 'This will delete all the data in the branch and will create random entries!  ';
-		echo '<entry type="button" onclick="show_confirm()" value="Continue" />';
+		echo '<input type="button" onclick="show_confirm()" value="Continue" />';
 	
 		if(!isset($_GET['startpopulating']) || $_GET['startpopulating'] != true) die();
 	
@@ -269,13 +281,19 @@ class Populate_LDAP extends CI_Controller {
 	
 		//creating an entry with a specific oid that will be used in the tests
 		$random = rand(999999,9999999);
-		$name = 'ACME_'.$random;
+		$name = 'ACME_yote'.$random;
 	
 		$entry = array();
 		$entry['oid'] = '10000000';
 		$entry['o'] = $name;
 		$entry['enabled'] = 'TRUE';
 		$entry['entryCreatedBy'] = 'unit_tests';
+ 		$entry['l'] = 'Milano';
+ 		$entry['countryName'] = 'Italy';
+		$entry['omail'] = strtolower('info@'.$name.'.com');
+		$entry['oURL'] = strtolower('http://www.'.$name.'.com');
+		$entry['oMobile'] = '+1'.($random*2);
+		$entry['telephoneNumber'] = '+39'.($random*3);
 		$entry['objectClass'] = 'dueviOrganization';
 		
 		$dn = 'oid='.$entry['oid'].','.$this->baseDN;
@@ -287,7 +305,7 @@ class Populate_LDAP extends CI_Controller {
 		for ($i = 2; $i <= $index; $i++) {
 				
 			$random = rand(999999,9999999);
-			$name = 'ACME_'.$random;
+			$name = 'ACME_yote'.$random;
 	
 			//entry fields from the LDAP schema MUST attribute
 			$entry = array();
@@ -295,6 +313,12 @@ class Populate_LDAP extends CI_Controller {
 			$entry['o'] = $name;
 			$entry['enabled'] = 'TRUE';
 			$entry['entryCreatedBy'] = 'unit_tests';
+ 			$entry['l'] = 'Milano';
+ 			$entry['countryName'] = 'Italy';
+ 			$entry['omail'] = strtolower('info@'.$name.'.com');
+ 			$entry['oURL'] = strtolower('http://www.'.$name.'.com');
+ 			$entry['oMobile'] = '+1'.($random*2);
+ 			$entry['telephoneNumber'] = '+39'.($random*3);
 			$entry['objectClass'] = 'dueviOrganization';
 			
 			$dn = 'oid='.$entry['oid'].','.$this->baseDN;
