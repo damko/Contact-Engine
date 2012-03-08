@@ -392,7 +392,7 @@ class Test_Controller extends CI_Controller {
 		if(!isset($lro->data->results_number)) $test = false;
 		if(!isset($lro->data->results_pages)) $test = false;
 		if(!isset($lro->data->results_page)) $test = false;
-		if(!isset($lro->data->sent_back_results_number)) $test = false;
+		if(!isset($lro->data->results_got_number)) $test = false;
 		
 		if(!isset($lro->data->content)) $test = false;
 		echo $this->run($test, 'is_true', 'Are the LdapReturnObject->data mandatory attributes all set ?', '');
@@ -417,12 +417,12 @@ class Test_Controller extends CI_Controller {
 		echo $this->run($test, 'is_true', 'Is results_number &gt;= 1 ?', '');
 
 		$test = false;
-		if($lro->data->sent_back_results_number >= 1) $test = true;
-		echo $this->run($test, 'is_true', 'Is sent_back_results_number &gt;= 1 ?', '');
+		if($lro->data->results_got_number >= 1) $test = true;
+		echo $this->run($test, 'is_true', 'Is results_got_number &gt;= 1 ?', '');
 		
 		$test = false;
-		if($lro->data->sent_back_results_number <= $lro->data->results_number) $test = true;
-		echo $this->run($test, 'is_true', 'Is sent_back_results_number <= $lro->data->results_number ?', '');
+		if($lro->data->results_got_number <= $lro->data->results_number) $test = true;
+		echo $this->run($test, 'is_true', 'Is results_got_number <= $lro->data->results_number ?', '');
 		
 		
 		
@@ -455,7 +455,7 @@ class Test_Controller extends CI_Controller {
 		
 		echo $this->run($lro->data->results_page, '1', 'Is results_page == 1 ?', '');
 		
-		echo $this->run($lro->data->sent_back_results_number, '0', 'Is sent_back_results_number == 0 ?', '');
+		echo $this->run($lro->data->results_got_number, '0', 'Is results_got_number == 0 ?', '');
 		
 	}
 		

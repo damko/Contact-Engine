@@ -8,7 +8,7 @@ class Ce_Return_Object extends CI_Model
 	protected $results_number = null; //total number of result for the current request
 	protected $results_pages = null; //number of pages necessary to display all the data
 	protected $results_page = null; //page number of the current set	
-	protected $sent_back_results_number = null; //number of items contained in the current set
+	protected $results_got_number = null; //number of items contained in the current set
 	
 	public function __construct(){
 		parent::__construct();
@@ -35,7 +35,7 @@ class Ce_Return_Object extends CI_Model
 		$this->http_message = $lro->data->http_status_message;
 		$this->data = $lro->data->content;		
 		$this->results_number = $lro->data->results_number; 
-		$this->sent_back_results_number = $lro->data->sent_back_results_number;
+		$this->results_got_number = $lro->data->results_got_number;
 		$this->results_pages = $lro->data->results_pages;
 		$this->results_page = $lro->data->results_page;		
 		
@@ -51,7 +51,7 @@ class Ce_Return_Object extends CI_Model
 	}
 	private function updateResultsValues() {
 		$this->results_number = count($this->data);
-		$this->sent_back_results_number = $this->results_number;
+		$this->results_got_number = $this->results_number;
 		
 		$this->results_pages = '1';
 		$this->results_page = '1';		
@@ -80,7 +80,7 @@ class Ce_Return_Object extends CI_Model
 		if(isset($this->results_number)) $output['status']['results_number'] = $this->results_number;
 		if(isset($this->results_pages)) $output['status']['results_pages'] = $this->results_pages;
 		if(isset($this->results_page)) $output['status']['results_page'] = $this->results_page;
-		if(isset($this->sent_back_results_number)) $output['status']['results_got_number'] = $this->sent_back_results_number;
+		if(isset($this->results_got_number)) $output['status']['results_got_number'] = $this->results_got_number;
 		
 		//content
 		if(isset($this->data)) $output['data'] = $this->data;

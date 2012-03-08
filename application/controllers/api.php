@@ -345,7 +345,7 @@ class Api extends REST_Controller
 				$this->result->http_status_code = '404';
 				$this->result->http_message = 'The object '.$model.' has no public method called '.$calledMethod;
 				$this->result->results_number = '0';
-				$this->result->sent_back_results_number = 0;
+				$this->result->results_got_number = 0;
 				
 				return $this->result->returnAsArray();
 			}			

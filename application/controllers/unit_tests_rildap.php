@@ -805,7 +805,7 @@ class Unit_Tests_RiLdap extends Test_Controller {
 		
 		
 		$this->getCodeOrigin();
-		$test = ($items_per_page = $this->rildap->result->data->sent_back_results_number) ? true : false;
+		$test = ($items_per_page = $this->rildap->result->data->results_got_number) ? true : false;
 		echo $this->run($test, 'is_true', 'Is the declared number of items per page equal to '.$items_per_page.' ?', '');
 
 		

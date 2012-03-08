@@ -19,7 +19,7 @@ class Ldap_Data_Object extends CI_Model {
 	protected $results_number; //total number of result for the current request
 	protected $results_pages; //number of pages necessary to display all the data
 	protected $results_page; //page number of the current set	
-	protected $sent_back_results_number; //number of items contained in the current set
+	protected $results_got_number; //number of items contained in the current set
 		
 	public function __construct(){
 		parent::__construct();

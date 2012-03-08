@@ -31,7 +31,7 @@ class Contact extends ObjectCommon
 			$this->result->http_status_code = '415';
 			$this->result->http_message = 'The method read for the object '.$this->objName.' requires an array in input.';
 			$this->result->results_number = '0';
-			$this->result->sent_back_results_number = 0;
+			$this->result->results_got_number = 0;
 				
 			return $this->result->returnAsArray(); 
 			
@@ -66,7 +66,7 @@ class Contact extends ObjectCommon
 			$this->result->http_status_code = '200';
 			$this->result->http_message = 'OK';
 			$this->result->results_number = $status_people['results_number'] + $status_organizations['results_number'];
-			$this->result->sent_back_results_number = $status_people['results_got_number'] + $status_organizations['results_got_number'];
+			$this->result->results_got_number = $status_people['results_got_number'] + $status_organizations['results_got_number'];
 			
 			//with pages now is a big deal. I return the highest value
 			$diff = $results_pages_people - $results_pages_organizations;

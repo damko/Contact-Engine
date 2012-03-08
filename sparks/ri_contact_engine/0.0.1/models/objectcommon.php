@@ -69,7 +69,7 @@ class ObjectCommon extends CI_Model
 			$this->result->results_pages = '1';
 			$this->result->results_page = '1';
 			$this->result->results_number = count($this->properties);
-			$this->result->sent_back_results_number = $this->result->results_number;
+			$this->result->results_got_number = $this->result->results_number;
 			
 			return $this->result->returnAsArray();			
 		} else {
@@ -198,7 +198,7 @@ class ObjectCommon extends CI_Model
 						$this->result->http_status_code = '415';
 						$this->result->http_message = 'The attribute '.$key.' is mandatory for the object '.$this->objName;
 						$this->result->results_number = '0';
-						$this->result->sent_back_results_number = 0;
+						$this->result->results_got_number = 0;
 
 						return false;
 					}
@@ -216,7 +216,7 @@ class ObjectCommon extends CI_Model
 			$this->result->http_status_code = '415';
 			$this->result->http_message = 'The attributes '.implode(',', array_keys($not_processed)).' are not attributes for the object '.$this->objName;
 			$this->result->results_number = '0';
-			$this->result->sent_back_results_number = 0;
+			$this->result->results_got_number = 0;
 			
 			return false;
 		}

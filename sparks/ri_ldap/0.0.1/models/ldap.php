@@ -677,7 +677,7 @@ class Ldap extends CI_Model {
 	{				
 		if($resource == 0) {
 			$this->data->content = array();
-			$this->data->sent_back_results_number = 0;
+			$this->data->results_got_number = 0;
 			$this->data->results_pages = '1';
 			$this->data->results_page = '1';
 			return true;
@@ -724,10 +724,7 @@ class Ldap extends CI_Model {
 			return false;
 		}
 				
-		//get the range of item equivalent to the searched page
-		
-		//if($wanted_page == '0' && $items_page != '0') $wanted_page = '1'; //do the pagination and return the 1st page
-		
+		//get the range of item equivalent to the searched page	
 		if ($items_page == '0' )
 		{
 			# fetch all in one page
@@ -772,7 +769,7 @@ class Ldap extends CI_Model {
 		$this->data->content = $content;
 		
 		//adding RESTinfo
-		$this->data->sent_back_results_number = count($content);
+		$this->data->results_got_number = count($content);
 		
 		if($items_page == '0') {
 			$this->data->results_pages = '0';
@@ -780,7 +777,7 @@ class Ldap extends CI_Model {
 			$this->data->results_pages =  ceil( $this->data->results_number / $items_page );
 		}
 				
-		if($this->data->sent_back_results_number == $this->data->results_number) 
+		if($this->data->results_got_number == $this->data->results_number) 
 		{
 			$this->data->results_page = '0';
 		} else {
