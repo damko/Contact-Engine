@@ -64,10 +64,8 @@ class ObjectCommon extends CI_Model
 			//it's an API request
 			$this->result = new Ce_Return_Object();
 			$this->result->data = $this->properties;
-			$this->result->http_status_code = '200';
-			$this->result->http_message = 'OK';
-			$this->result->results_pages = '1';
-			$this->result->results_page = '1';
+			$this->result->status_code = '200';
+			$this->result->message = 'OK';
 			$this->result->results_number = count($this->properties);
 			$this->result->results_got_number = $this->result->results_number;
 			
@@ -195,10 +193,10 @@ class ObjectCommon extends CI_Model
 					{
 						$this->result = new Ce_Return_Object();
 						$this->result->data = array();
-						$this->result->http_status_code = '415';
-						$this->result->http_message = 'The attribute '.$key.' is mandatory for the object '.$this->objName;
-						$this->result->results_number = '0';
-						$this->result->results_got_number = 0;
+						$this->result->status_code = '415';
+						$this->result->message = 'The attribute '.$key.' is mandatory for the object '.$this->objName;
+// 						$this->result->results_number = '0';
+// 						$this->result->results_got_number = 0;
 
 						return false;
 					}
@@ -213,10 +211,10 @@ class ObjectCommon extends CI_Model
 		{
 			$this->result = new Ce_Return_Object();
 			$this->result->data = array();
-			$this->result->http_status_code = '415';
-			$this->result->http_message = 'The attributes '.implode(',', array_keys($not_processed)).' are not attributes for the object '.$this->objName;
-			$this->result->results_number = '0';
-			$this->result->results_got_number = 0;
+			$this->result->status_code = '415';
+			$this->result->message = 'The attributes '.implode(',', array_keys($not_processed)).' are not attributes for the object '.$this->objName;
+// 			$this->result->results_number = '0';
+// 			$this->result->results_got_number = 0;
 			
 			return false;
 		}

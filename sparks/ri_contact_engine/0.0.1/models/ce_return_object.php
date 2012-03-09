@@ -1,14 +1,16 @@
 <?php  if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
 class Ce_Return_Object extends CI_Model
-{	
+{		
 	protected $data = array(); //contains data
-	protected $http_status_code = null; //this is for REST response.
-	protected $http_message = null; //this is for REST response.
+	protected $status_code = null; //this is for REST response.
+	protected $message = null; //this is for REST response.
 	protected $results_number = null; //total number of result for the current request
+	protected $results_got_number = null; //number of items contained in the current set
 	protected $results_pages = null; //number of pages necessary to display all the data
 	protected $results_page = null; //page number of the current set	
-	protected $results_got_number = null; //number of items contained in the current set
+	protected $finished = null; //page number of the current set
+	protected $duration = null; //page number of the current set
 	
 	public function __construct(){
 		parent::__construct();
@@ -19,7 +21,35 @@ class Ce_Return_Object extends CI_Model
 	}
 	
 	public function __set($attribute, $value) {
-		$this->$attribute = $value;
+		
+		//default values
+		$default = array(
+						'data' => array(),				
+						'status_code' => '500',
+						'message' => 0,
+						'results_number' => 0,
+						'results_got_number' => 0,
+						'results_pages' => '0',
+						'results_page' => '0',
+						'finished' => null,
+						'duration' => null,
+		);
+		
+		//sets the default values if necessary and prevents to store in the obj attributes that are not declared
+		$obj_attributes = array_keys(get_object_vars($this));
+		if(in_array($attribute, $obj_attributes))
+		{
+			if(is_null($value)) {
+					$value = $default[$attribute];
+			} 
+			
+			if($attribute == 'data' && !is_array($value)) $value = $default[$attribute];
+			
+			//finally store the value
+			$this->$attribute = $value;
+		} else {
+			$a = '';
+		}		
 	}
 	
 	public function __get($attribute) {
@@ -31,8 +61,8 @@ class Ce_Return_Object extends CI_Model
 		$obj_name = get_class($lro);
 		if($obj_name != 'Ldap_Return_Object') return false;
 		
-		$this->http_status_code = $lro->data->http_status_code;
-		$this->http_message = $lro->data->http_status_message;
+		$this->status_code = $lro->data->http_status_code;
+		$this->message = $lro->data->http_status_message;
 		$this->data = $lro->data->content;		
 		$this->results_number = $lro->data->results_number; 
 		$this->results_got_number = $lro->data->results_got_number;
@@ -49,12 +79,10 @@ class Ce_Return_Object extends CI_Model
 		//It's no more a LDAP result
 		$this->updateResultsValues();		
 	}
+	
 	private function updateResultsValues() {
 		$this->results_number = count($this->data);
-		$this->results_got_number = $this->results_number;
-		
-		$this->results_pages = '1';
-		$this->results_page = '1';		
+		$this->results_got_number = $this->results_number;		
 	}
 	
 	public function returnAsArray() {
@@ -62,8 +90,8 @@ class Ce_Return_Object extends CI_Model
 				'status' => array(
 						'results_number' => 0,
 						'results_got_number' => 0,
-						'results_pages' => '1',
-						'results_page' => '1',
+						'results_pages' => '0',
+						'results_page' => '0',
 						'finished' => null,
 						'duration' => null,
 						'status_code' => null,
@@ -73,8 +101,8 @@ class Ce_Return_Object extends CI_Model
 		);		
 		
 		//REST info
-		if(isset($this->http_status_code)) $output['status']['status_code'] = $this->http_status_code;
-		if(isset($this->http_message)) $output['status']['message'] = $this->http_message;
+		if(isset($this->status_code)) $output['status']['status_code'] = $this->status_code;
+		if(isset($this->message)) $output['status']['message'] = $this->message;
 		
 		//pagination
 		if(isset($this->results_number)) $output['status']['results_number'] = $this->results_number;

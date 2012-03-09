@@ -184,6 +184,7 @@ class Populate_LDAP extends CI_Controller {
 		$entry['labeledURI'] = strtolower('http://www.'.$surname.'.com');
 		$entry['mobile'] = '+1'.($random*2);
 		$entry['homePhone'] = '+39'.($random*3);		
+		$entry['entryCreationDate'] = date('Y-m-d');
 		
 		$dn = 'uid='.$entry['uid'].','.$this->baseDN;
 		
@@ -215,7 +216,8 @@ class Populate_LDAP extends CI_Controller {
 			$entry['mail'] = strtolower($name.'@'.$surname.'.com');
 			$entry['labeledURI'] = strtolower('http://www.'.$surname.'.com');
 			$entry['mobile'] = '+1'.($random*2);
-			$entry['homePhone'] = '+39'.($random*3);			
+			$entry['homePhone'] = '+39'.($random*3);	
+			$entry['entryCreationDate'] = date('Y-m-d');
 		
 			$dn = 'uid='.$entry['uid'].','.$this->baseDN;
 		

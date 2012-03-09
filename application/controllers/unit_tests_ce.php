@@ -210,6 +210,16 @@ class Unit_Tests_Ce extends Test_Controller {
 		$test = false;
 		if($rest_return['status']['results_number'] > $rest_return['status']['results_got_number']) $test = true;
 		$this->run($test, 'is_true', 'Is results_number &gt; results_got_number ?','I expect to get only part of the available results');
+
+		$this->getCodeOrigin();
+		$test = false;
+		if($rest_return['status']['results_pages'] > 0) $test = true;
+		$this->run($test, 'is_true', 'Is results_pages &gt; 0 ?','I expect to get more than zero');
+		
+		$this->getCodeOrigin();
+		$test = false;
+		if($rest_return['status']['results_pages'] > $rest_return['status']['results_page']) $test = true;
+		$this->run($test, 'is_true', 'Is results_pages &gt; results_page ?','I expect to get more pages than the page number I asked for');
 		
 		$this->printReturn($rest_return);
 
@@ -244,6 +254,16 @@ class Unit_Tests_Ce extends Test_Controller {
 		$test = false;
 		if($rest_return['status']['results_number'] > $rest_return['status']['results_got_number']) $test = true;
 		$this->run($test, 'is_true', 'Is results_number &gt; results_got_number ?','I expect to get only part of the available results');
+
+		$this->getCodeOrigin();
+		$test = false;
+		if($rest_return['status']['results_pages'] > 0) $test = true;
+		$this->run($test, 'is_true', 'Is results_pages &gt; 0 ?','I expect to get more than zero');
+		
+		$this->getCodeOrigin();
+		$test = false;
+		if($rest_return['status']['results_pages'] > $rest_return['status']['results_page']) $test = true;
+		$this->run($test, 'is_true', 'Is results_pages &gt; results_page ?','I expect to get more pages than the page number I asked for');
 		
 		$this->printReturn($rest_return);		
 		
@@ -277,6 +297,16 @@ class Unit_Tests_Ce extends Test_Controller {
 		$test = false;
 		if($rest_return['status']['results_number'] > $rest_return['status']['results_got_number']) $test = true;
 		$this->run($test, 'is_true', 'Is results_number &gt; results_got_number ?','I expect to get only part of the available results');
+		
+		$this->getCodeOrigin();
+		$test = false;
+		if($rest_return['status']['results_pages'] > 0) $test = true;
+		$this->run($test, 'is_true', 'Is results_pages &gt; 0 ?','I expect to get more than zero');
+		
+		$this->getCodeOrigin();
+		$test = false;
+		if($rest_return['status']['results_pages'] > $rest_return['status']['results_page']) $test = true;
+		$this->run($test, 'is_true', 'Is results_pages &gt; results_page ?','I expect to get more pages than the page number I asked for');
 		
 		$this->printReturn($rest_return);
 

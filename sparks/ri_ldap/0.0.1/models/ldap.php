@@ -678,8 +678,8 @@ class Ldap extends CI_Model {
 		if($resource == 0) {
 			$this->data->content = array();
 			$this->data->results_got_number = 0;
-			$this->data->results_pages = '1';
-			$this->data->results_page = '1';
+			$this->data->results_pages = '0';
+			$this->data->results_page = '0';
 			return true;
 		}
 		

@@ -342,10 +342,10 @@ class Api extends REST_Controller
 			{
 				$this->result = new Ce_Return_Object();
 				$this->result->data = array();
-				$this->result->http_status_code = '404';
-				$this->result->http_message = 'The object '.$model.' has no public method called '.$calledMethod;
+				$this->result->status_code = '404';
+				$this->result->message = 'The object '.$model.' has no public method called '.$calledMethod;
 				$this->result->results_number = '0';
-				$this->result->results_got_number = 0;
+				$this->result->results_got_number = '0';
 				
 				return $this->result->returnAsArray();
 			}			

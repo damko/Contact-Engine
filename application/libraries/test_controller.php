@@ -304,15 +304,15 @@ class Test_Controller extends CI_Controller {
 
 		
 		$test = false;
-		if($rest_return['status']['results_pages'] >= 1 ) $test = true;
+		if($rest_return['status']['results_pages'] >= 0 ) $test = true;
 		
-		echo $this->run($test, 'is_true', $method, 'Is the parameter "results_pages" &gt;= 1 ?');
+		echo $this->run($test, 'is_true', $method, 'Is the parameter "results_pages" &gt;= 0 ?');
 
 		
 		$test = false;
-		if($rest_return['status']['results_page'] >= 1 ) $test = true;
+		if($rest_return['status']['results_page'] >= 0 ) $test = true;
 		
-		echo $this->run($test, 'is_true', $method, 'Is the parameter "results_page" &gt;= 1 ?');
+		echo $this->run($test, 'is_true', $method, 'Is the parameter "results_page" &gt;= 0 ?');
 
 
 		$test = false;
@@ -428,12 +428,12 @@ class Test_Controller extends CI_Controller {
 		
 		
 		$test = false;
-		if($lro->data->results_pages >= 1) $test = true; 
-		echo $this->run($test, 'is_true', 'Is results_pages &gt;= 1 ?', '');
+		if($lro->data->results_pages >= 0) $test = true; 
+		echo $this->run($test, 'is_true', 'Is results_pages &gt;= 0 ?', '');
 		
 		$test = false;
-		if($lro->data->results_page >= 1) $test = true;
-		echo $this->run($test, 'is_true', 'Is results_page &gt;= 1 ?', '');	
+		if($lro->data->results_page >= 0) $test = true;
+		echo $this->run($test, 'is_true', 'Is results_page &gt;= 0 ?', '');	
 
 		$test = false;
 		if($lro->data->results_page <= $lro->data->results_pages) $test = true;
@@ -451,9 +451,9 @@ class Test_Controller extends CI_Controller {
 		
 		echo $this->run($lro->data->results_number, '0', 'Is results_number == 0 ?', '');
 		
-		echo $this->run($lro->data->results_pages, '1', 'Is results_pages == 1 ?', '');
+		echo $this->run($lro->data->results_pages, '0', 'Is results_pages == 0 ?', '');
 		
-		echo $this->run($lro->data->results_page, '1', 'Is results_page == 1 ?', '');
+		echo $this->run($lro->data->results_page, '0', 'Is results_page == 0 ?', '');
 		
 		echo $this->run($lro->data->results_got_number, '0', 'Is results_got_number == 0 ?', '');
 		

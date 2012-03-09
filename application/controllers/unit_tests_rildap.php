@@ -52,12 +52,12 @@ class Unit_Tests_RiLdap extends Test_Controller {
 		$this->getCodeOrigin();
 		$test = count($this->rildap->result->errors);
 		echo $this->run($test, '0','Counting errors of the previous test: expecting 0, got: '.$test,'');
-		$this->printLdapResult($this->rildap->result);
 		
 		
 		
 		$this->getCodeOrigin();
-		$this->checkLdapReturnObjectHasNoContent($this->rildap->result);		
+		$this->checkLdapReturnObjectHasNoContent($this->rildap->result);
+		$this->printLdapResult($this->rildap->result);
 	}
 	
 	
@@ -743,13 +743,13 @@ class Unit_Tests_RiLdap extends Test_Controller {
 		
 		
 		$this->getCodeOrigin();
-		echo $this->run($this->rildap->result->data->results_pages, '1', 'Is the total number of pages equal to 1 ?', '');
+		echo $this->run($this->rildap->result->data->results_pages, '0', 'Is the total number of pages equal to 0 ?', '');
 		
 		
 		
 		
 		$this->getCodeOrigin();
-		echo $this->run($this->rildap->result->data->results_page, '1', 'Is the current page number equal to 1 ?', '');
+		echo $this->run($this->rildap->result->data->results_page, '0', 'Is the current page number equal to 0 ?', '');
 		$this->printLdapResult($this->rildap->result);		
 		
 		

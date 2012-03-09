@@ -53,10 +53,10 @@ class Organization extends ObjectCommon
 		{
 			$this->result = new Ce_Return_Object();
 			$this->result->data = array();
-			$this->result->http_status_code = '500';
-			$this->result->http_message = 'I can not set a unique dn for the new '.$this->objName.' entry.';
-			$this->result->results_number = '0';
-			$this->result->results_got_number = 0;
+			$this->result->status_code = '500';
+			$this->result->message = 'I can not set a unique dn for the new '.$this->objName.' entry.';
+// 			$this->result->results_number = '0';
+// 			$this->result->results_got_number = 0;
 		
 			return $this->result->returnAsArray();
 		}
@@ -117,10 +117,10 @@ class Organization extends ObjectCommon
 		if(empty($this->oid)) {
 			$this->result = new Ce_Return_Object();
 			$this->result->data = array();
-			$this->result->http_status_code = '415';
-			$this->result->http_message = 'The '.$this->objName.' entry can not be identified.';
-			$this->result->results_number = '0';
-			$this->result->results_got_number = 0;
+			$this->result->status_code = '415';
+			$this->result->message = 'The '.$this->objName.' entry can not be identified.';
+// 			$this->result->results_number = '0';
+// 			$this->result->results_got_number = 0;
 				
 			return $this->result->returnAsArray();
 		}		
@@ -148,10 +148,10 @@ class Organization extends ObjectCommon
 		{
 			$this->result = new Ce_Return_Object();
 			$this->result->data = array();
-			$this->result->http_status_code = '415';
-			$this->result->http_message = 'A valid oid is required to delete a '.$this->objName.' entry.';
-			$this->result->results_number = '0';
-			$this->result->results_got_number = 0;
+			$this->result->status_code = '415';
+			$this->result->message = 'A valid oid is required to delete a '.$this->objName.' entry.';
+// 			$this->result->results_number = '0';
+// 			$this->result->results_got_number = 0;
 		
 			return $this->result->returnAsArray();
 		}
@@ -172,10 +172,10 @@ class Organization extends ObjectCommon
 		if(count($errors) > 0) {
 			$this->result = new Ce_Return_Object();
 			$this->result->data = array();
-			$this->result->http_status_code = '415';
-			$this->result->http_message = implode(', ', $errors);
-			$this->result->results_number = '0';
-			$this->result->results_got_number = 0;
+			$this->result->status_code = '415';
+			$this->result->message = implode(', ', $errors);
+// 			$this->result->results_number = '0';
+// 			$this->result->results_got_number = 0;
 	
 			return $this->result->returnAsArray();
 		}
@@ -212,10 +212,10 @@ class Organization extends ObjectCommon
 		if(count($errors) > 0) {
 			$this->result = new Ce_Return_Object();
 			$this->result->data = array();
-			$this->result->http_status_code = '415';
-			$this->result->http_message = implode(', ', $errors);
-			$this->result->results_number = '0';
-			$this->result->results_got_number = 0;
+			$this->result->status_code = '415';
+			$this->result->message = implode(', ', $errors);
+// 			$this->result->results_number = '0';
+// 			$this->result->results_got_number = 0;
 	
 			return $this->result->returnAsArray();
 		}
