@@ -163,7 +163,7 @@ class Populate_LDAP extends CI_Controller {
 
 		//creating an entry with a specific uid that will be used in the tests
 		$random = rand(999999,9999999);
-		$surname = 'Coyote_'.$random;
+		$surname = 'Coyote';
 		$name = 'Willy';
 		
 		$entry = array();
@@ -283,7 +283,7 @@ class Populate_LDAP extends CI_Controller {
 	
 		//creating an entry with a specific oid that will be used in the tests
 		$random = rand(999999,9999999);
-		$name = 'ACME_yote'.$random;
+		$name = 'ACME';
 	
 		$entry = array();
 		$entry['oid'] = '10000000';

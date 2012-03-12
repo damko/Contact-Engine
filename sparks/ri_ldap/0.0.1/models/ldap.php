@@ -561,6 +561,7 @@ class Ldap extends CI_Model {
 			break;
 	
 			case 'ldap_modify':
+				$a = $entry;
 				if(! $result = ldap_modify($this->connection, $this->dn, $entry)) {
 					$ldap_error = $this->getLdapError($command);
 					$message = $ldap_error['message'];
@@ -614,6 +615,10 @@ class Ldap extends CI_Model {
 		
 		//throws the Exception
 		if(isset($message)) {
+			if($ldap_error['ldap_errno'] == '21') {
+				$message .= '. Ldap syntax error.';
+				$http_status_code = '500';
+			}						
 			if(!isset($http_status_code)) $http_status_code = '500';
 			$this->report('trigger', $message, $http_status_code);
 		}

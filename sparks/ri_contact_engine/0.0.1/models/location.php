@@ -61,8 +61,6 @@ class Location extends ObjectCommon
 			$this->result->data = array();
 			$this->result->status_code = '500';
 			$this->result->message = 'I can not set a unique dn for the new '.$this->objName.' entry.';
-// 			$this->result->results_number = '0';
-// 			$this->result->results_got_number = 0;
 		
 			return $this->result->returnAsArray();
 		}
@@ -80,9 +78,24 @@ class Location extends ObjectCommon
 		
 		$this->result->importLdapReturnObject($this->ri_ldap->result);
 
-		if($exit_status) $this->result->pushData(array('locId' => $this->locId));
+		if($exit_status) 
+		{
+			$this->result->pushData(array('locId' => $this->locId));
+			$return = $this->result->returnAsArray();
+			
+			//get geolocation
+			if($this->getLatitudeLongitude())
+			{
+				$entry = array();
+				$entry['locLatitude'] = $this->locLatitude;
+				$entry['locLongitude'] = $this->locLongitude;
+			
+				$this->ri_ldap->CEupdate($entry, $dn);
+			}
+				
+		}
 		
-		return $this->result->returnAsArray();
+		return $return;
 	}
 	
 	public function read(array $input)
@@ -130,9 +143,23 @@ class Location extends ObjectCommon
 		
 		$this->result->importLdapReturnObject($this->ri_ldap->result);
 
-		if($exit_status) $this->result->pushData(array('locId' => $this->locId));
+		if($exit_status) 
+		{	
+			$this->result->pushData(array('locId' => $this->locId));
+			$return = $this->result->returnAsArray();
+			
+			//get geolocation
+			if($this->getLatitudeLongitude())
+			{
+				$entry = array();
+				$entry['locLatitude'] = $this->locLatitude;
+				$entry['locLongitude'] = $this->locLongitude;
+				
+				$this->ri_ldap->CEupdate($entry, $dn);
+			}
+		}
 		
-		return $this->result->returnAsArray();
+		return $return;
 		
 	}
 
@@ -144,8 +171,6 @@ class Location extends ObjectCommon
 			$this->result->data = array();
 			$this->result->status_code = '415';
 			$this->result->message = 'A valid locId is required to delete a '.$this->objName.' entry.';
-// 			$this->result->results_number = '0';
-// 			$this->result->results_got_number = 0;
 	
 			return $this->result->returnAsArray();
 		}
@@ -160,6 +185,8 @@ class Location extends ObjectCommon
 		//a bit of validation
 		if(empty($this->locStreet)) return false;
 		if(empty($this->locCity)) return false;
+		if(empty($this->locState)) return false;
+		if(empty($this->locCountry)) return false;
 		
 		//that's the yahoo placefinder application ID
 		$appId='dj0yJmk9eUVJNWFjNFhxRll3JmQ9WVdrOVRuQkdaa1J5TjJrbWNHbzlOalF6TmpFNE1UWXkmcz1jb25zdW1lcnNlY3JldCZ4PTY5';
@@ -175,11 +202,14 @@ class Location extends ObjectCommon
 	
 		//makes the request to yahoo
 		$xml=simplexml_load_file($search,"SimpleXMLElement",LIBXML_NOCDATA);
-		if ($xml->Result->quality > 60 && $xml->Error==0)
+		if ($xml->Result->quality >= 60 && $xml->Error==0)
 		{
 			$this->locLatitude = (string) $xml->Result->latitude;
 			$this->locLongitude = (string) $xml->Result->longitude;
+			return true;
 		}
+		
+		return false;
 	}	
 }
 

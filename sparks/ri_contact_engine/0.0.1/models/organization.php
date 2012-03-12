@@ -119,9 +119,7 @@ class Organization extends ObjectCommon
 			$this->result->data = array();
 			$this->result->status_code = '415';
 			$this->result->message = 'The '.$this->objName.' entry can not be identified.';
-// 			$this->result->results_number = '0';
-// 			$this->result->results_got_number = 0;
-				
+
 			return $this->result->returnAsArray();
 		}		
 		

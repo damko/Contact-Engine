@@ -318,7 +318,9 @@ class Api extends REST_Controller
 							if(!$method_short_name) $method_short_name = $method->name;
 							$method_name = $method->name;
 							if($method_short_name == $calledMethod)
-							{							
+							{					
+
+								//DEBUG POINT
 								$output = $this->$model->$method_name($input);
 
 								$this->finished = microtime(true);
