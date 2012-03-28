@@ -129,9 +129,12 @@ class Person extends ObjectCommon
 		if(!is_null($input)) {
 			$return = $this->read($input);
 			
+			$original_values = $this->toRest(false);
+			
 			if(count($return['data']) == 0) return $this->result->returnAsArray();
 			
-			if(!$this->bindDataWithClassProperties($input, false, true)) return $this->result->returnAsArray();
+			//if(!$this->bindDataWithClassProperties($input, false, true)) return $this->result->returnAsArray();
+			if(!$this->bindDataWithClassProperties($input, true, true)) return $this->result->returnAsArray();
 		} 
 		
 		if(!$this->getUid()) {
@@ -139,9 +142,6 @@ class Person extends ObjectCommon
 			$this->result->data = array();
 			$this->result->status_code = '415';
 			$this->result->message = 'The '.$this->objName.' entry can not be identified.';
-// 			$this->result->results_number = '0';
-// 			$this->result->results_got_number = 0;
-			
 			return $this->result->returnAsArray();			
 		}
 		
@@ -149,7 +149,20 @@ class Person extends ObjectCommon
 		
 		//save the entry on the LDAP server
 		$dn = 'uid='.$this->getUid().','.$this->baseDn;
+		
 		$entry = $this->toRest(false);
+		
+		//if an attribute has been deleted then it's not contained in the $input. 
+		//The only way to understand what's has been deleted is to compare the original entry value with the new ones
+		$deleted_attributes = array_diff_assoc($original_values, $entry);
+		foreach ($deleted_attributes as $attribute => $value) {
+			if(is_array($value)) {
+				$entry[$attribute] = array();
+			} else {
+				$entry[$attribute] = '';
+			}
+		}
+		
 		unset($entry['uid']); //never mess with the id during an update cause it has to do with dn
 		unset($entry['dn']);
 		

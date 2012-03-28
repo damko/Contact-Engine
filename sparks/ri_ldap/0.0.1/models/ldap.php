@@ -561,13 +561,14 @@ class Ldap extends CI_Model {
 			break;
 	
 			case 'ldap_modify':
-				$a = $entry;
+				//$a = $entry;
+				//$entry['oAdminRDN'] = array();
 				if(! $result = ldap_modify($this->connection, $this->dn, $entry)) {
 					$ldap_error = $this->getLdapError($command);
 					$message = $ldap_error['message'];
 				}
 			break;
-	
+							
 			case 'ldap_delete':
 				if(! $result = ldap_delete($this->connection, $this->dn)) {
 					$ldap_error = $this->getLdapError($command);

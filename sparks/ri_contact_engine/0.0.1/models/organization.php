@@ -127,7 +127,20 @@ class Organization extends ObjectCommon
 		
 		//save the entry on the LDAP server
 		$dn = 'oid='.$this->oid.','.$this->baseDn;
+		
 		$entry = $this->toRest(false);
+		
+		//if an attribute has been deleted then it's not contained in the $input.
+		//The only way to understand what's has been deleted is to compare the original entry value with the new ones
+		$deleted_attributes = array_diff_assoc($original_values, $entry);
+		foreach ($deleted_attributes as $attribute => $value) {
+			if(is_array($value)) {
+				$entry[$attribute] = array();
+			} else {
+				$entry[$attribute] = '';
+			}
+		}		
+		
 		unset($entry['oid']); //never mess with the id during an update cause it has to do with dn
 		unset($entry['dn']);
 		

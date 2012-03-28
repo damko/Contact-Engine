@@ -195,10 +195,11 @@ class ObjectCommon extends CI_Model
 						$this->result->data = array();
 						$this->result->status_code = '415';
 						$this->result->message = 'The attribute '.$key.' is mandatory for the object '.$this->objName;
-// 						$this->result->results_number = '0';
-// 						$this->result->results_got_number = 0;
 
 						return false;
+					} else {
+						//removes empty attributes so that they can be deleted
+						unset($this->$key);
 					}
 				}
 			}
@@ -213,8 +214,6 @@ class ObjectCommon extends CI_Model
 			$this->result->data = array();
 			$this->result->status_code = '415';
 			$this->result->message = 'The attributes '.implode(',', array_keys($not_processed)).' are not attributes for the object '.$this->objName;
-// 			$this->result->results_number = '0';
-// 			$this->result->results_got_number = 0;
 			
 			return false;
 		}
@@ -225,11 +224,17 @@ class ObjectCommon extends CI_Model
 	{
 		foreach ($this->properties as $key => $value)
 		{
-			if($empty_fields)
+			if($key == 'oAdminRDN') {
+				$a = '';
+			}
+			
+			if($empty_fields && empty($this->$key))
 			{
-				$output[$key] = $this->$key;
+				$output[$key] = '';
 			} else {
-				if(!empty($this->$key)) $output[$key] = $this->$key;
+				if(!empty($this->$key)){
+					$output[$key] = $this->$key;
+				}
 			}
 		}
 		return $output;
