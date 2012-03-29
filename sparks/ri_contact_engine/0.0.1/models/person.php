@@ -154,14 +154,11 @@ class Person extends ObjectCommon
 		
 		//if an attribute has been deleted then it's not contained in the $input. 
 		//The only way to understand what's has been deleted is to compare the original entry value with the new ones
-		$deleted_attributes = array_diff_assoc($original_values, $entry);
-		foreach ($deleted_attributes as $attribute => $value) {
-			if($attribute=='objectClass' || $attribute=='entryCreatedBy') continue;
-			if(is_array($value)) {
-				$entry[$attribute] = array();
-			} else {
-				$entry[$attribute] = '';
-			}
+		$deleted_attributes = array_diff(array_keys($original_values), array_keys($entry));
+		$required_attributes = $this->getRequiredProperties();
+		foreach ($deleted_attributes as $key => $attribute) {
+			if($attribute=='objectClass' || in_array($attribute,$required_attributes)) continue;
+			$entry[$attribute] = '';
 		}
 		
 		unset($entry['uid']); //never mess with the id during an update cause it has to do with dn
