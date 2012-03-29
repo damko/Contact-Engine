@@ -135,9 +135,16 @@ class Organization extends ObjectCommon
 		$deleted_attributes = array_diff(array_keys($original_values), array_keys($entry));
 		$required_attributes = $this->getRequiredProperties();
 		foreach ($deleted_attributes as $key => $attribute) {
-			if($attribute=='objectClass' || in_array($attribute,$required_attributes)) continue;
-			$entry[$attribute] = '';
-		}				
+			if($attribute=='objectClass' || in_array($attribute,$required_attributes) || $attribute=='entryCreationDate'){
+				continue;
+			} else {
+				if(is_array($original_values[$attribute])) {
+					$entry[$attribute] = array();
+				} else {
+					$entry[$attribute] = '';
+				}
+			}
+		}			
 		
 		unset($entry['oid']); //never mess with the id during an update cause it has to do with dn
 		unset($entry['dn']);
