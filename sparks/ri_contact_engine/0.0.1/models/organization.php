@@ -3,13 +3,14 @@
 
 class Organization extends ObjectCommon
 {	
-	public function __construct()
+	public function __construct(array $input = null)
 	{
 		parent::__construct();
 		
 		// Organization configuration
 		$this->load->config('organization');
 		$this->conf = $this->config->item('organization');
+		//default baseDn value
 		$this->baseDn = $this->conf['baseDn'];
 		$this->objName = 'organization';
 		
@@ -24,6 +25,7 @@ class Organization extends ObjectCommon
 	}
 	
 	// ================================= CRUD ================================
+	
 	
 	private function set_oid()
 	{
@@ -81,7 +83,9 @@ class Organization extends ObjectCommon
 	
 	public function read(array $input)
 	{	
-		extract($input,$extract_type = EXTR_OVERWRITE);
+		extract($input);
+		
+		if(isset($ce_key)) $this->set_baseDn($ce_key);
 		
 		if(!empty($input['filter']))
 		{
@@ -107,6 +111,11 @@ class Organization extends ObjectCommon
 		//FIXME This method requires more attention. For ex. what happens if I try to change the uid or the dn or the objectClass?
 				
 		if(!is_null($input)) {
+			
+			extract($input);
+		
+			if(isset($ce_key)) $this->set_baseDn($ce_key);
+			
 			$return = $this->read($input);
 				
 			if(count($return['data']) == 0) return $this->result->returnAsArray();
@@ -162,6 +171,7 @@ class Organization extends ObjectCommon
 	{
 		if(!is_array($input) || empty($input['oid']))
 		{
+			
 			$this->result = new Ce_Return_Object();
 			$this->result->data = array();
 			$this->result->status_code = '415';
@@ -171,7 +181,10 @@ class Organization extends ObjectCommon
 		
 			return $this->result->returnAsArray();
 		}
-				
+
+		extract($input);
+		if(isset($ce_key)) $this->set_baseDn($ce_key);
+		
 		$dn = 'oid='.$input['oid'].','.$this->baseDn;
 		 		
 		return parent::delete($dn);
@@ -181,6 +194,9 @@ class Organization extends ObjectCommon
 		
 		$errors = array();
 	
+		extract($input);
+		if(isset($ce_key)) $this->set_baseDn($ce_key);
+		
 		if(empty($input['to'])) $errors[] = 'Missing input "to". Possible values: organization, location';
 	
 		if(empty($input['oid'])) $errors[] = 'Missing input "oid"';
@@ -237,62 +253,7 @@ class Organization extends ObjectCommon
 		}
 	
 		return $this->update();		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-/* /* 		
-		$data = array();
-		 
-		if(empty($input['to'])) $data['error'] = 'Missing input "to". Possible values: organization, location';
-	
-		if(empty($input['oid'])) $data['error'] = 'Missing input "oid".';
-		
-		if($data['error']) return $data;
-	
-		//we need to get a precise organization not a set of people
-		unset($input['filter']);
-	
-		//let's get the get the organization's data
-		$data = $this->read($input);
-	
-		if($data['error']) return $data;
-		
-		//let's add the new location
-		$to = $input['to'];
-		switch ($to) {
-			case location:
-				
-				if(empty($input['locId']) or is_array($input['locId']))
-				{
-					$data['error'] = 'Missing input "locId".';
-					return $data;
-				}
-				
-				if(!in_array($input['locId'], $this->locRDN))
-				{
-					//add location to the previous locations
-					array_push($this->locRDN, $input['locId']);
-					$data['locRDN']	= $this->locRDN;
-				} else {
-					return true; //TODO maybe something more meaningful here
-				}
-				
-			break;
-	
-			default:
-				return false; //association not defined
-			break;
-		}
-		
-		$data['oid'] = $this->oid;
-		return $this->update($data); */ 
+
 	}	
 }
 

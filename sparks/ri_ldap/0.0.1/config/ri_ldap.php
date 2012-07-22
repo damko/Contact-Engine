@@ -8,7 +8,7 @@
 
 //Parameters influencing search results. Ref: http://it.php.net/manual/en/function.ldap-search.php
 $config['ldap']['sizeLimit'] = '1000'; //Enables you to limit the count of entries fetched. Setting this to 0 means no limit. 
-$config['ldap']['timeLimit'] = '15'; //Sets the number of seconds how long is spend on the search. Setting this to 0 means no limit.
+$config['ldap']['timeLimit'] = '5'; //Sets the number of seconds how long is spend on the search. Setting this to 0 means no limit.
 $config['ldap']['defer'] = '0'; //Specifies how aliases should be handled during the search.
 $config['ldap']['debug'] = false;  //outputs in $ldap->result all the PHP errors even the ones different from OutOfRangeException (errno 8)
 $config['ldap']['service_unavailable'] = false;  //if true all the requestes are dropped and an error message is sent back (503 HTTP error)

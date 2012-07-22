@@ -56,6 +56,9 @@ class Person extends ObjectCommon
 	 */
 	public function create(array $input)
 	{
+		extract($input);
+		if(isset($ce_key)) $this->set_baseDn($ce_key);
+		
 		if(!$this->set_uid())
 		{
 			$this->result = new Ce_Return_Object();
@@ -95,7 +98,8 @@ class Person extends ObjectCommon
 	 */
 	public function read(array $input)
 	{			
-		extract($input,$extract_type = EXTR_OVERWRITE);
+		extract($input);
+		if(isset($ce_key)) $this->set_baseDn($ce_key);
 		
 		if(!empty($input['filter'])) 
 		{
@@ -127,6 +131,10 @@ class Person extends ObjectCommon
 		//FIXME This method requires more attention. For ex. what happens if I try to change the uid or the dn or the objectClass?
 		
 		if(!is_null($input)) {
+			
+			extract($input);
+			if(isset($ce_key)) $this->set_baseDn($ce_key);
+			
 			$return = $this->read($input);
 			
 			$original_values = $this->toRest(false);
@@ -188,6 +196,9 @@ class Person extends ObjectCommon
 	 */
 	public function delete($input)
 	{
+		extract($input);
+		if(isset($ce_key)) $this->set_baseDn($ce_key);
+		
 		if(!is_array($input) || empty($input['uid']))
 		{
 			$this->result = new Ce_Return_Object();
@@ -215,6 +226,9 @@ class Person extends ObjectCommon
 	public function associate(array $input) {
 		
 		$errors = array();
+		
+		extract($input);
+		if(isset($ce_key)) $this->set_baseDn($ce_key);		
 		
 		if(empty($input['to'])) $errors[] = 'Missing input "to". Possible values: organization, location';
 		

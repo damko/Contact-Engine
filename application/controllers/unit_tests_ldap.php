@@ -49,7 +49,7 @@ class Unit_Tests_Ldap extends Test_Controller {
 	
 	
 	
-		$this->getCodeOrigin();
+/* 		$this->getCodeOrigin();
 		$this->ldap = new Ldap();
 		$note = 'I\'m not even passing the ldap:// protocol.';
 		$this->server = 'fake_server';
@@ -64,7 +64,7 @@ class Unit_Tests_Ldap extends Test_Controller {
 		$note = 'I\'m passing the ldap:// protocol but with a fake server name.';
 		$this->server = 'fake_server';
 		$test = $this->ldap->connect($this->server,$this->ldapdn,$this->ldappw,$this->version);
-		echo $this->run($test, 'is_false', 'Using '.$this->server.' as ldap connection.', $note);
+		echo $this->run($test, 'is_false', 'Using '.$this->server.' as ldap connection.', $note); */
 	
 	
 	
@@ -109,12 +109,26 @@ class Unit_Tests_Ldap extends Test_Controller {
 		$dn = 'uid='.$entry['uid'].','.$this->baseDN;
 	
 		$test = $this->ldap->create($entry, $dn);
+		echo $this->run($test, 'is_true', 'Is the exit status true ?', '');		
+		
+		if($test){
+			$dn_save = $dn;
+		}
+
+		$entry = array();
+		$entry['objectClass'][] = 'organization';
+		$entry['objectClass'][] = 'top';
+		$entry['o'] = 'test2';
+		$entry['description'] = 'php generated branch';
+		$dn = 'o=test2,dc=2v,dc=ntw';
+		$test = $this->ldap->create($entry, $dn);
 		echo $this->run($test, 'is_true', 'Is the exit status true ?', '');
-	
+
 		if($test){
 			echo 'Created entry with dn '.$dn.'<br/>';
-			return $dn;
+			return $dn_save;
 		}
+		
 	}
 	
 	public function test_Ldap_read($dn)

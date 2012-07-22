@@ -55,6 +55,9 @@ class Location extends ObjectCommon
 		
 	public function create(array $input)
 	{
+		extract($input);
+		if(isset($ce_key)) $this->set_baseDn($ce_key);
+		
 		if(!$this->set_locId())
 		{
 			$this->result = new Ce_Return_Object();
@@ -100,7 +103,8 @@ class Location extends ObjectCommon
 	
 	public function read(array $input)
 	{			
-		extract($input,$extract_type = EXTR_OVERWRITE);
+		extract($input);
+		if(isset($ce_key)) $this->set_baseDn($ce_key);
 		
 		if(!empty($input['filter']))
 		{
@@ -125,6 +129,9 @@ class Location extends ObjectCommon
 	public function update(array $input)
 	{
 		//FIXME This method requires more attention. For ex. what happens if I try to change the locId or the dn or the objectClass?
+
+		extract($input);
+		if(isset($ce_key)) $this->set_baseDn($ce_key);
 		
 		$return = $this->read($input);
 		if(count($return['data']) == 0) return $this->result->returnAsArray();
@@ -183,6 +190,10 @@ class Location extends ObjectCommon
 
 	public function delete($input)
 	{
+		
+		extract($input);
+		if(isset($ce_key)) $this->set_baseDn($ce_key);
+		
 		if(!is_array($input) || empty($input['locId']))
 		{
 			$this->result = new Ce_Return_Object();

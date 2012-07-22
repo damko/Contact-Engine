@@ -6,7 +6,7 @@ $autoload['config'] = array('person', 'organization', 'location');
 $autoload['helpers'] = array('ce_helper');
 
 # Load a contact-engine library
-$autoload['libraries'] = array('ce');
+$autoload['libraries'] = array('database', 'ce');
 
 # Load a contact-engine model
 $autoload['model'] = array('ce_return_object', 'objectcommon', 'person', 'organization', 'location', 'contact');

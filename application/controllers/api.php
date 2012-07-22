@@ -268,7 +268,8 @@ class Api extends REST_Controller
 		//http://stackoverflow.com/questions/7017810/php-and-codeigniter-how-do-you-check-if-a-model-exists-and-or-not-throw-an-error
 		if(isset($this->exposedObjects[$model]) & file_exists(APPPATH."models/$model.php"))	
 		{
-			$this->load->model($model);
+			$input = array('a' => 'b');
+			$this->load->model($model,'',$input);
 			return true;
 		}
 

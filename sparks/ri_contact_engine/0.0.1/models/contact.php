@@ -23,6 +23,10 @@ class Contact extends ObjectCommon
 	
 	public function read(array $input)
 	{
+		
+		extract($input);
+		if(isset($ce_key)) $this->set_baseDn($ce_key);
+		
 		$data = array();
 		if(!is_array($input) || empty($input)) 
 		{

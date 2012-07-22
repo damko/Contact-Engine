@@ -76,6 +76,37 @@ class ObjectCommon extends CI_Model
 		
 	}
 	
+	/**
+	 * This method looks in the contactengine mysql database to get the BaseDn for the given key and object.
+	 * If a record is found the baseDn set in the database record will be used instead of the one 
+	 * set in the config file 
+	 * 
+	 * @access		public
+	 * @param		$client_key	String
+	 * @return		boolean
+	 * 
+	 * @author 		Damiano Venturin
+	 * @copyright 	2V S.r.l.
+	 * @license	GPL
+	 * @since		Jul 22, 2012
+	 */ 
+	protected function set_baseDn($client_key) {
+		
+		if(empty($client_key)) return false;
+		
+		$query = $this->db->query('select * from ce_keys where id="' . $client_key .'"');
+	
+		if($query->num_rows() == 1) {
+			$rows = $query->result();
+			$record = $rows[0];
+			$baseDn = strtolower($this->objName) . '_basedn';
+			$this->baseDn = $record->$baseDn;
+			return true;
+		}
+		
+		return false;
+	}	
+	
 	public function getRequiredProperties() {
 		foreach ($this->properties as $property => $property_value) {
 			if($property_value['required'] == 1)

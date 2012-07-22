@@ -99,27 +99,16 @@ the relationships between the three objects.<br/>
 
 <div id="container">
     <div id="right" style="border-left: 1px dashed gray; padding-left: 10px;">
-	<p>
-	<b>Project mantra:</b> <i>One contact, one record.</i><br/>
-	<b>Project mission:</b> <i>To make contacts data accessible from any application.</i>
-	</p>
-    	<h2>Sponsors</h2>
-	<p>We gratefully thank our sponsors who are currently supporting the development of Contact Engine:</p>
-	<ul>
-		<li><a href="http://www.tradesmap.com" target="_blank"><img src="http://beesmap.com/wp-content/uploads/2012/01/tradesmap_logo1_smaller.png" /></a><br/>
-		Would you like to be a <a href="http://beesmap.com/solutions/for-contributors/" target="_blank">contributor</a> too?
-		</li>
-	</ul>
 
-    	<h2>References for developers</h2>
-    	<ul>
-    		<li><a href="https://github.com/damko/Contact-Engine" target="_blank">Code</a></li>
+    <h2>References for developers</h2>
+    <ul>
+    	<li><a href="https://github.com/damko/Contact-Engine" target="_blank">Code</a></li>
 		<li><a href="https://github.com/damko/Contact-Engine/issues" target="_blank">Issues</a></li>
-		<li><a href="https://github.com/damko/Contact-Engine/wiki">Wiki</a></li>
-    		<li><a href="<?php echo site_url('home/documentation'); ?>">Documentation</a></li>
-    		<li><a href="<?php echo site_url('unit_tests'); ?>">Unit Tests Page</a></li>
-    		<li><a href="https://github.com/damko/Contact-Engine/wiki/How-to-install" target="_blank">How to install</a></li>
-    	</ul>
+		<li><a href="https://github.com/damko/Contact-Engine/wiki" target="_blank">Wiki</a></li>
+    	<li><a href="<?php echo site_url('home/documentation'); ?>">Documentation</a></li>
+    	<li><a href="<?php echo site_url('unit_tests'); ?>">Unit Tests Page</a></li>
+    	<li><a href="https://github.com/damko/Contact-Engine/wiki/How-to-install" target="_blank">How to install</a></li>
+    </ul>
     	
 	<h2>Related applications</h2>
 	<ul>
@@ -129,8 +118,7 @@ the relationships between the three objects.<br/>
 	</ul>
     	<h2>Applications using CE</h2>
     	<ul>
-    		<li><a href="http://www.tradesmap.com" target="_blank">Tradesmap</a>: an innovative web application to find a tradesman who is in your area and to get estimated time of arrival, prices and rating.</li>
-    		<li><a href="https://www.squadrainformatica.com/en/development#mcbsb">MCB-SB</a>: an invoice manager for small businesses based on <a href="http://www.myclientbase.com" target="_blank">MCB</a></li>
+    		<li><a href="http://www.mcbsb.com" target="_blank">MCB-SB</a>: a back office application for small businesses based on <a href="http://www.myclientbase.com" target="_blank">MCB</a></li>
     	</ul>    	 	    	
 
 	<h2>Roadmap</h2>
@@ -140,11 +128,18 @@ the relationships between the three objects.<br/>
 		<li>Built-in authentication support throught social networks</li>
 		<li>Social networks data retrieving</li>
 	</ul>
-
-	<h2>Contribute</h2>
-	<p>If you are a php developer willing to contribute to the project please feel free to <a href="mailto:contact@beesmap.com?subject=I want to contribute to Contact Engine">contact us</a>.</p>    	 	
+    	 	
     </div>
-    <div id="left">
+    
+<!-- --------------------------------------------  -->
+    
+    <div id="left">    
+    
+	<p>
+	<b>Project mantra:</b> <i>One contact, one record.</i><br/>
+	<b>Project mission:</b> <i>To make contacts data accessible from any application.</i>
+	</p>
+	    
 	<h2>Technical details</h2>
 	<p>
 	Contact Engine is a <a href="http://www.codeigniter.com" target="_blank">Code Igniter</a> application (with <a href="http://getsparks.org/" target="_blank">Spark</a>) loaded into <a href="<?php echo site_url('home')?>">RestIgniter</a>.

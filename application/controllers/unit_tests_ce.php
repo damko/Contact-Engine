@@ -1050,7 +1050,6 @@ class Unit_Tests_Ce extends Test_Controller {
 		$method = 'read';
 		$input = array();
 		$input['filter'] = '(oid=10000000)';
-		
 		$rest_return = $this->rest->get($method, $input, 'serialize');
 		$this->getCodeOrigin();
 		$this->arrayReturn($method, $rest_return);
