@@ -51,6 +51,9 @@ class Organization extends ObjectCommon
 		
 	public function create(array $input)
 	{		
+		extract($input);
+		if(isset($ce_key)) $this->set_baseDn($ce_key);		
+		
 		if(!$this->set_oid())
 		{
 			$this->result = new Ce_Return_Object();

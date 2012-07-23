@@ -237,6 +237,7 @@ class ObjectCommon extends CI_Model
 		}
 		
 		unset($not_processed[$this->objName]); //the key "$this->objectName is set by the rest client to pass the method to call
+		unset($not_processed['ce_key']);   //the key "ce_key" eventually contains the "contact engine key" to reset the baseDn via API
 		
 		//let's look which data weren't processed
 		if($validate && count($not_processed) > 0)

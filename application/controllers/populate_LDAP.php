@@ -14,7 +14,8 @@ class Populate_LDAP extends CI_Controller {
 		$this->server = 'ldap://ldapmaster0:389';
 		$this->ldapdn = 'cn=admin,dc=2v,dc=ntw';
 		$this->ldappw = 'Wi7Xkcv300z';
-		$this->version = '3';	
+		$this->version = '3';
+
 	}	
 	
 	public function index(){
@@ -239,7 +240,7 @@ class Populate_LDAP extends CI_Controller {
 	public function organizations() {
 	
 		$this->baseDN = 'ou=organizations,o=ce,dc=2v,dc=ntw';
-	
+		
 		echo '<html><head>
 		<style type="text/css">
 		body {
@@ -343,7 +344,7 @@ class Populate_LDAP extends CI_Controller {
 	public function locations() {
 	
 		$this->baseDN = 'ou=locations,o=ce,dc=2v,dc=ntw';
-	
+		
 		echo '<html><head>
 		<style type="text/css">
 		body {
