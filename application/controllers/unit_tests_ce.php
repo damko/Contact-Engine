@@ -344,7 +344,7 @@ class Unit_Tests_Ce extends Test_Controller {
 	{	
 		$this->rest->initialize(array('server' => $this->config->item('rest_server').'exposeObj/person/'));
 
-		//calling the methon CREATE for object person without a filter
+		//calling the methon CREATE for object person
 		$this->testTitle('creates a person');
 		$method = 'create';
 		$input = array();
@@ -369,7 +369,6 @@ class Unit_Tests_Ce extends Test_Controller {
 		$this->getCodeOrigin();
 		$this->arrayReturn($method, $rest_return);
 		
-		//the filter has not been specified then it should return an error
 		$this->getCodeOrigin();
 		$this->checkNoRestError($method, $rest_return);
 		
