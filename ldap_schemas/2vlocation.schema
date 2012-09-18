@@ -1,0 +1,205 @@
+###########################################################################
+#
+# 2vlocation.schema for OpenLDAP 2.x
+# by Squadra Informatica 2V
+# author Damiano Venturin
+# http://www.squadrainformatica.com
+#
+# Iana PEN Number 29423 => 1.3.6.1.4.1.29423
+# check http://www.iana.org/assignments/enterprise-numbers
+#
+# OID syntax schema used in 2V schemas:
+# Ex.:
+# 1.3.6.1.4.1.29423.1021.3.1
+#                  |	|  |
+#      2V OID      |	|  |
+# <--------------->|	|  |--> incremental value
+#		   |<-->|
+#		   |	|
+#                  |	|--> object type: 1,2,3,4,5,9,11 *
+#		   | 
+#		   |--> ldap OID (default 1021) 
+#
+# Object type legenda: *
+# - LDAP syntaxes = 1
+# - Matching rules = 2
+# - Attribute types = 3
+# - Object classes = 4
+# - Supported features = 5
+# - Protocol mechanisms = 9
+# - Controls = 10
+# - Extended operations = 11
+#
+# Fields OIDs are taken from http://www.ietf.org/rfc/rfc2252.txt
+#
+# Object description
+# ------------------
+# Represents a physical location (geocode). 
+# It means: full address, latitude, longitude and membership.
+# Membership means that a location can be mapped to an ldap entry through 
+# a multivalue field (sort of memberUid)
+#
+###########################################################################
+
+# Aliases
+objectidentifier loc 1.3.6.1.4.1.29423.1021
+objectidentifier locationAttrs loc:3
+objectidentifier locationOCs loc:4
+
+#############################
+# Attributes Object location
+#############################
+
+#single value: DirectoryString
+attributetype (
+	locationAttrs:1
+	NAME 'locStreet'
+	DESC 'Street address'
+	EQUALITY caseIgnoreMatch
+	SINGLE-VALUE
+	SUBSTR caseIgnoreSubstringsMatch
+	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15{70} )
+
+#integer single value
+attributetype (
+	locationAttrs:2
+	NAME 'locZip'
+	DESC 'Zip Code'
+	SINGLE-VALUE
+	SYNTAX 1.3.6.1.4.1.1466.115.121.1.27{5} )
+
+#string single value
+attributetype (
+	locationAttrs:3
+	NAME 'locCity'
+	DESC 'City'
+	SINGLE-VALUE
+	EQUALITY caseIgnoreMatch
+	SUBSTR caseIgnoreSubstringsMatch
+	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15{50} )
+
+#string single value
+attributetype (
+	locationAttrs:4
+	NAME 'locState'
+	DESC 'State or region'
+	EQUALITY caseIgnoreMatch
+	SUBSTR caseIgnoreSubstringsMatch
+	SINGLE-VALUE
+	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15{50} )
+
+#string single value
+attributetype (
+	locationAttrs:5
+	NAME 'locCountry'
+	DESC 'Country'
+	EQUALITY caseIgnoreMatch
+	SUBSTR caseIgnoreSubstringsMatch
+	SINGLE-VALUE
+	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15{50} )
+
+#string single value. this should be a floating point but ldap has no OID for floating point
+attributetype (
+	locationAttrs:6
+	NAME 'locLatitude'
+	DESC 'Latitude'
+	EQUALITY caseIgnoreMatch
+	SUBSTR caseIgnoreSubstringsMatch
+	SINGLE-VALUE
+	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15{17} )
+
+#string single value. this should be a floating point but ldap has no OID for floating point
+attributetype (
+	locationAttrs:7
+	NAME 'locLongitude'
+	DESC 'Longitude'
+	EQUALITY caseIgnoreMatch
+	SUBSTR caseIgnoreSubstringsMatch
+	SINGLE-VALUE
+	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15{17} )
+
+#entryID
+attributetype (
+	locationAttrs:8
+	NAME 'locId'
+	DESC 'Location ID'
+	EQUALITY caseIgnoreMatch
+	SUBSTR caseIgnoreSubstringsMatch
+	SINGLE-VALUE
+	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15{256} )
+
+#single value: DirectoryString
+attributetype (
+	locationAttrs:9
+	NAME 'locDescription'
+	DESC 'Short location description, like house, registered office, warehouse ...'
+	EQUALITY caseIgnoreMatch
+	SUBSTR caseIgnoreSubstringsMatch
+	SINGLE-VALUE
+	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15{50} )
+
+#single value: TelephoneNumber
+attributetype ( 
+	locationAttrs:10
+        NAME 'locPhone'
+        DESC 'telephone number for the location'
+        EQUALITY telephoneNumberMatch
+        SUBSTR telephoneNumberSubstringsMatch
+	SINGLE-VALUE
+        SYNTAX 1.3.6.1.4.1.1466.115.121.1.50 )
+
+#################################
+# Attributes Object locationIdMap
+#################################
+#single value: DirectoryString
+attributetype (
+	locationAttrs:11
+	NAME 'locNextId'
+	DESC 'Next Id to use in the DN creation for a location'
+	EQUALITY caseIgnoreMatch
+	SUBSTR caseIgnoreSubstringsMatch
+	SINGLE-VALUE
+	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15{15} ) 
+
+##################################
+# Attributes Object locationMember
+##################################
+#Distinguished Name
+#multiple value: DirectoryString
+attributetype (
+	locationAttrs:12
+	NAME 'locRDN'
+	DESC 'RDN for a location'
+	EQUALITY caseExactIA5Match
+	SUBSTR caseExactIA5SubstringsMatch
+	SYNTAX 1.3.6.1.4.1.1466.115.121.1.26 )
+
+################
+# Object Classes
+################
+objectclass ( 
+	locationOCs:1
+        NAME 'dueviLocation'
+        DESC 'Describes a physical location'
+        SUP dueviDefault
+	STRUCTURAL
+        MUST ( locStreet $ locCity $ locState $ locCountry $ locId $ locDescription )  
+	MAY ( locZip $ locPhone $ locLatitude $ locLongitude $ entryCreatedBy $ entryUpdatedBy ) )
+
+objectclass ( 
+	locationOCs:2
+        NAME 'dueviLocationIdMap'
+        DESC 'Saves next IdMap. It is used to create the next location DN'
+        SUP dueviDefault
+	AUXILIARY
+        MUST ( locNextId ) )
+
+objectclass ( 
+	locationOCs:3
+        NAME 'dueviLocationMember'
+        DESC 'Adds to any ldap entry the capability to be mapped to one or more existing locations'
+        SUP dueviDefault
+	AUXILIARY 
+	MAY ( locRDN ) )
+
+# EOF

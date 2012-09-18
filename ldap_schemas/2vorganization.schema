@@ -1,0 +1,152 @@
+###########################################################################
+#
+# 2vorganization.schema for OpenLDAP 2.x
+# by Squadra Informatica 2V
+# author Damiano Venturin
+# http://www.squadrainformatica.com
+#
+# Iana PEN Number 29423 => 1.3.6.1.4.1.29423
+# check http://www.iana.org/assignments/enterprise-numbers
+#
+# OID syntax schema used in 2V schemas:
+# Ex.:
+# 1.3.6.1.4.1.29423.1021.3.1
+#                  |	|  |
+#      2V OID      |	|  |
+# <--------------->|	|  |--> incremental value
+#		   |<-->|
+#		   |	|
+#                  |	|--> object type: 1,2,3,4,5,9,11 *
+#		   | 
+#		   |--> ldap OID (default 1021) 
+#
+# Object type legenda: *
+# - LDAP syntaxes = 1
+# - Matching rules = 2
+# - Attribute types = 3
+# - Object classes = 4
+# - Supported features = 5
+# - Protocol mechanisms = 9
+# - Controls = 10
+# - Extended operations = 11
+#
+# Fields OIDs are taken from http://www.ietf.org/rfc/rfc2252.txt
+#
+# Object description
+# ------------------
+# Represents a company or an organization. 
+#
+###########################################################################
+
+# Aliases
+objectidentifier org 1.3.6.1.4.1.29423.1024
+objectidentifier oAttrs org:3
+objectidentifier oOCs org:4
+
+
+####################################
+# Attributes Object dueviOrganization
+####################################
+#single value: DirectoryString
+attributetype ( 
+	oAttrs:1
+	NAME 'oid'
+	DESC 'organization identifier'
+	EQUALITY caseIgnoreMatch
+	SUBSTR caseIgnoreSubstringsMatch
+	SINGLE-VALUE
+	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15{256} )
+
+#single value: NumericString
+attributetype ( 
+	oAttrs:2 
+	NAME 'vatNumber'
+	DESC 'Vat Number'
+	EQUALITY numericStringMatch
+	SINGLE-VALUE
+	SYNTAX 1.3.6.1.4.1.1466.115.121.1.36{11} )
+
+#single value: IA5string
+attributetype (
+	oAttrs:3
+	NAME 'omail'
+	DESC 'organization main email address'
+        SINGLE-VALUE
+	EQUALITY caseIgnoreIA5Match
+	SUBSTR caseIgnoreIA5SubstringsMatch
+	SYNTAX 1.3.6.1.4.1.1466.115.121.1.26{256} )
+
+#single value: Telephone Number
+attributetype ( 
+	oAttrs:4
+        NAME 'oMobile'
+        DESC 'mobile number for the organization'
+        EQUALITY telephoneNumberMatch
+        SUBSTR telephoneNumberSubstringsMatch
+	SINGLE-VALUE
+        SYNTAX 1.3.6.1.4.1.1466.115.121.1.50 )
+
+#single value: DirectoryString
+attributetype (
+	oAttrs:5
+	NAME 'oURL'
+	DESC 'organization main url'
+        SINGLE-VALUE
+        SYNTAX 1.3.6.1.4.1.1466.115.121.1.15{200})
+
+#single value: DirectoryString
+attributetype (
+	oAttrs:6
+	NAME 'oType'
+	DESC 'organization type'
+        SINGLE-VALUE
+        SYNTAX 1.3.6.1.4.1.1466.115.121.1.15{200})
+
+#multiple value: DirectoryString
+attributetype (
+	oAttrs:7
+	NAME 'businessActivity'
+	DESC 'describes the business activities. Ex: production, repair ...'
+        SYNTAX 1.3.6.1.4.1.1466.115.121.1.15{200})
+
+#multiple value: DirectoryString
+attributetype (
+	oAttrs:8
+	NAME 'businessAudience'
+	DESC 'describes who are the target of the business activity. Ex: companies, private customers, government ...'
+        SYNTAX 1.3.6.1.4.1.1466.115.121.1.15{200})
+
+#multiple value: DirectoryString
+attributetype ( 
+	oAttrs:9
+	NAME 'adminUid'
+	DESC 'RDN of the administrators for the organization'
+	EQUALITY caseIgnoreMatch
+	SUBSTR caseIgnoreSubstringsMatch
+	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15{256} )
+
+
+#multivalue string
+#attributetype (
+#	cAttrs:3
+#	NAME 'companyCanOrder'
+#	DESC 'contacts listed here can order and act as the company'
+#        EQUALITY caseExactIA5Match
+#        SUBSTR caseExactIA5SubstringsMatch
+#        SYNTAX 1.3.6.1.4.1.1466.115.121.1.26 )
+
+
+
+# organization
+objectclass (
+	oOCs:1
+        NAME 'dueviOrganization'
+        DESC 'object matching a (italian) company or organization'
+	SUP organization
+	STRUCTURAL
+	MUST ( oid $ o $ enabled $ entryCreatedBy)
+	MAY (  vatNumber $ codiceFiscale $ l $ postalAddress $ l $ st $ c $ locRDN $ postalCode $ category $ memberUid $ 
+	       enabled $ dbId $ entryUpdatedBy $ lastPurchaseDate $ lastAssignmentDate $
+	       omail $ oMobile $ oURL $ oType $ businessActivity $ businessAudience $ adminUid
+	       ))
+# EOF
