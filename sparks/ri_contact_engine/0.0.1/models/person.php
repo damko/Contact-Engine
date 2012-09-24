@@ -65,8 +65,6 @@ class Person extends ObjectCommon
 			$this->result->data = array();
 			$this->result->status_code = '500';
 			$this->result->message = 'I can not set a unique dn for the new '.$this->objName.' entry.';
-// 			$this->result->results_number = '0';
-// 			$this->result->results_got_number = 0;
 				
 			return $this->result->returnAsArray();
 		}
@@ -76,10 +74,9 @@ class Person extends ObjectCommon
 		if(!$this->bindDataWithClassProperties($input,true))  return $this->result->returnAsArray();
 				
 		//save the entry on the LDAP server
-		$dn = 'uid='.$this->getUid().','.$this->baseDn;
 		if(empty($this->objectClass)) $this->objectClass = $this->conf['objectClass'];
+		$dn = 'uid='.$this->getUid().','.$this->baseDn;
 		
- 		//$entry = $this->toRest(false); //TODO delme
 		$exit_status = $this->ri_ldap->CEcreate($this->toRest(false),$dn);
 		
 		$this->result->importLdapReturnObject($this->ri_ldap->result);
@@ -141,8 +138,8 @@ class Person extends ObjectCommon
 			
 			if(count($return['data']) == 0) return $this->result->returnAsArray();
 			
-			//if(!$this->bindDataWithClassProperties($input, false, true)) return $this->result->returnAsArray();
-			if(!$this->bindDataWithClassProperties($input, true, true)) return $this->result->returnAsArray();
+			if(!$this->bindDataWithClassProperties($input, false, true)) return $this->result->returnAsArray();
+
 		} 
 		
 		if(!$this->getUid()) {
@@ -168,11 +165,22 @@ class Person extends ObjectCommon
 			if($attribute=='objectClass' || in_array($attribute,$required_attributes) || $attribute=='entryCreationDate'){
 				continue;
 			} else {
-				if(is_array($original_values[$attribute])) {
-					$entry[$attribute] = array();
-				} else {
-					$entry[$attribute] = '';
+				$prop = $this->properties;	
+				
+				if( $this->properties[$attribute]['no-user-modification'] == 1) continue;
+						
+				if( $this->properties[$attribute]['boolean'] == 1) {
+					$entry[$attribute] = 'FALSE';
+					continue;
 				}
+
+				if( $this->properties[$attribute]['single-value'] == 1) {
+					$entry[$attribute] = '';
+					continue;
+				} else {
+					$entry[$attribute] = array();
+					continue;
+				}						
 			}
 		}
 		
@@ -205,8 +213,6 @@ class Person extends ObjectCommon
 			$this->result->data = array();
 			$this->result->status_code = '415';
 			$this->result->message = 'A valid uid is required to delete a '.$this->objName.' entry.';
-// 			$this->result->results_number = '0';
-// 			$this->result->results_got_number = 0;
 		
 			return $this->result->returnAsArray();
 		}
@@ -239,8 +245,6 @@ class Person extends ObjectCommon
 			$this->result->data = array();
 			$this->result->status_code = '415';
 			$this->result->message = implode(', ', $errors);
-// 			$this->result->results_number = '0';
-// 			$this->result->results_got_number = 0;
 		
 			return $this->result->returnAsArray();
 		}
@@ -292,8 +296,6 @@ class Person extends ObjectCommon
 			$this->result->data = array();
 			$this->result->status_code = '415';
 			$this->result->message = implode(', ', $errors);
-// 			$this->result->results_number = '0';
-// 			$this->result->results_got_number = 0;
 		
 			return $this->result->returnAsArray();
 		}				

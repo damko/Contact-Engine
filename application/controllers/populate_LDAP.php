@@ -186,6 +186,7 @@ class Populate_LDAP extends CI_Controller {
 		$entry['mobile'] = '+1'.($random*2);
 		$entry['homePhone'] = '+39'.($random*3);		
 		$entry['entryCreationDate'] = date('Y-m-d');
+		$entry['dbId'] = rand(1000,9999);
 		
 		$dn = 'uid='.$entry['uid'].','.$this->baseDN;
 		

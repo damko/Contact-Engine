@@ -471,8 +471,9 @@ class Unit_Tests_Ce extends Test_Controller {
 		//update person 
 		$method = 'update';
 		$input = array();
+		//$input = $rest_return['data'][0];
 		$input['uid'] = $uid;
-		$new_displayName = $input['displayName'] = 'This is updated to '.$input['displayName'].' '.rand(100, 999);
+		$new_displayName = $input['displayName'] = $rest_return['data'][0]['displayName'].' '.rand(100, 999);
 		$this->testTitle('update person with uid='.$uid.' : setting the displayName='.$input['displayName']);
 		
 		$rest_return = $this->rest->get($method, $input, 'serialize');
@@ -540,8 +541,7 @@ class Unit_Tests_Ce extends Test_Controller {
 		$this->testTitle('update the same person sending an input array without any field but the uid. It means: nothing to update');
 			
 		$method = 'update';
-		//$input = array( 'uid' => $uid);
-		$input = array( 'uid' => '10000000');
+		$input = array('uid' => '10000000');
 			
 		$rest_return = $this->rest->get($method, $input, 'serialize');
 			

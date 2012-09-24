@@ -34,8 +34,6 @@ class Contact extends ObjectCommon
 			$this->result->data = array();
 			$this->result->status_code = '415';
 			$this->result->message = 'The method read for the object '.$this->objName.' requires an array in input.';
-// 			$this->result->results_number = '0';
-// 			$this->result->results_got_number = 0;
 							
 			return $this->result->returnAsArray(); 
 			

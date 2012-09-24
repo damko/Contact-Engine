@@ -232,7 +232,11 @@ class ObjectCommon extends CI_Model
 						//removes empty attributes so that they can be deleted
 						unset($this->$key);
 					}
-				}
+				} else {	
+				
+					//removes empty attributes so that they can be deleted
+					unset($this->$key);
+				}	
 			}
 		}
 		
@@ -255,11 +259,7 @@ class ObjectCommon extends CI_Model
 	protected function toRest($empty_fields = true)
 	{
 		foreach ($this->properties as $key => $value)
-		{
-			if($key == 'oAdminRDN') {
-				$a = '';
-			}
-			
+		{			
 			if($empty_fields && empty($this->$key))
 			{
 				$output[$key] = '';
