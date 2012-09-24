@@ -36,6 +36,12 @@ class Api extends REST_Controller
 		
 		parent::__construct();
 		
+		//a bit of security
+		$this->config->load('restigniter');
+		if($this->config->item('only_localhost')) {
+			if($_SERVER['REMOTE_ADDR'] != '127.0.0.1' && $_SERVER['REMOTE_ADDR'] != '127.0.1.1') return false;
+		}		
+		
 		$this->__getExposedObjs();
 		
 		$this->loadSparks();
