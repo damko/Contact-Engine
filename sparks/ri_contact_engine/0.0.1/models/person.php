@@ -103,7 +103,6 @@ class Person extends ObjectCommon
 			$filter = $input['filter'];
 		} else {
 			if(!empty($input['uid'])) $filter = '(uid='.$input['uid'].')';
-			if(!empty($input['dbId'])) $filter = '(dbId='.$input['dbId'].')'; //TODO maybe I can remove this
 		}
 		
 		$output = array();
@@ -142,6 +141,7 @@ class Person extends ObjectCommon
 
 		} 
 		
+		//if the person has not been found return 415
 		if(!$this->getUid()) {
 			$this->result = new Ce_Return_Object();
 			$this->result->data = array();
@@ -162,7 +162,9 @@ class Person extends ObjectCommon
 		$deleted_attributes = array_diff(array_keys($original_values), array_keys($entry));
 		$required_attributes = $this->getRequiredProperties();
 		foreach ($deleted_attributes as $key => $attribute) {
+			
 			if($attribute=='objectClass' || in_array($attribute,$required_attributes) || $attribute=='entryCreationDate'){
+				//these are special values that we don't want to delete in any case
 				continue;
 			} else {
 				$prop = $this->properties;	

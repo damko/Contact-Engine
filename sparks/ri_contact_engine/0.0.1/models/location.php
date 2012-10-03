@@ -111,7 +111,6 @@ class Location extends ObjectCommon
 			$filter = $input['filter'];
 		} else {
 			if(!empty($input['locId'])) $filter = '(locId='.$input['locId'].')';
-			if(!empty($input['dbId'])) $filter = '(dbId='.$input['dbId'].')'; //TODO maybe I can remove this
 		}
 		
 		$output = array();

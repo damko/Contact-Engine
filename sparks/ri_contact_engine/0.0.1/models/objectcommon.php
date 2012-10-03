@@ -53,7 +53,6 @@ class ObjectCommon extends CI_Model
 		return parent::__get($property_name);
 	}
 	
-	
 	public function __set($property_name,$value) {
 		if(!isset($this->properties[$property_name])) return false;
 		$this->$property_name = $value;

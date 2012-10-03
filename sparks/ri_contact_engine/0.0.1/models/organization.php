@@ -95,7 +95,6 @@ class Organization extends ObjectCommon
 			$filter = $input['filter'];
 		} else {
 			if(!empty($input['oid'])) $filter = '(oid='.$input['oid'].')';
-			if(!empty($input['dbId'])) $filter = '(dbId='.$input['dbId'].')'; //TODO maybe I can remove this
 		}
 		
 		$output = array();
