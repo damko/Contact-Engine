@@ -49,6 +49,7 @@ class Unit_Tests_Ce extends Test_Controller {
   		$this->testPersonProperties();
   		$this->testPersonCreate();
   		$this->testPersonRead();
+  		$this->testPersonAuthenticate();  		
 		$this->testPersonUpdate();
  		$this->testPersonDelete();
 	}
@@ -478,11 +479,9 @@ class Unit_Tests_Ce extends Test_Controller {
 		
 		$rest_return = $this->rest->get($method, $input, 'serialize');
 		
-		
 		$this->getCodeOrigin();
 		$this->arrayReturn($method, $rest_return);
 
-		//the filter has been specified then it should not return an error
 		$this->getCodeOrigin();
 		$this->checkNoRestError($method, $rest_return);
 
@@ -498,6 +497,7 @@ class Unit_Tests_Ce extends Test_Controller {
 		$this->printReturn($rest_return);
 		
 		
+		return;
 		
 		
 		//show the updated entry
@@ -621,11 +621,286 @@ class Unit_Tests_Ce extends Test_Controller {
 	
 	}
 	
+	public function testPersonAuthenticate() {
+		$this->rest->initialize(array('server' => $this->config->item('rest_server').'exposeObj/person/'));
+		
+		$this->testTitle('Authentication passing wrong attributes');
+		
+		$method = 'authenticate';
+		$input = array();
+		$input['filter'] = '(givenName=Willy*)';
+
+		$rest_return = $this->rest->get($method, $input, 'serialize');
+		
+		$this->getCodeOrigin();
+		$this->arrayReturn($method, $rest_return);
+
+		$this->getCodeOrigin();
+		$note = 'I expect an error. What I get is: '.$rest_return['status']['message'];
+		$this->checkRestError($method, $rest_return,$note);
+
+		$this->getCodeOrigin();
+		$this->check415($method, $rest_return);
+		
+		$this->getCodeOrigin();
+		$this->checkHasNoData($method, $rest_return);
+		
+
+
+		
+		
+		
+		$this->testTitle('Authentication using email');
+		
+		$method = 'authenticate';
+		$input = array();
+		$input['mail'] = 'wile@coyote.com';
+		$input['userPassword'] = 'password';
+		
+		$rest_return = $this->rest->get($method, $input, 'serialize');
+		
+		$this->getCodeOrigin();
+		$this->arrayReturn($method, $rest_return);
+		
+		$this->getCodeOrigin();
+		$note = 'I expect OK. What I get is: '.$rest_return['status']['message'];
+		$this->checkNoRestError($method, $rest_return,$note);
+		
+		$this->getCodeOrigin();
+		$this->check200($method, $rest_return);
+		
+		$this->getCodeOrigin();
+		$this->checkHasData($method, $rest_return);		
+		
+
+		
+		
+		
+		
+		$this->testTitle('Authentication using email but not providing password');
+		
+		$method = 'authenticate';
+		$input = array();
+		$input['mail'] = 'wile@coyote.com';
+		
+		$rest_return = $this->rest->get($method, $input, 'serialize');
+		
+		$this->getCodeOrigin();
+		$this->arrayReturn($method, $rest_return);
+		
+		$this->getCodeOrigin();
+		$note = 'I expect an error. What I get is: '.$rest_return['status']['message'];
+		$this->checkRestError($method, $rest_return,$note);
+				
+		$this->getCodeOrigin();
+		$this->check415($method, $rest_return);
+		
+		$this->getCodeOrigin();
+		$this->checkHasNoData($method, $rest_return);
+
+		
+		
+		
+		
+		$this->testTitle('Authentication using email but providing wrong password');
+		
+		$method = 'authenticate';
+		$input = array();
+		$input['mail'] = 'wile@coyote.com';
+		$input['userPassword'] = 'saotuensnt';
+		
+		$rest_return = $this->rest->get($method, $input, 'serialize');
+		
+		$this->getCodeOrigin();
+		$this->arrayReturn($method, $rest_return);
+
+		$this->getCodeOrigin();
+		$note = 'I expect an error. What I get is: '.$rest_return['status']['message'];
+		$this->checkRestError($method, $rest_return,$note);
+
+		$this->getCodeOrigin();
+		$this->check415($method, $rest_return);
+		
+		$this->getCodeOrigin();
+		$this->checkHasNoData($method, $rest_return);
+		
+		
+		
+		
+		
+		
+		
+		
+		$this->testTitle('Authentication using email and providing more fields than necessary');
+		
+		$method = 'authenticate';
+		$input = array();
+		$input['mail'] = 'wile@coyote.com';
+		$input['userPassword'] = 'password';
+		$input['filter'] = 'saotuensnt';
+		$input['whatever'] = array('snsnthsn','stnhstnh');
+		
+		$rest_return = $this->rest->get($method, $input, 'serialize');
+		
+		$this->getCodeOrigin();
+		$this->arrayReturn($method, $rest_return);
+		
+		$this->getCodeOrigin();
+		$note = 'I expect OK. What I get is: '.$rest_return['status']['message'];
+		$this->checkNoRestError($method, $rest_return,$note);
+		
+		$this->getCodeOrigin();
+		$this->check200($method, $rest_return);
+		
+		$this->getCodeOrigin();
+		$this->checkHasData($method, $rest_return);
+		
+		
+		
+		
+		
+		
+		
+		
+		$this->testTitle('Authentication with valid uid wrong password');
+		
+		$method = 'authenticate';
+		$input = array();
+		$input['uid'] = '10000000';
+		$input['userPassword'] = 'bibu';
+		
+		$rest_return = $this->rest->get($method, $input, 'serialize');
+		
+		$this->getCodeOrigin();
+		$this->arrayReturn($method, $rest_return);
+		
+		$this->getCodeOrigin();
+		$note = 'I expect an error. What I get is: '.$rest_return['status']['message'];
+		$this->checkRestError($method, $rest_return,$note);
+		
+		$this->getCodeOrigin();
+		$this->check415($method, $rest_return);
+		
+		$this->getCodeOrigin();
+		$this->checkHasNoData($method, $rest_return);		
+
+		
+		
+		
+		
+		
+		$this->testTitle('Authentication with valid uid and NO password');
+		
+		$method = 'authenticate';
+		$input = array();
+		$input['uid'] = '10000000';
+		
+		$rest_return = $this->rest->get($method, $input, 'serialize');
+		
+		$this->getCodeOrigin();
+		$this->arrayReturn($method, $rest_return);
+		
+		//fields are wrong then it should return an error
+		$this->getCodeOrigin();
+		$note = 'I expect an error. What I get is: '.$rest_return['status']['message'];
+		$this->checkRestError($method, $rest_return,$note);		
+		
+		$this->getCodeOrigin();
+		$this->check415($method, $rest_return);
+		
+		$this->getCodeOrigin();
+		$this->checkHasNoData($method, $rest_return);
+
+		
+		
+		
+		
+		
+
+		
+		$this->testTitle('Authentication with invalid uid and password');
+		
+		$method = 'authenticate';
+		$input = array();
+		$input['uid'] = '32891378';
+		$input['userPassword'] = 'bibu';
+		
+		$rest_return = $this->rest->get($method, $input, 'serialize');
+		
+		$this->getCodeOrigin();
+		$this->arrayReturn($method, $rest_return);
+		
+		$this->getCodeOrigin();
+		$note = 'I expect an error. What I get is: '.$rest_return['status']['message'];
+		$this->checkRestError($method, $rest_return,$note);
+		
+		$this->getCodeOrigin();
+		$this->check415($method, $rest_return);
+		
+		$this->getCodeOrigin();
+		$this->checkHasNoData($method, $rest_return);		
+		
+		
+		
+		
+		
+		
+		$this->testTitle('Valid authentication');
+		
+		$method = 'authenticate';
+		$input = array();
+		$input['uid'] = '10000000';
+		$input['userPassword'] = 'password';
+		
+		$rest_return = $this->rest->get($method, $input, 'serialize');
+		
+		$this->getCodeOrigin();
+		$this->arrayReturn($method, $rest_return);
+		
+		$this->getCodeOrigin();
+		$note = 'I expect OK. What I get is: '.$rest_return['status']['message'];
+		$this->checkNoRestError($method, $rest_return,$note);		
+		
+		$this->getCodeOrigin();
+		$this->check200($method, $rest_return);
+		
+		$this->getCodeOrigin();
+		$this->checkHasData($method, $rest_return);
+
+		
+		
+		
+		
+		
+		
+		$this->testTitle('Authentication passing right attributes and wrong values');
+		
+		$method = 'authenticate';
+		$input = array();
+		$input['uid'] = '(givenName=Willy*)';
+		$input['userPassword'] = '(givenName=Willy*)';
+		
+		$rest_return = $this->rest->get($method, $input, 'serialize');
+		
+		$this->getCodeOrigin();
+		$this->arrayReturn($method, $rest_return);
+		
+		$this->getCodeOrigin();
+		$note = 'I expect an error. What I get is: '.$rest_return['status']['message'];
+		$this->checkRestError($method, $rest_return,$note);
+
+		$this->getCodeOrigin();
+		$this->check415($method, $rest_return);
+		
+		$this->getCodeOrigin();
+		$this->checkHasNoData($method, $rest_return);		
+	}
+	
 	public function testPersonDelete()
 	{
 		$this->rest->initialize(array('server' => $this->config->item('rest_server').'exposeObj/person/'));
 
-		//calling the methon READ for object person with a filter
+		//calling the method READ for object person with a filter
 		$this->testTitle('delete 1 person taken randomly but having first name Willy*');
 		$method = 'read';
 		$input = array();

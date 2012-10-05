@@ -165,7 +165,7 @@ class Populate_LDAP extends CI_Controller {
 		//creating an entry with a specific uid that will be used in the tests
 		$random = rand(999999,9999999);
 		$surname = 'Coyote';
-		$name = 'Willy';
+		$name = 'Wile';
 		
 		$entry = array();
 		$entry['uid'] = '10000000';
@@ -174,7 +174,7 @@ class Populate_LDAP extends CI_Controller {
 		$entry['givenName'] = $name;
 		$entry['displayName'] = $entry['cn'];
 		$entry['fileAs'] = $entry['cn'];
-		$entry['userPassword'] = 'mypassword';
+		$entry['userPassword'] = 'password';
 		$entry['enabled'] = 'TRUE';
 		$entry['entryCreatedBy'] = 'unit tests';
 		$entry['category'] = 'mycategory';
@@ -208,7 +208,7 @@ class Populate_LDAP extends CI_Controller {
 			$entry['givenName'] = $name;
 			$entry['displayName'] = $entry['cn'];
 			$entry['fileAs'] = $entry['cn'];
-			$entry['userPassword'] = 'mypassword';
+			$entry['userPassword'] = 'password';
 			$entry['enabled'] = 'TRUE';
 			$entry['entryCreatedBy'] = 'unit tests';
 			$entry['category'] = 'mycategory';

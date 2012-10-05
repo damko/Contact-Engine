@@ -322,7 +322,8 @@ class Ri_Ldap extends Ldap {
 		
 		$this->connection = $this->RoConnection;
 	
-		return $this->restReturn($this->read($dn = null, $sizeLimit = null, $timeLimit = null, $defer = null));
+		//return $this->restReturn($this->read($dn = null, $sizeLimit = null, $timeLimit = null, $defer = null));
+		return $this->restReturn($this->read($dn, $sizeLimit, $timeLimit, $defer));
 	}
 
 	

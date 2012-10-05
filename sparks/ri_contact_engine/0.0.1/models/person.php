@@ -224,6 +224,126 @@ class Person extends ObjectCommon
 		return parent::delete($dn);
 	}
 	
+	/**
+	 * Authenticates the given user
+	 * Required attributes in the input array: userPassword and (uid or mail). 
+	 * If uid and mail are both in $input then only uid will be considered.
+	 *  
+	 * @param array $input
+	 * @return boolean
+	 */
+	public function authenticate($input)
+	{
+		if(isset($input['ce_key'])) $this->set_baseDn($input['ce_key']);
+		
+		if(!is_array($input))
+		{			
+			return $this->invalidCredentials('Invalid input. Please set uid or mail and userPassword');
+		}
+		
+		if(empty($input['uid']) && empty($input['mail']))
+		{
+			return $this->invalidCredentials('Your input should contain one of these attributes: uid or mail');
+		}
+
+		if(empty($input['userPassword']))
+		{
+			return $this->invalidCredentials('Your input should contain the userPassword attribute');
+		}
+		
+		//be sure that input is well formed and doesn't contain unnecessary fields
+		$tmp = array();
+		if(isset($input['uid'])) $tmp['uid'] = trim($input['uid']);
+		if(isset($input['mail'])) $tmp['mail'] = trim($input['mail']);
+		$tmp['userPassword'] = trim($input['userPassword']);
+		$input = $tmp;
+		unset($tmp);
+		
+		//if a uid is not provided try to guess it using the email address
+		if(empty($input['uid'])) {
+			//look for a person using the mail attribute
+			$search = array();
+			$search['filter'] = '(mail='.strtolower($input['mail']).')';
+			$found = $this->read($search);
+			
+			if(count($found['data']) > 1) {
+				$this->result = new Ce_Return_Object();
+				$this->result->data = array();
+				$this->result->status_code = '500';
+				$this->result->message = 'Internal Server Error';
+					
+				return $this->result->returnAsArray();
+			}
+			
+			if(count($found['data']) == 0) {
+				return $this->invalidCredentials();
+			}
+			
+			$input['uid'] = $found['data'][0]['uid'][0];
+		}
+		
+		$dn = 'uid='.$input['uid'].','.$this->baseDn;
+		
+		$this->ri_ldap->CEread($dn);
+		
+		$this->result->importLdapReturnObject($this->ri_ldap->result);
+		
+		if(count($this->result->data) > 1) {
+			$this->result = new Ce_Return_Object();
+			$this->result->data = array();
+			$this->result->status_code = '500';
+			$this->result->message = 'Internal Server Error';
+				
+			return $this->result->returnAsArray();
+		}
+
+		if(count($this->result->data) == 0) {
+			return $this->invalidCredentials();
+		}
+		
+		$person = $this->result->data['0'];
+		$stored_password = $person['userPassword'][0];
+		
+		$authenticated = false;
+		
+		//case 1: password is stored in LDAP not encrypted
+		$given_password = $input['userPassword'];
+		if($given_password == $stored_password) $authenticated = true;
+
+		//case 2: password is stored in LDAP with MD5 encryption		
+		$given_password = '{MD5}'.base64_encode(pack("H*",md5($input['userPassword'])));
+		if($given_password == $stored_password) $authenticated = true; 
+
+		//case 3: password is stored in LDAP with SHA encryption		
+		$given_password = '{SHA}'.base64_encode(pack("H*",sha1($input['userPassword'])));
+		if($given_password == $stored_password) $authenticated = true;
+
+		//case 3: password is stored in LDAP with CRYPT encryption
+		//TODO http://php.net/manual/en/function.crypt.php
+				
+		if(!$authenticated) $this->invalidCredentials();
+		
+		$result = $this->result->returnAsArray();
+		
+		//TODO should I give back all contact's attributes or only part of them?
+		return $result;		
+	}
+	
+	
+	private function invalidCredentials($message = null){
+		
+		$this->result = new Ce_Return_Object();
+		$this->result->data = array();
+		$this->result->status_code = '415';
+		if(is_null($message)) {
+			$this->result->message = 'Invalid credentials';
+		} else {
+			$this->result->message = $message;
+		}
+		
+		return $this->result->returnAsArray();
+	}
+	
 	// ===================== Other Methods ===============================
 	
 	private function getUid()
