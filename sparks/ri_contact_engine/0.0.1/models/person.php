@@ -259,36 +259,21 @@ class Person extends ObjectCommon
 		$input = $tmp;
 		unset($tmp);
 		
-		//if a uid is not provided try to guess it using the email address
-		if(empty($input['uid'])) {
+		if(!empty($input['mail'])) {
 			//look for a person using the mail attribute
 			$search = array();
 			$search['filter'] = '(mail='.strtolower($input['mail']).')';
-			$found = $this->read($search);
-			
-			if(count($found['data']) > 1) {
-				$this->result = new Ce_Return_Object();
-				$this->result->data = array();
-				$this->result->status_code = '500';
-				$this->result->message = 'Internal Server Error';
-					
-				return $this->result->returnAsArray();
-			}
-			
-			if(count($found['data']) == 0) {
-				return $this->invalidCredentials();
-			}
-			
-			$input['uid'] = $found['data'][0]['uid'][0];
 		}
 		
-		$dn = 'uid='.$input['uid'].','.$this->baseDn;
+		if(!empty($input['uid'])) {
+			//look for a person using the mail attribute
+			$search = array();
+			$search['filter'] = '(uid='.strtolower($input['uid']).')';
+		}
 		
-		$this->ri_ldap->CEread($dn);
-		
-		$this->result->importLdapReturnObject($this->ri_ldap->result);
-		
-		if(count($this->result->data) > 1) {
+		$result = $this->read($search);
+			
+		if(count($result['data']) > 1) {
 			$this->result = new Ce_Return_Object();
 			$this->result->data = array();
 			$this->result->status_code = '500';
@@ -296,12 +281,10 @@ class Person extends ObjectCommon
 				
 			return $this->result->returnAsArray();
 		}
-
-		if(count($this->result->data) == 0) {
-			return $this->invalidCredentials();
-		}
-		
-		$person = $this->result->data['0'];
+			
+		if(count($result['data']) == 0) return $this->invalidCredentials();
+				
+		$person = $result['data']['0'];
 		$stored_password = $person['userPassword'][0];
 		
 		$authenticated = false;

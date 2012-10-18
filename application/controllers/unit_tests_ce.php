@@ -674,7 +674,7 @@ class Unit_Tests_Ce extends Test_Controller {
 		
 
 		
-		
+		return;
 		
 		
 		$this->testTitle('Authentication using email but not providing password');
