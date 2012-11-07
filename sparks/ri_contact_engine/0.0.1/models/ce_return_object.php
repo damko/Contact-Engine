@@ -92,8 +92,8 @@ class Ce_Return_Object extends CI_Model
 						'results_got_number' => 0,
 						'results_pages' => '0',
 						'results_page' => '0',
-						'finished' => null,
-						'duration' => null,
+						'finished' => 0,
+						'duration' => 0,
 						'status_code' => null,
 						'message' => null,
 				),
@@ -109,6 +109,8 @@ class Ce_Return_Object extends CI_Model
 		if(isset($this->results_pages)) $output['status']['results_pages'] = $this->results_pages;
 		if(isset($this->results_page)) $output['status']['results_page'] = $this->results_page;
 		if(isset($this->results_got_number)) $output['status']['results_got_number'] = $this->results_got_number;
+		if(isset($this->finished)) $output['status']['finished'] = $this->finished;
+		if(isset($this->duration)) $output['status']['duration'] = $this->duration;
 		
 		//content
 		if(isset($this->data)) $output['data'] = $this->data;

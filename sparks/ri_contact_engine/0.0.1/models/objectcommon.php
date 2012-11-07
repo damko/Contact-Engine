@@ -163,6 +163,24 @@ class ObjectCommon extends CI_Model
 		return $output;		 
 	}	
 	
+	/**
+	 * Returns the total number of entries found with the specified filter
+	 *
+	 * @access		public
+	 * @param		array $input
+	 * @return		array $return
+	 * @author 		Damiano Venturin
+	 * @since		Nov 2, 2012
+	 */
+	public function count(array $input)
+	{
+		$result = $this->read($input);
+		$return = $result;
+		if($result['status']['status_code'] == 200){
+			$return['data'] = array('total_entries' => count($result['data']));
+		}
+		return $return;
+	}	
 	
 	public function delete($dn)
 	{			

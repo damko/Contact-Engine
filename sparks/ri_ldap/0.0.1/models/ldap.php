@@ -536,7 +536,7 @@ class Ldap extends CI_Model {
 		extract($params);
 		
 		//validation
-		if(isset($message)) unset($message); //just in case
+		
 		if(!$this->preRunValidation($command, $params)) return false;
 		
 	

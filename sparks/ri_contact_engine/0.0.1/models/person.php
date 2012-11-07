@@ -107,7 +107,27 @@ class Person extends ObjectCommon
 		
 		$output = array();
 		if(isset($filter)) $output['filter'] = $filter; 
-		if(isset($wanted_attributes)) $output['wanted_attributes'] = $wanted_attributes; 
+		if(isset($wanted_attributes)) $output['wanted_attributes'] = $wanted_attributes;
+		
+		if(isset($sort_by)) {
+			
+			$person_attributes = array_keys($this->properties);
+			
+			if(is_array($sort_by)) {	
+				foreach ($sort_by as $key => $parameter) {
+					if(!in_array($parameter, $person_attributes)) unset($sort_by[$key]);
+				}
+				
+			} else {
+				if(in_array($sort_by, $person_attributes)){
+					$sort_by = array($sort_by);
+				} else {
+					$sort_by = array();
+				}
+			}
+		}
+		if(!isset($sort_by) || count($sort_by) == 0) $sort_by = array('sn'); //default
+		
 		if(isset($sort_by)) $output['sort_by'] = $sort_by;
 		if(isset($flow_order)) $output['flow_order'] = $flow_order; 
 		if(isset($wanted_page)) $output['wanted_page'] = $wanted_page; 
@@ -133,9 +153,9 @@ class Person extends ObjectCommon
 			
 			$return = $this->read($input);
 			
-			$original_values = $this->toRest(false);
-			
 			if(count($return['data']) == 0) return $this->result->returnAsArray();
+			
+			$original_values = $this->toRest(false);
 			
 			if(!$this->bindDataWithClassProperties($input, false, true)) return $this->result->returnAsArray();
 
@@ -163,6 +183,7 @@ class Person extends ObjectCommon
 		$required_attributes = $this->getRequiredProperties();
 		foreach ($deleted_attributes as $key => $attribute) {
 			
+			//TODO I should add also entryCreatedBy when I'm sure that it works correctly in the creation stage
 			if($attribute=='objectClass' || in_array($attribute,$required_attributes) || $attribute=='entryCreationDate'){
 				//these are special values that we don't want to delete in any case
 				continue;

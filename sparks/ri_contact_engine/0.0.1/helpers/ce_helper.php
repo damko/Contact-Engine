@@ -3,7 +3,7 @@
 
 function pagination_setup($input)
 {
-	log_message('debug','Ce_helper has been loaded');
+	/* log_message('debug','Ce_helper has been loaded'); */
 	
 	$return = array();
 	

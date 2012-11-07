@@ -100,7 +100,27 @@ class Organization extends ObjectCommon
 		$output = array();
 		if(isset($filter)) $output['filter'] = $filter;
 		if(isset($wanted_attributes)) $output['wanted_attributes'] = $wanted_attributes;
+		
+		if(isset($sort_by)) {
+				
+			$organization_attributes = array_keys($this->properties);
+				
+			if(is_array($sort_by)) {
+				foreach ($sort_by as $key => $parameter) {
+					if(!in_array($parameter, $organization_attributes)) unset($sort_by[$key]);
+				}
+		
+			} else {
+				if(in_array($sort_by, $organization_attributes)){
+					$sort_by = array($sort_by);
+				} else {
+					$sort_by = array();
+				}
+			}
+		}
+		if(!isset($sort_by) || count($sort_by) == 0) $sort_by = array('o'); //default		
 		if(isset($sort_by)) $output['sort_by'] = $sort_by;
+		
 		if(isset($flow_order)) $output['flow_order'] = $flow_order;
 		if(isset($wanted_page)) $output['wanted_page'] = $wanted_page;
 		if(isset($items_page)) $output['items_page'] = $items_page;
