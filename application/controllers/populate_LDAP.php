@@ -11,10 +11,12 @@ class Populate_LDAP extends CI_Controller {
 		
 		$this->load->spark('ri_ldap/0.0.1');
 		
-		$this->server = 'ldap://ldapmaster0:389';
-		$this->ldapdn = 'cn=admin,dc=2v,dc=ntw';
-		$this->ldappw = 'Wi7Xkcv300z';
-		$this->version = '3';
+
+		$tmp = $this->config->item('ldapMaster');		
+		$this->server = $tmp['url'];
+		$this->ldapdn = $tmp['binddn'];
+		$this->ldappw = $tmp['bindpw'];
+		$this->version = $tmp['version'];
 
 	}	
 	

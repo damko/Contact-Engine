@@ -61,6 +61,9 @@ class Ldap extends CI_Model {
 	}
 	
 	protected function reset_result() {
+		$this->load->model('ldap_return_object');
+		$this->load->model('ldap_data_object');
+		
 		//this is what will be returned beside the exit status
 		$this->result = new Ldap_Return_Object();
 		$this->data = new Ldap_Data_Object();

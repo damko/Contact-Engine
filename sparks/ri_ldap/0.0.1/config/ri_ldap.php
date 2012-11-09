@@ -18,18 +18,15 @@ $config['ldapMaster'][0]['url'] = "ldap://ldapmaster0:389";
 $config['ldapMaster'][0]['version'] = 3;
 $config['ldapMaster'][0]['binddn'] = "cn=admin,dc=2v,dc=ntw";
 $config['ldapMaster'][0]['bindpw'] = "Wi7Xkcv300z";
-//$config['ldapMaster'][0]['referrals'] = true;
 
 //1ST LDAP SLAVE SERVER
 $config['ldapSlave'][0]['url'] = "ldap://ldapslave0:389";
 $config['ldapSlave'][0]['version'] = 3;
 $config['ldapSlave'][0]['binddn'] = "cn=admin,dc=2v,dc=ntw";
 $config['ldapSlave'][0]['bindpw'] = "Wi7Xkcv300z";
-//$config['ldapSlave'][0]['referrals'] = true;
 
 //2ND LDAP SLAVE SERVER
 // $config['ldapSlave'][1]['url'] = "ldap://ldapslave1:389";
 // $config['ldapSlave'][1]['version'] = 3;
 // $config['ldapSlave'][1]['binddn'] = "cn=admin,dc=2v,dc=ntw";
 // $config['ldapSlave'][1]['bindpw'] = "Wi7Xkcv300z";
-//$config['ldapSlave'][1]['referrals'] = true;
