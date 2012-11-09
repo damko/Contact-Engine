@@ -71,24 +71,27 @@ class CI_Log {
 	 */
 	public function write_log($level = 'error', $msg, $php_error = FALSE)
 	{
-		if ($this->_enabled === FALSE)
+			if ($this->_enabled === FALSE)
 		{
 			return FALSE;
 		}
 
 		$level = strtoupper($level);
 
-		if ( ! isset($this->_levels[$level]) OR ($this->_levels[$level] > $this->_threshold))
+		if (( ! isset($this->_levels[$level]) OR ($this->_levels[$level] > $this->_threshold))
+			&& ! isset($this->_threshold_array[$this->_levels[$level]]))
 		{
 			return FALSE;
 		}
+
 
 		$filepath = $this->_log_path.'log-'.date('Y-m-d').'.php';
 		$message  = '';
 
 		if ( ! file_exists($filepath))
 		{
-			$message .= "<"."?php  if ( ! defined('BASEPATH')) exit('No direct script access allowed'); ?".">\n\n";
+			$newfile = TRUE;
+			$message .= '<'."?php if ( ! defined('BASEPATH')) exit('No direct script access allowed'); ?".">\n\n";
 		}
 
 		if ( ! $fp = @fopen($filepath, FOPEN_WRITE_CREATE))
@@ -96,14 +99,18 @@ class CI_Log {
 			return FALSE;
 		}
 
-		$message .= $level.' '.(($level == 'INFO') ? ' -' : '-').' '.date($this->_date_fmt). ' --> '.$msg."\n";
+		$message .= $level.' '.($level === 'INFO' ? ' -' : '-').' '.date($this->_date_fmt).' --> '.$msg."\n";
 
 		flock($fp, LOCK_EX);
 		fwrite($fp, $message);
 		flock($fp, LOCK_UN);
 		fclose($fp);
 
-		@chmod($filepath, FILE_WRITE_MODE);
+		if (isset($newfile) && $newfile === TRUE)
+		{
+			@chmod($filepath, FILE_WRITE_MODE);
+		}
+
 		return TRUE;
 	}
 
