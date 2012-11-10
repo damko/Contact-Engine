@@ -10,10 +10,10 @@ class Unit_Tests_RiLdap extends Test_Controller {
 		$this->load->spark('ri_ldap/0.0.1');
 		
 		$tmp = $this->config->item('ldapMaster');		
-		$this->server = $tmp['url'];
-		$this->ldapdn = $tmp['binddn'];
-		$this->ldappw = $tmp['bindpw'];
-		$this->version = $tmp['version'];
+		$this->server = $tmp[0]['url'];
+		$this->ldapdn = $tmp[0]['binddn'];
+		$this->ldappw = $tmp[0]['bindpw'];
+		$this->version = $tmp[0]['version'];
 		$this->baseDN = 'ou=users,o=ce,dc=2v,dc=ntw';
 	}
 		

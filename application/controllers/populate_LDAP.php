@@ -5,6 +5,12 @@ require APPPATH.'/libraries/test_controller.php';
 
 
 class Populate_LDAP extends CI_Controller {
+	
+	public $server;
+	public $ldapdn;
+	public $ldappw;
+	public $version;
+	
 	public function __construct()
 	{
 		parent::__construct();
@@ -13,10 +19,10 @@ class Populate_LDAP extends CI_Controller {
 		
 
 		$tmp = $this->config->item('ldapMaster');		
-		$this->server = $tmp['url'];
-		$this->ldapdn = $tmp['binddn'];
-		$this->ldappw = $tmp['bindpw'];
-		$this->version = $tmp['version'];
+		$this->server = $tmp[0]['url'];
+		$this->ldapdn = $tmp[0]['binddn'];
+		$this->ldappw = $tmp[0]['bindpw'];
+		$this->version = $tmp[0]['version'];
 
 	}	
 	

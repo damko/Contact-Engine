@@ -131,7 +131,7 @@ class Organization extends ObjectCommon
 	public function update(array $input = null)
 	{
 		//FIXME This method requires more attention. For ex. what happens if I try to change the uid or the dn or the objectClass?
-				
+		
 		if(!is_null($input)) {
 			
 			extract($input);
@@ -141,6 +141,8 @@ class Organization extends ObjectCommon
 			$return = $this->read($input);
 				
 			if(count($return['data']) == 0) return $this->result->returnAsArray();
+				
+			$original_values = $this->toRest(false);
 				
 			if(!$this->bindDataWithClassProperties($input, false, true)) return $this->result->returnAsArray();
 		}
@@ -163,20 +165,24 @@ class Organization extends ObjectCommon
 		
 		//if an attribute has been deleted then it's not contained in the $input.
 		//The only way to understand what's has been deleted is to compare the original entry value with the new ones
-		$deleted_attributes = array_diff(array_keys($original_values), array_keys($entry));
-		$required_attributes = $this->getRequiredProperties();
-		foreach ($deleted_attributes as $key => $attribute) {
-			if($attribute=='objectClass' || in_array($attribute,$required_attributes) || $attribute=='entryCreationDate'){
-				continue;
-			} else {
-				if(is_array($original_values[$attribute])) {
-					$entry[$attribute] = array();
+		if(is_array($original_values) && is_array($entry)) {
+			$deleted_attributes = array_diff(array_keys($original_values), array_keys($entry));
+			$required_attributes = $this->getRequiredProperties();
+			foreach ($deleted_attributes as $key => $attribute) {
+				if($attribute=='objectClass' || in_array($attribute,$required_attributes) || $attribute=='entryCreationDate'){
+					continue;
 				} else {
-					$entry[$attribute] = '';
+					if(is_array($original_values[$attribute])) {
+						$entry[$attribute] = array();
+					} else {
+						$entry[$attribute] = '';
+					}
 				}
-			}
-		}			
-		
+			}			
+		} else {
+			//TODO what to do? 
+		}
+				
 		unset($entry['oid']); //never mess with the id during an update cause it has to do with dn
 		unset($entry['dn']);
 		

@@ -265,6 +265,5 @@ $config['rest_ajax_only'] = FALSE;
  */
 $config['rest_server']	= 'http://ce_github/index.php/api/';
 
-
 /* End of file rest.php */
 /* Location: ./system/application/config/rest.php */

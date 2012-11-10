@@ -10,10 +10,10 @@ class Unit_Tests_Ldap extends Test_Controller {
 		$this->load->spark('ri_ldap/0.0.1');
 		
 		$tmp = $this->config->item('ldapMaster');		
-		$this->server = $tmp['url'];
-		$this->ldapdn = $tmp['binddn'];
-		$this->ldappw = $tmp['bindpw'];
-		$this->version = $tmp['version'];
+		$this->server = $tmp[0]['url'];
+		$this->ldapdn = $tmp[0]['binddn'];
+		$this->ldappw = $tmp[0]['bindpw'];
+		$this->version = $tmp[0]['version'];
 		$this->baseDN = 'ou=users,o=ce,dc=2v,dc=ntw';
 	}
 	
@@ -48,27 +48,6 @@ class Unit_Tests_Ldap extends Test_Controller {
 	
 		$old_ldap_server = $this->server;
 	
-	
-	
-/* 		$this->getCodeOrigin();
-		$this->ldap = new Ldap();
-		$note = 'I\'m not even passing the ldap:// protocol.';
-		$this->server = 'fake_server';
-		$test = $this->ldap->connect($this->server,$this->ldapdn,$this->ldappw,$this->version);
-		echo $this->run($test, 'is_false', 'Using '.$this->server.' as ldap connection.', $note);
-	
-	
-	
-	
-		$this->getCodeOrigin();
-		$this->ldap = new Ldap();
-		$note = 'I\'m passing the ldap:// protocol but with a fake server name.';
-		$this->server = 'fake_server';
-		$test = $this->ldap->connect($this->server,$this->ldapdn,$this->ldappw,$this->version);
-		echo $this->run($test, 'is_false', 'Using '.$this->server.' as ldap connection.', $note); */
-	
-	
-	
 		$this->getCodeOrigin();
 		$this->ldap = new Ldap();
 		$note = '';
@@ -83,7 +62,7 @@ class Unit_Tests_Ldap extends Test_Controller {
 		$this->testTitle('Testing the LDAP Object create() method');
 	
 	
-		$this->subTestTitle('Performing a good creation using all the mandatory attributes');
+		$this->subTestTitle('Person creation using all the mandatory attributes');
 		$this->getCodeOrigin();
 		$this->ldap = new Ldap();
 		$this->ldap->connect($this->server,$this->ldapdn,$this->ldappw,$this->version);
@@ -116,12 +95,16 @@ class Unit_Tests_Ldap extends Test_Controller {
 			$dn_save = $dn;
 		}
 
+		$this->subTestTitle('Creation of an Organization branch');
+		$this->getCodeOrigin();
+		
+		$branchname = 'testorg_'.rand('100000', '999999');
 		$entry = array();
 		$entry['objectClass'][] = 'organization';
 		$entry['objectClass'][] = 'top';
-		$entry['o'] = 'test2';
+		$entry['o'] = $branchname;
 		$entry['description'] = 'php generated branch';
-		$dn = 'o=test2,dc=2v,dc=ntw';
+		$dn = 'o='.$branchname.',dc=2v,dc=ntw';
 		$test = $this->ldap->create($entry, $dn);
 		echo $this->run($test, 'is_true', 'Is the exit status true ?', '');
 

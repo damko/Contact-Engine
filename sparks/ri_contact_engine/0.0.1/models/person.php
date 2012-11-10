@@ -179,34 +179,37 @@ class Person extends ObjectCommon
 		
 		//if an attribute has been deleted then it's not contained in the $input. 
 		//The only way to understand what's has been deleted is to compare the original entry value with the new ones
-		$deleted_attributes = array_diff(array_keys($original_values), array_keys($entry));
-		$required_attributes = $this->getRequiredProperties();
-		foreach ($deleted_attributes as $key => $attribute) {
-			
-			//TODO I should add also entryCreatedBy when I'm sure that it works correctly in the creation stage
-			if($attribute=='objectClass' || in_array($attribute,$required_attributes) || $attribute=='entryCreationDate'){
-				//these are special values that we don't want to delete in any case
-				continue;
-			} else {
-				$prop = $this->properties;	
+		if(is_array($original_values) && is_array($entry)) {
+			$deleted_attributes = array_diff(array_keys($original_values), array_keys($entry));
+			$required_attributes = $this->getRequiredProperties();
+			foreach ($deleted_attributes as $key => $attribute) {
 				
-				if( $this->properties[$attribute]['no-user-modification'] == 1) continue;
-						
-				if( $this->properties[$attribute]['boolean'] == 1) {
-					$entry[$attribute] = 'FALSE';
-					continue;
-				}
-
-				if( $this->properties[$attribute]['single-value'] == 1) {
-					$entry[$attribute] = '';
+				//TODO I should add also entryCreatedBy when I'm sure that it works correctly in the creation stage
+				if($attribute=='objectClass' || in_array($attribute,$required_attributes) || $attribute=='entryCreationDate'){
+					//these are special values that we don't want to delete in any case
 					continue;
 				} else {
-					$entry[$attribute] = array();
-					continue;
-				}						
+					$prop = $this->properties;	
+					
+					if( $this->properties[$attribute]['no-user-modification'] == 1) continue;
+							
+					if( $this->properties[$attribute]['boolean'] == 1) {
+						$entry[$attribute] = 'FALSE';
+						continue;
+					}
+	
+					if( $this->properties[$attribute]['single-value'] == 1) {
+						$entry[$attribute] = '';
+						continue;
+					} else {
+						$entry[$attribute] = array();
+						continue;
+					}						
+				}
 			}
+		} else {
+			//TODO what to do?
 		}
-		
 		unset($entry['uid']); //never mess with the id during an update cause it has to do with dn
 		unset($entry['dn']);
 		
