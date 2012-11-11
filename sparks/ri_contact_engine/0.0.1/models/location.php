@@ -140,6 +140,9 @@ class Location extends ObjectCommon
 			return $this->result->returnAsArray();
 		}
 	
+		unset($input['locLatitude']);
+		unset($input['locLongitude']);
+		
 		if($exit_status = parent::update($input)){
 			
 			$return = $this->result->returnAsArray();
