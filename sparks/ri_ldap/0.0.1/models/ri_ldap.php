@@ -346,7 +346,7 @@ class Ri_Ldap extends Ldap {
 	 *
 	 * @todo
 	 */	
-	public function CEupdate($entry, $dn = null) {
+	public function CEupdate($entry, $dn = null, $delete = false) {
 		
 		if(!$this->initialize()) return $this->restReturn($this->result);
 		
@@ -354,7 +354,7 @@ class Ri_Ldap extends Ldap {
 		
 		$this->connection = $this->WrConnection;
 		
-		return $this->restReturn($this->update($entry, $dn));
+		return $this->restReturn($this->update($entry, $dn, $delete));
 	}
 	
 	
@@ -386,6 +386,18 @@ class Ri_Ldap extends Ldap {
 		
 		return $this->restReturn($this->delete($dn));
 	}
+	
+	
+	public function CEdelete_attribute($entry, $dn = null) {
+	
+		if(!$this->initialize()) return $this->restReturn($this->result);
+	
+		$this->reset_result(); //cleaning $this->result from what initialize wrote inside
+	
+		$this->connection = $this->WrConnection;
+	
+		return $this->restReturn($this->mod_del($entry, $dn));
+	}	
 	
 	/**
 	 * Performs a sort of loadbalancing between the LDAP servers (slaves or masters) if more than one is provided

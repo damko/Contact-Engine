@@ -281,12 +281,7 @@ class Ldap extends CI_Model {
 	 * @see
 	 * 
 	 * @author 		Damiano Venturin
-	 * @copyright 	2V S.r.l.
-	 * @license		GPL
-	 * @link		http://www.contact-engine.info
-	 * @since		Mar 4, 2012
-	 * 
-	 * @todo		
+	 * @since		Mar 4, 2012	
 	 */
 	public function delete($dn = null)
 	{
@@ -320,9 +315,6 @@ class Ldap extends CI_Model {
 	 * @see
 	 * 
 	 * @author 		Damiano Venturin
-	 * @copyright 	2V S.r.l.
-	 * @license		GPL
-	 * @link		http://www.contact-engine.info
 	 * @since		Feb 24, 2012
 	 * 
 	 * @todo	It's possible to perform a search on multiple DNs. http://www.php.net/manual/en/function.ldap-search.php#94554 This might be useful if I want to perform a search on both people and organizations in one shot	
@@ -360,18 +352,9 @@ class Ldap extends CI_Model {
 	 * @param		$sizeLimit		integer		Search param. It limits the max amount of items to get from LDAP. If it's not set it will be substituted with the value stored in the config file.
 	 * @param		$timeLimit		integer		Search param. It limits the max amount of time to perform the LDAP search query. If it's not set it will be substituted with the value stored in the config file.
 	 * @param		$deref			integer		Search param. It specifies how aliases should be handled during the search. http://www.php.net/ldap_list
-	 * @var
-	 * @return		boolean
-	 * @example
-	 * @see
 	 *
 	 * @author 		Damiano Venturin
-	 * @copyright 	2V S.r.l.
-	 * @license		GPL
-	 * @link		http://www.contact-engine.info
 	 * @since		Mar 4, 2012
-	 *
-	 * @todo
 	 */
 	public function read($dn = null, $sizeLimit = null, $timeLimit = null, $defer = null) {
 		if(!empty($dn) and !is_array($dn)) $this->dn = $dn;
@@ -394,28 +377,28 @@ class Ldap extends CI_Model {
 	 * @access		public
 	 * @param		$entry	array	Mandatory. The array containing the data for the entry.
 	 * @param		$dn		string	The DN of the new entry. If empty $this->dn will be used instead.
-	 * @var			
 	 * @return		boolean
-	 * @example
-	 * @see
 	 * 
 	 * @author 		Damiano Venturin
-	 * @copyright 	2V S.r.l.
-	 * @license		GPL
-	 * @link		http://www.contact-engine.info
 	 * @since		Mar 4, 2012
-	 * 
-	 * @todo		
 	 */
-	public function update($entry, $dn = null) {
+	public function update($entry, $dn = null, $delete = false) {
 		
 		if(!empty($dn) and !is_array($dn)) $this->dn = $dn;
 		
-		$params = array(
-							'command' => 'ldap_modify',
-							'entry' => $entry,
-		);
-		
+		if($delete){
+			$params = array(
+					'command' => 'ldap_mod_del',
+					'entry' => $entry,
+			);
+				
+		} else {
+			$params = array(
+								'command' => 'ldap_modify',
+								'entry' => $entry,
+			);
+		}
+				
 		return $this->run($params) ? true : false;
 	}
 
@@ -424,18 +407,10 @@ class Ldap extends CI_Model {
 	 * 
 	 * @access		private
 	 * @param		$params		array	Mandatory. It contains the parameters for the LDAP function.
-	 * @var			
 	 * @return		boolean		True if it's validated.
-	 * @example
-	 * @see
 	 * 
 	 * @author 		Damiano Venturin
-	 * @copyright 	2V S.r.l.
-	 * @license		GPL
-	 * @link		http://www.contact-engine.info
 	 * @since		Feb 24, 2012
-	 * 
-	 * @todo		
 	 */
 	private function preRunValidation($command,array $params)
 	{
@@ -513,19 +488,11 @@ class Ldap extends CI_Model {
 	 * Executes a LDAP command and throws errors if needed.
 	 * 
 	 * @access		private
-	 * @param		$params		array	Mandatory. It contains the parameters for the LDAP function.		
-	 * @var			
+	 * @param		$params		array	Mandatory. It contains the parameters for the LDAP function.			
 	 * @return		$result		It can be the LDAP result or false if something went wrong.
-	 * @example
-	 * @see
 	 * 
 	 * @author 		Damiano Venturin
-	 * @copyright 	2V S.r.l.
-	 * @license		GPL
-	 * @link		http://www.contact-engine.info
-	 * @since		Feb 24, 2012
-	 * 
-	 * @todo		
+	 * @since		Feb 24, 2012	
 	 */
 	private function run(array $params)
 	{
@@ -582,7 +549,14 @@ class Ldap extends CI_Model {
 					}					
 				}
 			break;
-					
+
+			case 'ldap_mod_del':
+				if(! $result = ldap_mod_del($this->connection, $this->dn, $entry)) {
+					$ldap_error = $this->getLdapError($command);
+					$message = $ldap_error['message'];
+				}
+			break;			
+			
 			case 'ldap_list'; 
 				//adjusting optional search parameters
 				if(is_null($sizeLimit)) $sizeLimit = $this->conf['sizeLimit'];
@@ -635,18 +609,10 @@ class Ldap extends CI_Model {
 	 * 
 	 * @access		private
 	 * @param		$command	string	The executed LDAP command. It's used to improve the returned error message
-	 * @var			
 	 * @return		$result		array	The array containing the errors. $result['ldap_errno'] contains the LDAP error message. $result['ldap_errstr'] contains the LDAP error message. $result['message'] contains the improved error message that will be really used. 
-	 * @example
-	 * @see
 	 * 
 	 * @author 		Damiano Venturin
-	 * @copyright 	2V S.r.l.
-	 * @license		GPL
-	 * @link		http://www.contact-engine.info
 	 * @since		Feb 24, 2012
-	 * 
-	 * @todo		
 	 */
 	private function getLdapError($command = null){
 		$result = array();

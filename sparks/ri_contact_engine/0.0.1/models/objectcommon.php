@@ -162,6 +162,161 @@ class ObjectCommon extends CI_Model
 		$output = $this->result->returnAsArray();
 		return $output;		 
 	}	
+
+	/**
+	 * Updates the entry to what specified in the $input array: basically the $input array represents the whole entry.
+	 * All the attributes not specified in the $input array will be erased unless they are mandatory
+	 *
+	 * @access		public
+	 * @param		array $input
+	 * @return		boolean
+	 * @author 		Damiano Venturin
+	 * @since		Nov 10, 2012
+	 */	
+	public function update(array $input) {
+				
+		extract($input);
+		if(isset($ce_key)) $this->set_baseDn($ce_key);
+			
+		$return = $this->read($input);
+			
+		if(count($return['data']) == 0) {
+			//if the person has not been found return 415
+			$this->result = new Ce_Return_Object();
+			$this->result->data = array();
+			$this->result->status_code = '415';
+			$this->result->message = 'The specified '.$this->objName.' can not be found.';
+			return false;
+		}
+			
+		$old_entry = $this->toRest(false);
+			
+		if(!$this->bindDataWithClassProperties($input, false, true)) return false;
+		
+		$new_entry = $this->toRest(false);
+		
+		switch ($this->objName) {
+			case 'person':
+				$dn = 'uid='.$this->getUid().','.$this->baseDn;
+				if(in_array('dueviperson', $this->objectClass)) $new_entry['entryUpdateDate'] = date('Y-m-d');
+			break;
+					
+			case 'organization':
+				$dn = 'oid='.$this->oid.','.$this->baseDn;
+				if(in_array('dueviorganization', $this->objectClass)) $new_entry['entryUpdateDate'] = date('Y-m-d');
+			break;
+					
+			case 'location':
+				$dn = 'locId='.$this->locId.','.$this->baseDn;
+				if(in_array('duevilocation', $this->objectClass)) $new_entry['entryUpdateDate'] = date('Y-m-d');
+			break;
+		}		
+		
+		//Looking for deleted attributes. Note: LDAP attribute deletion is a beast ...
+		//If an attribute has been deleted then it's not contained in the $input.
+		//The only way to understand what's has been deleted is to compare the original entry values with the new ones
+		if(is_array($old_entry) && is_array($new_entry)) {
+			
+			$deleted_attributes = array_diff(array_keys($old_entry), array_keys($new_entry));
+			$required_attributes = $this->getRequiredProperties();
+			
+			//some attributes can not be just deleted
+			foreach ($deleted_attributes as $key => $attribute) {
+				
+				$to_delete = array();
+				
+				//these are special attributes that we don't want to delete in any case
+				if($attribute=='objectClass') continue;
+				
+				if($attribute=='entryCreatedBy') continue;
+				
+				if($attribute=='entryCreationDate') continue;
+				
+				if( $this->properties[$attribute]['no-user-modification'] == 1) continue;
+				
+				if(in_array($attribute,$required_attributes)) {
+					
+					if( $this->properties[$attribute]['boolean'] == 1) {
+						$new_entry[$attribute] = 'FALSE';
+						continue;
+					}				
+					
+					continue;
+				}
+
+				//here the weapon against the beast...
+				if( $this->properties[$attribute]['single-value'] == 1) {
+					$to_delete[$attribute] = array(); 
+				} else {
+					if(is_array($old_entry[$attribute])){
+						foreach ($old_entry[$attribute] as $key => $value) {
+							$to_delete[$attribute][$key] = $value;
+						}
+					} else {
+						$to_delete[$attribute] = $old_entry[$attribute];
+					}
+				}
+				
+				//performs attributes deletion
+				//I have not found a better way to perform the deletion than this. 
+				//I tried to group the updates in only one call but it fails mysteriously
+				if(!$this->ri_ldap->CEupdate($to_delete, $dn, true)){
+					$this->result = new Ce_Return_Object();
+					$this->result->data = array();
+					$this->result->status_code = '500';
+					$this->result->message = 'System error: The attribute ' . $attribute . ' for the object ' . $this->objName . ' can not be deleted';
+					return false;
+				}
+			}
+		} else {
+			//this should happen but ...
+			$this->result = new Ce_Return_Object();
+			$this->result->data = array();
+			$this->result->status_code = '500';
+			return false; 			
+		}
+
+		
+		//performs the update of the left values
+		unset($new_entry['uid']); //never mess with the id during an update cause it has to do with dn
+		unset($new_entry['dn']);
+		
+		if(count($new_entry) == 0) {
+			//nothing to change
+			$this->result = new Ce_Return_Object();
+			$this->result->data = array();
+			$this->result->status_code = '200';
+			$this->result->message = 'Nothing to update for this '.$this->objName;
+			return false; 			
+		}
+		
+		//$this->validate(); //TODO add entry validation before updating
+		
+		if($exit_status = $this->ri_ldap->CEupdate($new_entry, $dn)){
+		
+			$this->result->importLdapReturnObject($this->ri_ldap->result);
+		
+			
+			switch ($this->objName) {
+				case 'person':
+					$this->result->pushData(array('uid' => $this->getUid()));
+				break;
+						
+				case 'organization':
+					$this->result->pushData(array('oid' => $this->oid));
+				break;
+						
+				case 'location':
+					$this->result->pushData(array('locId' => $this->locId));
+				break;
+			}
+			
+			return true;
+		}
+		
+		$this->result->importLdapReturnObject($this->ri_ldap->result);
+		return false;
+	}
 	
 	/**
 	 * Returns the total number of entries found with the specified filter

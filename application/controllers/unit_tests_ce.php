@@ -391,7 +391,21 @@ class Unit_Tests_Ce extends Test_Controller {
 		$this->rest->initialize(array('server' => $this->config->item('rest_server').'exposeObj/person/'));
 
 	
-	
+		$this->testTitle('Update a person sending an empty array');
+		
+		$method = 'update';
+		$input = array();
+		//$input['filter'] = '(uid='.$uid.')';
+		
+		$rest_return = $this->rest->get($method, $input, 'serialize');
+		$this->getCodeOrigin();
+		$this->arrayReturn($method, $rest_return);
+		
+		
+		
+		
+		
+		
 		
 		//calling the methon READ for object person with a filter
 		$this->testTitle('get the list of person with givenName starting with Willy*');
@@ -470,12 +484,13 @@ class Unit_Tests_Ce extends Test_Controller {
 
 		
 		//update person 
+		$this->testTitle('Update person with uid='.$uid.' : setting the displayName='.$input['displayName']);
 		$method = 'update';
 		$input = array();
-		//$input = $rest_return['data'][0];
+		$input = $person = $rest_return['data'][0];
 		$input['uid'] = $uid;
-		$new_displayName = $input['displayName'] = $rest_return['data'][0]['displayName'].' '.rand(100, 999);
-		$this->testTitle('update person with uid='.$uid.' : setting the displayName='.$input['displayName']);
+
+		$new_displayName = $input['displayName'] = $person['displayName'].' '.rand(100, 999);
 		
 		$rest_return = $this->rest->get($method, $input, 'serialize');
 		
@@ -495,9 +510,6 @@ class Unit_Tests_Ce extends Test_Controller {
 		echo $this->run($test, 'is_numeric', $method.' - Integer uid', 'Checking if the returned uid is a number');
  
 		$this->printReturn($rest_return);
-		
-		
-		return;
 		
 		
 		//show the updated entry
@@ -528,44 +540,78 @@ class Unit_Tests_Ce extends Test_Controller {
 		$test = false;
 		if($displayName == $new_displayName) $test = true;
 		$this->getCodeOrigin();
-		echo $this->run($test, 'is_true', $method.' - correct result', 'The attribute displayName was successfully modified');
+		echo $this->run($test, 'is_true', $method.' - correct result', 'The attribute displayName was successfully modified ?');
 		
 		$this->printReturn($rest_return);
 
-		
+
+
 
 		
 		
-
-		//update person with wrong filter
-		$this->testTitle('update the same person sending an input array without any field but the uid. It means: nothing to update');
-			
+		$rand = rand(1900, 2012);
+		$birthdate = $rand.'-12-31';
+		$this->testTitle('Update previous person adding a new attribute "birthDate = '.$birthdate.'"');
 		$method = 'update';
-		$input = array('uid' => '10000000');
-			
+		$input = $person;
+		$input['birthDate'] = $birthdate;
+		
 		$rest_return = $this->rest->get($method, $input, 'serialize');
-			
 		
 		$this->getCodeOrigin();
 		$this->arrayReturn($method, $rest_return);
-
+		
 		$this->getCodeOrigin();
 		$this->checkNoRestError($method, $rest_return);
-			
+		
 		
 		$this->getCodeOrigin();
 		$this->check200($method, $rest_return);
-
 		
+		//check uid is a number
+		$uid = $test = $rest_return['data']['uid'];
 		$this->getCodeOrigin();
-		$this->checkHasData($method, $rest_return);
+		echo $this->run($test, 'is_numeric', $method.' - Integer uid', 'Checking if the returned uid is a number');
 		
 		$this->printReturn($rest_return);
-				
 		
 		
 		
-
+		
+		
+		
+		
+		
+		$this->testTitle('Update previous person removing attribute birthDate');
+		$method = 'update';
+		$input = $person;
+		
+		$rest_return = $this->rest->get($method, $input, 'serialize');
+		
+		$this->getCodeOrigin();
+		$this->arrayReturn($method, $rest_return);
+		
+		$this->getCodeOrigin();
+		$this->checkNoRestError($method, $rest_return);
+		
+		
+		$this->getCodeOrigin();
+		$this->check200($method, $rest_return);
+		
+		//check uid is a number
+		$uid = $test = $rest_return['data']['uid'];
+		$this->getCodeOrigin();
+		echo $this->run($test, 'is_numeric', $method.' - Integer uid', 'Checking if the returned uid is a number');
+		
+		$this->printReturn($rest_return);
+		
+		
+		
+		
+		
+		return;
+		
+		
 		
 		
 		//update person with wrong filter

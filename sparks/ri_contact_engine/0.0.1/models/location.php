@@ -48,11 +48,6 @@ class Location extends ObjectCommon
 		return true;
 	}
 		
-// 	private function getLocId()
-// 	{
-// 		return !empty($this->locId['0']) ? $this->locId['0'] : FALSE;
-// 	}
-		
 	public function create(array $input)
 	{
 		extract($input);
@@ -125,51 +120,28 @@ class Location extends ObjectCommon
 		
 	}
 
-	public function update(array $input)
+
+	/**
+	 * Updates the entry to what specified in the $input array: basically the $input array represents the whole entry.
+	 * All the attributes not specified in the $input array will be erased unless they are mandatory
+	 *
+	 * @access		public
+	 * @param		array $input
+	 * @return		array
+	 */
+	public function update(array $input = null)
 	{
-		//FIXME This method requires more attention. For ex. what happens if I try to change the locId or the dn or the objectClass?
-
-		extract($input);
-		if(isset($ce_key)) $this->set_baseDn($ce_key);
-		
-		$return = $this->read($input);
-		if(count($return['data']) == 0) return $this->result->returnAsArray();
-		
-		if(!$this->bindDataWithClassProperties($input, false, true)) return $this->result->returnAsArray();
-		
-		//$this->validate();
-		
-		//save the entry on the LDAP server
-		$dn = 'locId='.$this->locId.','.$this->baseDn;
-		
-		$entry = $this->toRest(false);
-
-		//if an attribute has been deleted then it's not contained in the $input.
-		//The only way to understand what's has been deleted is to compare the original entry value with the new ones
-		$deleted_attributes = array_diff(array_keys($original_values), array_keys($entry));
-		$required_attributes = $this->getRequiredProperties();
-		foreach ($deleted_attributes as $key => $attribute) {
-			if($attribute=='objectClass' || in_array($attribute,$required_attributes) || $attribute=='entryCreationDate'){
-				continue;
-			} else {
-				if(is_array($original_values[$attribute])) {
-					$entry[$attribute] = array();
-				} else {
-					$entry[$attribute] = '';
-				}
-			}
+		if(count($input) == 0 || !isset($input['locId'])) {
+			$this->result = new Ce_Return_Object();
+			$this->result->data = array();
+			$this->result->status_code = '415';
+			$this->result->message = 'A valid array is required to update a '.$this->objName.' entry.';
+	
+			return $this->result->returnAsArray();
 		}
-		
-		unset($entry['locId']); //never mess with the id during an update cause it has to do with dn
-		unset($entry['dn']);
-		
-		$exit_status = $this->ri_ldap->CEupdate($entry, $dn);
-		
-		$this->result->importLdapReturnObject($this->ri_ldap->result);
-
-		if($exit_status) 
-		{	
-			$this->result->pushData(array('locId' => $this->locId));
+	
+		if($exit_status = parent::update($input)){
+			
 			$return = $this->result->returnAsArray();
 			
 			//get geolocation
@@ -178,15 +150,14 @@ class Location extends ObjectCommon
 				$entry = array();
 				$entry['locLatitude'] = $this->locLatitude;
 				$entry['locLongitude'] = $this->locLongitude;
-				
+			
 				$this->ri_ldap->CEupdate($entry, $dn);
-			}
+			}		
 		}
 		
 		return $return;
-		
-	}
-
+	}	
+	
 	public function delete($input)
 	{
 		
