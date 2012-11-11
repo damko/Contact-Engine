@@ -124,7 +124,7 @@ class Location extends ObjectCommon
 	/**
 	 * Updates the entry to what specified in the $input array: basically the $input array represents the whole entry.
 	 * All the attributes not specified in the $input array will be erased unless they are mandatory
-	 *
+	 * Add item 'force_geo_values' in the $input array to skip geolocation
 	 * @access		public
 	 * @param		array $input
 	 * @return		array
@@ -140,21 +140,25 @@ class Location extends ObjectCommon
 			return $this->result->returnAsArray();
 		}
 	
-		unset($input['locLatitude']);
-		unset($input['locLongitude']);
+		if(!isset($input['force_geo_values']) || $input['force_geo_values'] == false){
+			if(isset($input['locLatitude'])) unset($input['locLatitude']);
+			if(isset($input['locLongitude'])) unset($input['locLongitude']);
+		}
 		
 		if($exit_status = parent::update($input)){
 			
 			$return = $this->result->returnAsArray();
 			
 			//get geolocation
-			if($this->getLatitudeLongitude())
-			{
-				$entry = array();
-				$entry['locLatitude'] = $this->locLatitude;
-				$entry['locLongitude'] = $this->locLongitude;
-			
-				$this->ri_ldap->CEupdate($entry, $dn);
+			if(!isset($input['force_geo_values']) || $input['force_geo_values'] == false){
+				if($this->getLatitudeLongitude())
+				{
+					$entry = array();
+					$entry['locLatitude'] = $this->locLatitude;
+					$entry['locLongitude'] = $this->locLongitude;
+				
+					$this->ri_ldap->CEupdate($entry, $dn);
+				}
 			}		
 		}
 		
