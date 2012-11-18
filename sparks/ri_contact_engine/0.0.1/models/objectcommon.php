@@ -249,8 +249,12 @@ class ObjectCommon extends CI_Model
 					$to_delete[$attribute] = array(); 
 				} else {
 					if(is_array($old_entry[$attribute])){
-						foreach ($old_entry[$attribute] as $key => $value) {
-							$to_delete[$attribute][$key] = $value;
+						if(count($old_entry[$attribute]) == 1){
+							$to_delete[$attribute] = array();
+						} else {
+							foreach ($old_entry[$attribute] as $key => $value) {
+								$to_delete[$attribute][$key] = $value;
+							}
 						}
 					} else {
 						$to_delete[$attribute] = $old_entry[$attribute];
