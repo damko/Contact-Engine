@@ -23,6 +23,8 @@ class Unit_Tests_Ldap extends Test_Controller {
 				
 		echo '<a href="/index.php/unit_tests/">Back</a> to unit-tests front page.<br/>';
 		
+		$this->printSummary();
+		
 		//runs tests
 		echo '<div id="left">';
 		$this->test_Ldap_Connection();
@@ -32,7 +34,7 @@ class Unit_Tests_Ldap extends Test_Controller {
 		if($dn) $this->test_Ldap_delete($dn);
 		echo '</div>';
 		
-		$this->printSummary();
+		
 		
 		echo '<div></body></html>';
 	}

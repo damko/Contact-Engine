@@ -19,7 +19,7 @@ class Unit_Tests_Ce extends Test_Controller {
 		}
 			 
 		//load the rest client
-		$this->load->spark('restclient/2.0.0');
+		$this->load->spark('restclient/2.1.0');
 	}	
 	
 	public function index()
@@ -28,6 +28,8 @@ class Unit_Tests_Ce extends Test_Controller {
 		
 		echo '<a href="/index.php/unit_tests/">Back</a> to unit-tests front page.<br/>';
 
+		$this->printSummary();
+		
 		echo '<div id="left">';
  		$this->testPerson();
   		$this->testOrganization();
@@ -37,8 +39,6 @@ class Unit_Tests_Ce extends Test_Controller {
    		$this->testPersonAssocLoc();
   		$this->testOrganizationAssocLoc();
 		echo '</div>';
-		
-		$this->printSummary();
 		
 		echo '<div></body></html>';
 		
@@ -79,7 +79,6 @@ class Unit_Tests_Ce extends Test_Controller {
 		$this->testTitle('get person properties</h3>');
 		$method = 'getProperties';
 		
-		
 		$rest_return = $this->rest->get($method, null, 'serialize');
 
 		$test = false;
@@ -119,7 +118,7 @@ class Unit_Tests_Ce extends Test_Controller {
 		$input = array();
 		$input['filter'] = '(uid=10000000)';
 		
-		$rest_return = $this->rest->get($method, $input, 'serialize');
+		$rest_return = $this->rest->get($method, $input, 'serialize');		
 		$this->getCodeOrigin();
 		$this->arrayReturn($method, $rest_return);
 		

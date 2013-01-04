@@ -20,7 +20,7 @@ class Unit_Tests_Api extends Test_Controller {
 		$this->load->spark('chartex/0.0.1');
 				
 		//load the rest client
-		$this->load->spark('restclient/2.0.0');	
+		$this->load->spark('restclient/2.1.0');	
 		
 		//set the server page
 		//$a = $this->config->item('rest_server');
@@ -33,6 +33,8 @@ class Unit_Tests_Api extends Test_Controller {
 		$this->load->view('unit_tests');
 		
 		echo '<a href="/index.php/unit_tests/">Back</a> to unit-tests front page.<br/>';
+		
+		$this->printSummary();
 		
 		echo '<div id="left">';
 				
@@ -83,7 +85,6 @@ class Unit_Tests_Api extends Test_Controller {
 		
 		echo '</div>';
 		
-		$this->printSummary();
 		
 		echo '<div></body></html>';		
 	}		

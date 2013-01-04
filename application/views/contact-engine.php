@@ -1,101 +1,8 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<title>Contact Engine</title>
+<?php  include 'include/header.php'; ?>
 
-<style type="text/css">
-body {
-	background-color: #fff;
-	margin: 40px;
-	font-family: Lucida Grande, Verdana, Sans-serif;
-	font-size: 14px;
-	color: #4F5155;
-}
-
-a {
-	color: #003399;
-	background-color: transparent;
-	font-weight: normal;
-}
-
-h1 {
-	color: #000;
-	background-color: transparent;
-	border-bottom: 1px solid #D0D0D0;
-	font-size: 24px;
-	font-weight: bold;
-	margin: 24px 0 2px 0;
-	padding: 5px 0 6px 0;
-}
-
-h2 {
-	background-color: transparent;
-	font-size: 20px;
-	font-weight: bold;
-	margin: 0px;
-	padding: 5px 0 6px 0;
-}
-
-code {
-	font-family: Monaco, Verdana, Sans-serif;
-	font-size: 12px;
-	background-color: #f9f9f9;
-	border: 1px solid #D0D0D0;
-	color: #002166;
-	display: block;
-	margin: 14px 0 14px 0;
-	padding: 12px 10px 12px 10px;
-}
-
-dt {
-	font-weight: bold;
-}
-
-dd {
-	margin-bottom: 10px;
-}
-
-pre {
-	font-style: italic;
-	margin-left: 10px;
-	color: black;
-	background-color: #999;
-	padding: 6px;
-}
-
-div#container {
-	float: left;
-	width: 100%;
-	background: #FFF;
-}
-
-div#right{
-	float:right;
-	display:inline;
-	width:400px;
-    /* border: 1px solid #CCC; */
-    margin:5px;
-    margin-top: 0px;
-    background: #FFF;
-} 
-
-div#left{
-    margin-top: 12px;
-    background: #FFF;
-} 
-</style>
-</head>
 <body>
 
-<h1>Contact Engine</h1>
-<br/><br/>
-<h2>What is Contact Engine</h2>
-<p>
-It's a middleware service meant to handle via API-REST information about <b>People</b>, <b>Organizations</b>, <b>Locations</b> and 
-the relationships between the three objects.<br/>
-<br/>
-</p>
+<h1>Contact Engine</h1><br/>
 
 <div id="container">
     <div id="right" style="border-left: 1px dashed gray; padding-left: 10px;">
@@ -104,12 +11,12 @@ the relationships between the three objects.<br/>
     <ul>
     	<li><a href="https://github.com/damko/Contact-Engine" target="_blank">Code</a></li>
 		<li><a href="https://github.com/damko/Contact-Engine/issues" target="_blank">Issues</a></li>
-		<li><a href="https://github.com/damko/Contact-Engine/wiki" target="_blank">Wiki</a></li>
-    	<li><a href="<?php echo site_url('home/documentation'); ?>">Documentation</a></li>
-    	<li><a href="<?php echo site_url('unit_tests'); ?>">Unit Tests Page</a></li>
-    	<li><a href="https://github.com/damko/Contact-Engine/wiki/How-to-install" target="_blank">How to install</a></li>
+		<li><a href="https://github.com/damko/Contact-Engine/wiki/How-to-install" target="_blank">How to install</a></li>
+    	<li><a href="<?php echo site_url('/documentation'); ?>">Documentation</a></li>
+    	<li><a href="<?php echo site_url('unit_tests'); ?>">Unit Tests</a></li>
     </ul>
-    	
+    
+    <!-- 	
 	<h2>Related applications</h2>
 	<ul>
 		<li><a href="https://github.com/damko/RestIgniter" target="_blank">Rest Igniter</a>: CodeIgniter with REST support.</li>
@@ -128,36 +35,51 @@ the relationships between the three objects.<br/>
 		<li>Built-in authentication support throught social networks</li>
 		<li>Social networks data retrieving</li>
 	</ul>
-    	 	
+     -->
+     	
     </div>
     
 <!-- --------------------------------------------  -->
     
-    <div id="left">    
-    
+    <div id="left" style="min-width: 650px; max-width: 650px;">    
+	
+	<h2>What is Contact Engine</h2>
 	<p>
-	<b>Project mantra:</b> <i>One contact, one record.</i><br/>
-	<b>Project mission:</b> <i>To make contacts data accessible from any application.</i>
+		It's a middleware service meant to handle via API-REST information about <b>People</b>, <b>Organizations</b>, 
+		<b>Locations</b> and the relationships between the three objects.
+	</p>    
+	<p>
+		<b>Project mantra:</b> <i>One contact, one record.</i><br/>
+		<b>Project mission:</b> <i>To make contacts data accessible from any application.</i>
 	</p>
 	    
 	<h2>Technical details</h2>
 	<p>
-	Contact Engine is a <a href="http://www.codeigniter.com" target="_blank">Code Igniter</a> application (with <a href="http://getsparks.org/" target="_blank">Spark</a>) loaded into <a href="<?php echo site_url('home')?>">RestIgniter</a>.
+		Contact Engine is a <a href="http://www.codeigniter.com" target="_blank">Code Igniter</a> 
+		application (with <a href="http://getsparks.org/" target="_blank">Spark</a>) loaded into 
+		<a href="https://github.com/damko/RestIgniter" target="_blank" >RestIgniter</a>.
 	</p>
+	
 	<p>
-	The programming language is of PHP and the backend is LDAP and natively supports master-slave LDAP infrastructures.
+		The programming language is of PHP and the backend is LDAP and natively supports master-slave LDAP infrastructures.
 	</p>
 
 	<h2>How it works</h2>
 	<p>
-	Contact Engine acts like the opposite of a common <a href="http://en.wikipedia.org/wiki/Object-relational_mapping">ORM</a>: the properties (attributes) of the 3 objects are automatically set by parsing the ldap schema. For this reason, adding a new attribute to the schema for one o more objects is enough to add a new attribute to the object.<br/>
-	You can refine the attributes of the 3 objects as you like without rewriting a single line of code.
+		Contact Engine acts like the opposite of a common <a href="http://en.wikipedia.org/wiki/Object-relational_mapping">ORM</a>: 
+		the properties (attributes) of the 3 objects are automatically set by parsing the ldap schema. For this reason, 
+		adding a new attribute to the schema for one o more objects is enough to add a new attribute to the object.<br/>
+		You can refine the attributes of the 3 objects as you like without rewriting a single line of code.
 	</p>
 
 	<h2>Architecture</h2>
-	<p>The architecture of CE allows data access through 2 possible path: via LDAP and via REST as shown in the picture below.</p>
-	<img src="images/contact-engine.png"><br/><br/>
+	
+	<p>
+		The architecture of CE allows data access through 2 possible path: via LDAP and via REST as shown in the picture below.
+		<img style="margin-top: 20px;" src="images/contact-engine.png">
+	</p>
 
+	<!-- 
 	<h2>Advantages</h2>
 	<p>Because CE's architecture, it has some unique advantages:</p>
 	<ul>		
@@ -170,6 +92,7 @@ the relationships between the three objects.<br/>
 		<li><b><a href="https://www.forge.funambol.org" target="_blank">Funambol</a> ready</b>: All the contacts stored by CE can be handled (one way) by a Funambol server <b>without writing a single line of code</b>. In this way contacts data can be kept synchronized on mobile phones and desktop applications even if they are not ldap-aware or rest-aware (they still funambol connector though, but there is large support for devices).</li>
 		<li><b>Strong and mature software</b>: CE is new and still in development but is based on solid and well tested software.</li>
 	</ul>
+	 -->
     </div>
 </div>
  

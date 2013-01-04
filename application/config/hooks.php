@@ -10,12 +10,15 @@
  |
  */
 
+//TODO delme if everything works
+/*
 $hook['pre_controller'][] = array(
   'class' => 'Pear_hook',
   'function' => 'index',
   'filename' => 'pear_hook.php',
   'filepath' => 'hooks'
-);  
+);
+*/  
 
 /* End of file hooks.php */
 /* Location: ./application/config/hooks.php */

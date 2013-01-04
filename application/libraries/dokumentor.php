@@ -10,7 +10,7 @@ class Dokumentor extends CI_Controller {
 		parent::__construct();
 
 		// Load the rest client
-		$this->load->spark('restclient/2.0.0');
+		$this->load->spark('restclient/2.1.0');
 		$this->rest->initialize(array('server' => $this->config->item('rest_server')));
 	}
 
@@ -46,12 +46,6 @@ class Dokumentor extends CI_Controller {
 		
 		//get methods list
 		foreach ($objects as $key => $object) {
-			
-			//let's check if the required object is an exposed object
-			//NO! because when a spark contains more than one object we don't know how many objects are exposed
-// 			$exposedObjects = $this->config->item('exposeObj');
-// 			if(!$exposedObjects) return false;
-//			if(!isset($exposedObjects[$object])) break; 
 			
 			$tmp_methods = $this->rest->get('methods', array(
 														 'object' => $object,

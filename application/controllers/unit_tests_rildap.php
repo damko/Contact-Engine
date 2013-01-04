@@ -23,6 +23,8 @@ class Unit_Tests_RiLdap extends Test_Controller {
 
 		echo '<a href="/index.php/unit_tests/">Back</a> to unit-tests front page.<br/>';
 		
+		$this->printSummary();
+		
 		//runs tests
 		echo '<div id="left">';
 		$this->test_Ri_LDAP_Initialize();
@@ -32,8 +34,6 @@ class Unit_Tests_RiLdap extends Test_Controller {
 		$this->test_Ri_Ldap_update();
 		$this->test_Ri_Ldap_delete();
 		echo '</div>';
-		
-		$this->printSummary();
 		
 		echo '<div></body></html>';
 	}
