@@ -26,6 +26,7 @@ The architecture of CE allows data access through 2 possible path: via LDAP and 
 > * Add the vhost name to your /etc/hosts file: ex "contactengine 127.0.0.1"
 > * Be sure that the constant ENVIRONMENT is set as production 
 > * Configure an LDAP server. Dynamic installation is highly encouraged.
+> * Create the required LDAP branches (follow the config files in ri_ldap configuration folder to understand the structure)
 > * Load the ldap schemas include in the ldap_schemas directory into your LDAP server
 > * Create the mysql table using the sql file included in the sql folder
 > * Configure the config/database.php file accordingly
