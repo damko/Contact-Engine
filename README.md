@@ -43,32 +43,32 @@ Be also sure to give the proper rights to all the folders: particularly give wri
 If you followed all the instructions above you should be capable to see the home page by pointing your browser at http://contactengine 
 and then you can read the documentation and run the tests. Don't forget to have a look at the tests code to see how it works. 
 
-`
-<VirtualHost *:80>
-	ServerAdmin you@yourdomain.com
-	ServerName contactengine
-	DocumentRoot /var/www/contactengine
 
-	<Directory /var/www/contactengine>
-		Options Indexes FollowSymLinks MultiViews
-		AllowOverride all
+	<VirtualHost *:80>
+		ServerAdmin you@yourdomain.com
+		ServerName contactengine
+		DocumentRoot /var/www/contactengine
+	
+		<Directory /var/www/contactengine>
+			Options Indexes FollowSymLinks MultiViews
+			AllowOverride all
+	
+			Order allow,deny
+			allow from all
+	
+	        RewriteEngine on
+	        RewriteCond %{HTTP_HOST} !^contactengine [NC]
+	        RewriteRule ^(.*)$ http://contactengine/$1 [R=301,L]
+	
+	
+	        RewriteCond %{REQUEST_FILENAME} !-f
+	        RewriteCond %{REQUEST_FILENAME} !-d
+	        RewriteRule ^(.*)$ /index.php?$1 [L]	
+	
+		</Directory>
+	
+		## Logfiles configuration
+		LogLevel warn
+		ErrorLog /var/log/apache2/contactengine.log
+	</VirtualHost>
 
-		Order allow,deny
-		allow from all
-
-        RewriteEngine on
-        RewriteCond %{HTTP_HOST} !^contactengine [NC]
-        RewriteRule ^(.*)$ http://contactengine/$1 [R=301,L]
-
-
-        RewriteCond %{REQUEST_FILENAME} !-f
-        RewriteCond %{REQUEST_FILENAME} !-d
-        RewriteRule ^(.*)$ /index.php?$1 [L]	
-
-	</Directory>
-
-	## Logfiles configuration
-	LogLevel warn
-	ErrorLog /var/log/apache2/contactengine.log
-</VirtualHost>
-`
