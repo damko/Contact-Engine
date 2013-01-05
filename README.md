@@ -18,3 +18,57 @@ you can refine the attributes of the 3 objects as you like without rewriting a s
 
 ##Architecture
 The architecture of CE allows data access through 2 possible path: via LDAP and via REST 
+
+##How to install
+> * Download this code or clone the repository into your web root
+> * Create a vhost following the example at the bottom of the page
+> * Add the vhost name to your /etc/hosts file: ex "contactengine 127.0.0.1" 
+> * Configure an LDAP server. Dynamic installation is highly encouraged.
+> * Load the ldap schemas include in the ldap_schemas directory into your LDAP server
+> * Create the mysql table using the sql file included in the sql folder
+> * Configure the config/database.php file accordingly
+> * Extract the package ci213_system in /var/ci213_system
+> * Create the folder /var/sparks and install in it the following sparks
+> * * chartex 0.0.2 http://getsparks.org/packages/chartex/show
+> * * curl 1.2.1
+> * * restclient 2.1.0
+> * * ri_ldap 0.0.2
+> * * ri_contact_engine 0.0.2
+
+Be also sure to give the proper rights to all the folders: particularly give write access to the following folders:
+> * application/logs
+> * application/xml
+
+##How to start
+If you followed all the instructions above you should be capable to see the home page by pointing your browser at http://contactengine 
+and then you can read the documentation and run the tests. Don't forget to have a look at the tests code to see how it works. 
+
+`
+<VirtualHost *:80>
+	ServerAdmin you@yourdomain.com
+	ServerName contactengine
+	DocumentRoot /var/www/contactengine
+
+	<Directory /var/www/contactengine>
+		Options Indexes FollowSymLinks MultiViews
+		AllowOverride all
+
+		Order allow,deny
+		allow from all
+
+        RewriteEngine on
+        RewriteCond %{HTTP_HOST} !^contactengine [NC]
+        RewriteRule ^(.*)$ http://contactengine/$1 [R=301,L]
+
+
+        RewriteCond %{REQUEST_FILENAME} !-f
+        RewriteCond %{REQUEST_FILENAME} !-d
+        RewriteRule ^(.*)$ /index.php?$1 [L]	
+
+	</Directory>
+
+	## Logfiles configuration
+	LogLevel warn
+	ErrorLog /var/log/apache2/contactengine.log
+</VirtualHost>
+`

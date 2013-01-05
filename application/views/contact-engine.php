@@ -11,7 +11,6 @@
     <ul>
     	<li><a href="https://github.com/damko/Contact-Engine" target="_blank">Code</a></li>
 		<li><a href="https://github.com/damko/Contact-Engine/issues" target="_blank">Issues</a></li>
-		<li><a href="https://github.com/damko/Contact-Engine/wiki/How-to-install" target="_blank">How to install</a></li>
     	<li><a href="<?php echo site_url('/documentation'); ?>">Documentation</a></li>
     	<li><a href="<?php echo site_url('unit_tests'); ?>">Unit Tests</a></li>
     </ul>
