@@ -47,6 +47,10 @@ Be also sure to give the proper rights to all the folders: particularly give wri
 If you followed all the instructions above you should be capable to see the home page by pointing your browser at http://contactengine 
 and then you can read the documentation and run the tests. Don't forget to have a look at the tests code to see how it works. 
 
+##See it in action
+Being a middleware there isn't that much to see (no UI) but you can see its application in this project http://tooljar.biz
+
+##Vhost example
 
 	<VirtualHost *:80>
 		ServerAdmin you@yourdomain.com
