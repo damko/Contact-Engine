@@ -32,7 +32,7 @@ The architecture of CE allows data access through 2 possible path: via LDAP and 
 > * Configure the config/database.php file accordingly
 > * Extract the package ci213_system in /var/ci213_system
 > * Create the folder /var/sparks and install in it the following sparks
-> * * chartex 0.0.2 http://getsparks.org/packages/chartex/show
+> * * chartex 0.0.1 http://getsparks.org/packages/chartex/show
 > * * curl 1.2.1
 > * * restclient 2.1.0
 > * * ri_ldap 0.0.2
@@ -75,4 +75,3 @@ and then you can read the documentation and run the tests. Don't forget to have 
 		LogLevel warn
 		ErrorLog /var/log/apache2/contactengine.log
 	</VirtualHost>
-

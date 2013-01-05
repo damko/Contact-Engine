@@ -5,8 +5,8 @@
  */
 
 $config['exposeObj'] = array(
-								'chartex' => 'chartex/0.0.2', //used just for unit tests
-								'ri_ldap' => 'ri_ldap/0.0.2', //used just for unit tests
+								'chartex' => 'chartex/0.0.1', //used just for unit tests
+								'ri_ldap' => 'ri_ldap/0.0.2', 
 								'ri_contact_engine' => 'ri_contact_engine/0.0.2',								
 							);
 $config['only_localhost'] = true;

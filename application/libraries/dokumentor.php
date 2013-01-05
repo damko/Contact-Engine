@@ -42,7 +42,7 @@ class Dokumentor extends CI_Controller {
 	 */
 	public function displayAPI(array $objects = null) 
 	{
-		if(is_null($objects) || !is_array($objects)) return false; //$objects = array('chartex/0.0.2');
+		if(is_null($objects) || !is_array($objects)) return false; //$objects = array('chartex/0.0.1');
 		
 		//get methods list
 		foreach ($objects as $key => $object) {
