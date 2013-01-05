@@ -20,9 +20,11 @@ you can refine the attributes of the 3 objects as you like without rewriting a s
 The architecture of CE allows data access through 2 possible path: via LDAP and via REST 
 
 ##How to install
+> * Enable mod-rewrite for apache: ´a2enmod rewrite´
 > * Download this code or clone the repository into your web root
 > * Create a vhost following the example at the bottom of the page
-> * Add the vhost name to your /etc/hosts file: ex "contactengine 127.0.0.1" 
+> * Add the vhost name to your /etc/hosts file: ex "contactengine 127.0.0.1"
+> * Be sure that the constant ENVIRONMENT is set as production 
 > * Configure an LDAP server. Dynamic installation is highly encouraged.
 > * Load the ldap schemas include in the ldap_schemas directory into your LDAP server
 > * Create the mysql table using the sql file included in the sql folder
