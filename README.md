@@ -36,6 +36,7 @@ The architecture of CE allows data access through 2 possible path: via LDAP and 
 > * * restclient 2.1.0
 > * * ri_ldap 0.0.2
 > * * ri_contact_engine 0.0.2
+> * Check every single config file in the sparks directory and modify it accordingly to your system settings
 
 Be also sure to give the proper rights to all the folders: particularly give write access to the following folders:
 > * application/logs
