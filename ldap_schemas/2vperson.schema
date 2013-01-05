@@ -35,7 +35,7 @@
 # Object description
 # ------------------
 # Represents a person. It has all the attributes of the evolutionPerson
-# schema, samba account schema, drupal account schema and some more.
+# schema and some more.
 # The schema is made also to hook the location schema
 #
 ###########################################################################
@@ -52,7 +52,6 @@ objectidentifier pOCs pers:4
 attributetype (
 	pAttrs:1
 	NAME 'oRDN'
-	DESC 'RDN for an organization '
 	EQUALITY caseExactIA5Match
 	SUBSTR caseExactIA5SubstringsMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.26 )
@@ -61,7 +60,7 @@ attributetype (
 attributetype (
 	pAttrs:2
 	NAME 'acceptsPrivacy'
-	DESC 'boolean value to indicate if a contact accepted the Privacy statement'
+	DESC 'Shows if the person accepted the Privacy Statement. True or false.'
 	EQUALITY booleanMatch
 	SINGLE-VALUE
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.7 )
@@ -69,7 +68,7 @@ attributetype (
 attributetype (
 	pAttrs:3
 	NAME 'acceptsCommercialAgreement'
-	DESC 'boolean value to indicate if a contact accepted the commercial agreement'
+	DESC 'Shows if the person accepted the Commercial Agreement. True or false.'
 	EQUALITY booleanMatch
 	SINGLE-VALUE
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.7 )
@@ -77,7 +76,7 @@ attributetype (
 attributetype (
 	pAttrs:4
 	NAME 'acceptsCommercialCommunications'
-	DESC 'boolean value to indicate if a contact accepted to receive commercial communications'
+	DESC 'Shows if the person agreed to receive commercial communications. True or false.'
 	EQUALITY booleanMatch
 	SINGLE-VALUE
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.7 )
@@ -86,14 +85,143 @@ attributetype (
 attributetype (
 	pAttrs:5
 	NAME 'oAdminRDN'
-	DESC 'RDN of organizations for which the contact is administrator'
 	EQUALITY caseExactIA5Match
 	SUBSTR caseExactIA5SubstringsMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.26 )
 
+#single value: DirectoryString
+attributetype (
+	pAttrs:6
+	NAME 'hairColor'
+	DESC 'Hair color'
+	EQUALITY caseExactIA5Match
+	SYNTAX 1.3.6.1.4.1.1466.115.121.1.26{20}
+	SINGLE-VALUE )
+
+#single value: Integer
+attributetype (
+	pAttrs:7
+	NAME 'childrenNumber'
+	DESC 'Number of children'
+        EQUALITY integerMatch
+        SYNTAX 1.3.6.1.4.1.1466.115.121.1.27{2}
+	SINGLE-VALUE )
+
+#single value: DirectoryString
+attributetype (
+	pAttrs:8
+	NAME 'weight'
+	DESC 'Weight'
+	EQUALITY caseExactIA5Match
+	SYNTAX 1.3.6.1.4.1.1466.115.121.1.26{6}
+	SINGLE-VALUE )
+
+#single value: DirectoryString
+attributetype (
+	pAttrs:9
+	NAME 'height'
+	DESC 'Height'
+	EQUALITY caseExactIA5Match
+	SYNTAX 1.3.6.1.4.1.1466.115.121.1.26{6}
+	SINGLE-VALUE )
+
+#single value: DirectoryString
+attributetype (
+	pAttrs:10
+	NAME 'gender'
+	DESC 'Gender'
+	EQUALITY caseExactIA5Match
+	SYNTAX 1.3.6.1.4.1.1466.115.121.1.26{1}
+	SINGLE-VALUE )
+
+#single value: DirectoryString
+attributetype (
+	pAttrs:11
+	NAME 'eyeColor'
+	DESC 'Eye color'
+	EQUALITY caseExactIA5Match
+	SYNTAX 1.3.6.1.4.1.1466.115.121.1.26{20}
+	SINGLE-VALUE )
+
+#single value: boolean
+attributetype (
+	pAttrs:12
+	NAME 'hasGlasses'
+	DESC 'Shows if the person wears glasses. True or false.'
+	EQUALITY booleanMatch
+	SINGLE-VALUE
+	SYNTAX 1.3.6.1.4.1.1466.115.121.1.7 )
+
+#single value: boolean
+attributetype (
+	pAttrs:13
+	NAME 'hasContactLens'
+	DESC 'Shows if the person wears contact lens. True or false.'
+	EQUALITY booleanMatch
+	SINGLE-VALUE
+	SYNTAX 1.3.6.1.4.1.1466.115.121.1.7 )
+
+#multiple value: DirectoryString
+attributetype (
+	pAttrs:14
+	NAME 'allergicTo'
+	DESC 'Lists the elements to which the person is allergic.'
+	EQUALITY caseExactIA5Match
+	SUBSTR caseExactIA5SubstringsMatch
+	SYNTAX 1.3.6.1.4.1.1466.115.121.1.26 )
+
+#single value: boolean
+attributetype (
+	pAttrs:15
+	NAME 'vegetarian'
+	DESC 'Shows if the person is vegetarian. True or false.'
+	EQUALITY booleanMatch
+	SINGLE-VALUE
+	SYNTAX 1.3.6.1.4.1.1466.115.121.1.7 )
+
+#single value: boolean
+attributetype (
+	pAttrs:16
+	NAME 'single'
+	DESC 'Shows if the person is single. True or false.'
+	EQUALITY booleanMatch
+	SINGLE-VALUE
+	SYNTAX 1.3.6.1.4.1.1466.115.121.1.7 )
+
+#single value: boolean
+attributetype (
+	pAttrs:17
+	NAME 'married'
+	DESC 'Shows if the person is married. True or false.'
+	EQUALITY booleanMatch
+	SINGLE-VALUE
+	SYNTAX 1.3.6.1.4.1.1466.115.121.1.7 )
+
+#single value: boolean
+attributetype (
+	pAttrs:18
+	NAME 'divorced'
+	DESC 'Shows if the person is divorced. True or false.'
+	EQUALITY booleanMatch
+	SINGLE-VALUE
+	SYNTAX 1.3.6.1.4.1.1466.115.121.1.7 )
+
+#single value: boolean
+attributetype (
+	pAttrs:19
+	NAME 'widower'
+	DESC 'Shows if the person is widower or widow. True or false.'
+	EQUALITY booleanMatch
+	SINGLE-VALUE
+	SYNTAX 1.3.6.1.4.1.1466.115.121.1.7 )
+
 
 ################
 # Object Classes
+# These are some of the old values removed after a cleanup
+# MAY
+# sambaSID $ sambaPwdLastSet $ sambaPasswordHistory $ sambaNTPassword $ 
+# sambaAcctFlags $ loginShell $ homeDirectory $ gidNumber $ gecos $
 ################
 objectclass ( 
 	pOCs:1
@@ -102,12 +230,13 @@ objectclass (
         SUP evolutionPerson
 	STRUCTURAL
         MUST ( uid $ cn $ sn $ givenName $ displayName $ fileAs $ userPassword $ enabled $ entryCreatedBy $ category ) 
-	MAY ( 
-		sambaSID $ sambaPwdLastSet $ sambaPasswordHistory $ sambaNTPassword $ 
-		sambaAcctFlags $ loginShell $ homeDirectory $ gidNumber $ gecos $ 
+	MAY (  
 		mozillaHomePostalCode $ mozillaHomeLocalityName $ mozillaHomeState $
 		mozillaHomeCountryName $ businessRole $ entryUpdatedBy $ entryUpdateDate $ entryCreationDate $
 		locRDN $ lastPurchaseDate $ lastAssignmentDate $ codiceFiscale $ dbId $ 
-		oRDN $ oAdminRDN $ acceptsPrivacy $ acceptsCommercialAgreement $ acceptsCommercialCommunications 
-		))
+		oRDN $ oAdminRDN $ acceptsPrivacy $ acceptsCommercialAgreement $ acceptsCommercialCommunications $
+		facebookURI $ googleplusURI $ linkedinURI $ githubURI $ twitterURI $ youtubeURI $ skypeID $
+		weight $ height $ gender $ hairColor $ eyeColor $ single $ married $ divorced $ widower $ childrenNumber $ 
+		hasGlasses $ hasContactLens $ allergicTo $ vegetarian
+	))
 # EOF

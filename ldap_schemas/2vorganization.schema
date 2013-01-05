@@ -51,7 +51,7 @@ objectidentifier oOCs org:4
 attributetype ( 
 	oAttrs:1
 	NAME 'oid'
-	DESC 'organization identifier'
+	DESC 'Unique identification number for the organization'
 	EQUALITY caseIgnoreMatch
 	SUBSTR caseIgnoreSubstringsMatch
 	SINGLE-VALUE
@@ -61,7 +61,7 @@ attributetype (
 attributetype ( 
 	oAttrs:2 
 	NAME 'vatNumber'
-	DESC 'Vat Number'
+	DESC 'VAT Number: unique identification number for an organization. Used for taxes'
 	EQUALITY numericStringMatch
 	SINGLE-VALUE
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.36{11} )
@@ -70,7 +70,7 @@ attributetype (
 attributetype (
 	oAttrs:3
 	NAME 'omail'
-	DESC 'organization main email address'
+	DESC 'Main email address of the organization'
         SINGLE-VALUE
 	EQUALITY caseIgnoreIA5Match
 	SUBSTR caseIgnoreIA5SubstringsMatch
@@ -80,7 +80,7 @@ attributetype (
 attributetype ( 
 	oAttrs:4
         NAME 'oMobile'
-        DESC 'mobile number for the organization'
+        DESC 'Mobile number of the organization'
         EQUALITY telephoneNumberMatch
         SUBSTR telephoneNumberSubstringsMatch
 	SINGLE-VALUE
@@ -90,7 +90,7 @@ attributetype (
 attributetype (
 	oAttrs:5
 	NAME 'oURL'
-	DESC 'organization main url'
+	DESC 'URL of the official website of the organization'
         SINGLE-VALUE
         SYNTAX 1.3.6.1.4.1.1466.115.121.1.15{200})
 
@@ -98,7 +98,7 @@ attributetype (
 attributetype (
 	oAttrs:6
 	NAME 'oType'
-	DESC 'organization type'
+	DESC 'Organization type like INC LLC SPA'
         SINGLE-VALUE
         SYNTAX 1.3.6.1.4.1.1466.115.121.1.15{200})
 
@@ -106,36 +106,23 @@ attributetype (
 attributetype (
 	oAttrs:7
 	NAME 'businessActivity'
-	DESC 'describes the business activities. Ex: production, repair ...'
+	DESC 'Describes the business activities, like production, repair, sales'
         SYNTAX 1.3.6.1.4.1.1466.115.121.1.15{200})
 
 #multiple value: DirectoryString
 attributetype (
 	oAttrs:8
 	NAME 'businessAudience'
-	DESC 'describes who are the target of the business activity. Ex: companies, private customers, government ...'
+	DESC 'Describes who are the target of the business activity, like companies, private customers, army'
         SYNTAX 1.3.6.1.4.1.1466.115.121.1.15{200})
 
 #multiple value: DirectoryString
 attributetype ( 
 	oAttrs:9
 	NAME 'adminUid'
-	DESC 'RDN of the administrators for the organization'
 	EQUALITY caseIgnoreMatch
 	SUBSTR caseIgnoreSubstringsMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15{256} )
-
-
-#multivalue string
-#attributetype (
-#	cAttrs:3
-#	NAME 'companyCanOrder'
-#	DESC 'contacts listed here can order and act as the company'
-#        EQUALITY caseExactIA5Match
-#        SUBSTR caseExactIA5SubstringsMatch
-#        SYNTAX 1.3.6.1.4.1.1466.115.121.1.26 )
-
-
 
 # organization
 objectclass (
@@ -146,7 +133,8 @@ objectclass (
 	STRUCTURAL
 	MUST ( oid $ o $ enabled $ entryCreatedBy)
 	MAY (  vatNumber $ codiceFiscale $ l $ postalAddress $ l $ st $ c $ locRDN $ postalCode $ category $ memberUid $ 
-	       enabled $ dbId $ entryUpdatedBy $ lastPurchaseDate $ lastAssignmentDate $
-	       omail $ oMobile $ oURL $ oType $ businessActivity $ businessAudience $ adminUid
+	       enabled $ dbId $ entryUpdatedBy $ lastPurchaseDate $ lastAssignmentDate $ entryUpdateDate $ entryCreationDate $ 
+	       omail $ oMobile $ oURL $otherPhone $ oType $ businessActivity $ businessAudience $ adminUid $
+	       facebookURI $ googleplusURI $ linkedinURI $ githubURI $ twitterURI $ youtubeURI $ skypeID 
 	       ))
 # EOF

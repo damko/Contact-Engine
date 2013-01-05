@@ -15,7 +15,7 @@ class Populate_LDAP extends CI_Controller {
 	{
 		parent::__construct();
 		
-		$this->load->spark('ri_ldap/0.0.1');
+		$this->load->spark('ri_ldap/0.0.2');
 		
 
 		$tmp = $this->config->item('ldapMaster');		

@@ -50,7 +50,7 @@ objectidentifier coOCs common:4
 attributetype (
 	coAttrs:1
 	NAME 'lastPurchaseDate'
-	DESC 'date in which the company or person made the fist purchase'
+	DESC 'Date in which the organization or person made the last purchase'
         SYNTAX 1.3.6.1.4.1.1466.115.121.1.26{10} 
 	SINGLE-VALUE ) 
 
@@ -58,7 +58,7 @@ attributetype (
 attributetype (
 	coAttrs:2
 	NAME 'lastAssignmentDate'
-	DESC 'date in which the company or person made the fist sale'
+	DESC 'Date in which the organization or person made the last request for support'
         SYNTAX 1.3.6.1.4.1.1466.115.121.1.26{10}
 	SINGLE-VALUE ) 
 
@@ -66,7 +66,7 @@ attributetype (
 attributetype (
 	coAttrs:3
 	NAME 'dbId'
-	DESC 'id number which binds the contact to a mysql database'
+	DESC 'Id number which binds the organization or the person to a relational database like Mysql'
 	EQUALITY integerMatch
 	SINGLE-VALUE
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.27{20} )
@@ -75,16 +75,16 @@ attributetype (
 attributetype (
 	coAttrs:4
 	NAME 'entryCreatedBy'
-	DESC 'user who registered the entry for the first time'
+	DESC 'Full name of the user who registered the organization or the person for the first time'
         EQUALITY caseIgnoreMatch
         SINGLE-VALUE
-        SYNTAX 1.3.6.1.4.1.1466.115.121.1.15{10} )
+        SYNTAX 1.3.6.1.4.1.1466.115.121.1.15{100} )
 
 #single value: IA5String, date
 attributetype (
 	coAttrs:5
 	NAME 'entryCreationDate'
-	DESC 'Creation date'
+	DESC 'Date in which the organization or the person has been created'
         SYNTAX 1.3.6.1.4.1.1466.115.121.1.26{10} 
 	SINGLE-VALUE ) 
 
@@ -92,16 +92,16 @@ attributetype (
 attributetype (
 	coAttrs:6
 	NAME 'entryUpdatedBy'
-	DESC 'user who updated the entry for the last time'
+	DESC 'Full name of the user who updated the entry for the last time'
         EQUALITY caseIgnoreMatch
         SINGLE-VALUE
-        SYNTAX 1.3.6.1.4.1.1466.115.121.1.15{10} )
+        SYNTAX 1.3.6.1.4.1.1466.115.121.1.15{100} )
 
 #single value: IA5String, date
 attributetype (
 	coAttrs:7
 	NAME 'entryUpdateDate'
-	DESC 'Update Date'
+	DESC 'Last date in which the organization or the person has been updated'
         SYNTAX 1.3.6.1.4.1.1466.115.121.1.26{10} 
 	SINGLE-VALUE ) 
 
@@ -109,7 +109,7 @@ attributetype (
 attributetype (
 	coAttrs:8
 	NAME 'enabled'
-	DESC 'boolean value to indicate if an entry should be considered deleted'
+	DESC 'Shows if an organization or a person should be considered active or deleted'
 	EQUALITY booleanMatch
 	SINGLE-VALUE
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.7 )
@@ -118,11 +118,74 @@ attributetype (
 attributetype ( 
 	coAttrs:9
 	NAME 'codiceFiscale'
-	DESC 'codice fiscale: applies on italian persons and organizations'
+	DESC 'Fiscal code. It applies only to italian persons and organizations'
 	EQUALITY caseIgnoreMatch
 	SUBSTR caseIgnoreSubstringsMatch
 	SINGLE-VALUE
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15{16} )
+
+#single value: DirectoryString
+attributetype (
+        coAttrs:10
+        NAME 'facebookURI'
+        DESC 'Facebook URL of the person'
+   EQUALITY caseExactIA5Match
+        SYNTAX 1.3.6.1.4.1.1466.115.121.1.26{254}
+        SINGLE-VALUE )
+
+#single value: DirectoryString
+attributetype (
+        coAttrs:11
+        NAME 'googleplusURI'
+        DESC 'Google Plus URL of the person'
+   EQUALITY caseExactIA5Match
+        SYNTAX 1.3.6.1.4.1.1466.115.121.1.26{254}
+        SINGLE-VALUE )
+
+#single value: DirectoryString
+attributetype (
+        coAttrs:12
+        NAME 'linkedinURI'
+        DESC 'LinkedIn URL of the person'
+   EQUALITY caseExactIA5Match
+        SYNTAX 1.3.6.1.4.1.1466.115.121.1.26{254}
+        SINGLE-VALUE )
+
+#single value: DirectoryString
+attributetype (
+        coAttrs:13
+        NAME 'githubURI'
+        DESC 'GitHub URL of the person'
+   EQUALITY caseExactIA5Match
+        SYNTAX 1.3.6.1.4.1.1466.115.121.1.26{254}
+        SINGLE-VALUE )
+
+#single value: DirectoryString
+attributetype (
+        coAttrs:14
+        NAME 'twitterURI'
+        DESC 'Twitter URL of the person'
+   EQUALITY caseExactIA5Match
+        SYNTAX 1.3.6.1.4.1.1466.115.121.1.26{254}
+        SINGLE-VALUE )
+
+#single value: DirectoryString
+attributetype (
+        coAttrs:15
+        NAME 'youtubeURI'
+        DESC 'Youtube URL of the person'
+   EQUALITY caseExactIA5Match
+        SYNTAX 1.3.6.1.4.1.1466.115.121.1.26{254}
+        SINGLE-VALUE )
+
+#single value: DirectoryString
+attributetype (
+        coAttrs:16
+        NAME 'skypeID'
+        DESC 'skype name of the person'
+   EQUALITY caseExactIA5Match
+        SYNTAX 1.3.6.1.4.1.1466.115.121.1.26{50}
+        SINGLE-VALUE )
 
 # common fields
 objectclass (

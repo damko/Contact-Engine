@@ -17,7 +17,7 @@ class Unit_Tests_Api extends Test_Controller {
 		}
 				
 		//load the chartex class
-		$this->load->spark('chartex/0.0.1');
+		$this->load->spark('chartex/0.0.2');
 				
 		//load the rest client
 		$this->load->spark('restclient/2.1.0');	

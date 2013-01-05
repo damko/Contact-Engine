@@ -49,12 +49,22 @@ objectidentifier locationOCs loc:4
 #############################
 # Attributes Object location
 #############################
+#entryID
+attributetype (
+	locationAttrs:1
+	NAME 'locId'
+	DESC 'A unique identification number for the location'
+	EQUALITY caseIgnoreMatch
+	SUBSTR caseIgnoreSubstringsMatch
+	SINGLE-VALUE
+	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15{256} )
+
 
 #single value: DirectoryString
 attributetype (
-	locationAttrs:1
+	locationAttrs:2
 	NAME 'locStreet'
-	DESC 'Street address'
+	DESC 'Street address of the location'
 	EQUALITY caseIgnoreMatch
 	SINGLE-VALUE
 	SUBSTR caseIgnoreSubstringsMatch
@@ -62,37 +72,37 @@ attributetype (
 
 #integer single value
 attributetype (
-	locationAttrs:2
+	locationAttrs:3
 	NAME 'locZip'
-	DESC 'Zip Code'
+	DESC 'Zip Code of the location'
 	SINGLE-VALUE
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.27{5} )
 
 #string single value
 attributetype (
-	locationAttrs:3
-	NAME 'locCity'
-	DESC 'City'
-	SINGLE-VALUE
-	EQUALITY caseIgnoreMatch
-	SUBSTR caseIgnoreSubstringsMatch
-	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15{50} )
-
-#string single value
-attributetype (
 	locationAttrs:4
-	NAME 'locState'
-	DESC 'State or region'
+	NAME 'locCity'
+	DESC 'City, town or village of the location'
+	SINGLE-VALUE
 	EQUALITY caseIgnoreMatch
 	SUBSTR caseIgnoreSubstringsMatch
-	SINGLE-VALUE
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15{50} )
 
 #string single value
 attributetype (
 	locationAttrs:5
+	NAME 'locState'
+	DESC 'State or Region or Province of the location'
+	EQUALITY caseIgnoreMatch
+	SUBSTR caseIgnoreSubstringsMatch
+	SINGLE-VALUE
+	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15{50} )
+
+#string single value
+attributetype (
+	locationAttrs:6
 	NAME 'locCountry'
-	DESC 'Country'
+	DESC 'Country, Nation of the location'
 	EQUALITY caseIgnoreMatch
 	SUBSTR caseIgnoreSubstringsMatch
 	SINGLE-VALUE
@@ -100,7 +110,7 @@ attributetype (
 
 #string single value. this should be a floating point but ldap has no OID for floating point
 attributetype (
-	locationAttrs:6
+	locationAttrs:7
 	NAME 'locLatitude'
 	DESC 'Latitude'
 	EQUALITY caseIgnoreMatch
@@ -110,7 +120,7 @@ attributetype (
 
 #string single value. this should be a floating point but ldap has no OID for floating point
 attributetype (
-	locationAttrs:7
+	locationAttrs:8
 	NAME 'locLongitude'
 	DESC 'Longitude'
 	EQUALITY caseIgnoreMatch
@@ -118,48 +128,45 @@ attributetype (
 	SINGLE-VALUE
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15{17} )
 
-#entryID
-attributetype (
-	locationAttrs:8
-	NAME 'locId'
-	DESC 'Location ID'
-	EQUALITY caseIgnoreMatch
-	SUBSTR caseIgnoreSubstringsMatch
-	SINGLE-VALUE
-	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15{256} )
-
 #single value: DirectoryString
 attributetype (
 	locationAttrs:9
 	NAME 'locDescription'
-	DESC 'Short location description, like house, registered office, warehouse ...'
+	DESC 'Short description of the location, like house, registered office, warehouse'
 	EQUALITY caseIgnoreMatch
 	SUBSTR caseIgnoreSubstringsMatch
 	SINGLE-VALUE
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15{50} )
 
+#single value: DirectoryString
+attributetype (
+	locationAttrs:10
+	NAME 'locReference'
+	DESC 'Shows the name of the person or organization to which the location is related. Used to create P.0.I. lists'
+	EQUALITY caseIgnoreMatch
+	SUBSTR caseIgnoreSubstringsMatch
+	SINGLE-VALUE
+	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15{100} )
+
 #single value: TelephoneNumber
 attributetype ( 
-	locationAttrs:10
+	locationAttrs:11
         NAME 'locPhone'
-        DESC 'telephone number for the location'
+        DESC 'Land line telephone number of the location'
         EQUALITY telephoneNumberMatch
         SUBSTR telephoneNumberSubstringsMatch
 	SINGLE-VALUE
         SYNTAX 1.3.6.1.4.1.1466.115.121.1.50 )
 
-#################################
-# Attributes Object locationIdMap
-#################################
-#single value: DirectoryString
-attributetype (
-	locationAttrs:11
-	NAME 'locNextId'
-	DESC 'Next Id to use in the DN creation for a location'
-	EQUALITY caseIgnoreMatch
-	SUBSTR caseIgnoreSubstringsMatch
+#single value: FaxNumber
+attributetype ( 
+	locationAttrs:12
+        NAME 'locFax'
+        DESC 'Land line fax number of the location'
+        EQUALITY telephoneNumberMatch
+        SUBSTR telephoneNumberSubstringsMatch
 	SINGLE-VALUE
-	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15{15} ) 
+        SYNTAX 1.3.6.1.4.1.1466.115.121.1.50 )
 
 ##################################
 # Attributes Object locationMember
@@ -167,9 +174,8 @@ attributetype (
 #Distinguished Name
 #multiple value: DirectoryString
 attributetype (
-	locationAttrs:12
+	locationAttrs:13
 	NAME 'locRDN'
-	DESC 'RDN for a location'
 	EQUALITY caseExactIA5Match
 	SUBSTR caseExactIA5SubstringsMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.26 )
@@ -184,22 +190,7 @@ objectclass (
         SUP dueviDefault
 	STRUCTURAL
         MUST ( locStreet $ locCity $ locState $ locCountry $ locId $ locDescription )  
-	MAY ( locZip $ locPhone $ locLatitude $ locLongitude $ entryCreatedBy $ entryUpdatedBy ) )
-
-objectclass ( 
-	locationOCs:2
-        NAME 'dueviLocationIdMap'
-        DESC 'Saves next IdMap. It is used to create the next location DN'
-        SUP dueviDefault
-	AUXILIARY
-        MUST ( locNextId ) )
-
-objectclass ( 
-	locationOCs:3
-        NAME 'dueviLocationMember'
-        DESC 'Adds to any ldap entry the capability to be mapped to one or more existing locations'
-        SUP dueviDefault
-	AUXILIARY 
-	MAY ( locRDN ) )
-
+	MAY ( locZip $ locPhone $locFax $ locLatitude $ locLongitude $ entryCreatedBy $ entryUpdatedBy $ entryCreationDate $ entryUpdateDate $
+	      locReference 
+	) )
 # EOF

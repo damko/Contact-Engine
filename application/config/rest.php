@@ -263,7 +263,7 @@ $config['rest_ajax_only'] = FALSE;
  |--------------------------------------------------------------------------
  |
  */
-$config['rest_server']	= 'http://ce_github/index.php/api/';
+$config['rest_server']	= 'http://'.$_SERVER['HTTP_HOST'].'/index.php/api/';  // full URL for the API controller
 
 /* End of file rest.php */
 /* Location: ./system/application/config/rest.php */

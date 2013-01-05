@@ -35,7 +35,7 @@
 # Object description
 # ------------------
 # Represents a person. It has all the attributes of the evolutionPerson
-# schema, samba account schema, drupal account schema and some more.
+# schema and some more.
 # The schema is made also to hook the location schema
 #
 ###########################################################################
