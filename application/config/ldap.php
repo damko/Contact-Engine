@@ -18,3 +18,6 @@ $config['ldapSlave'][0]['url'] = "ldap://localhost:389";
 $config['ldapSlave'][0]['version'] = 3;
 $config['ldapSlave'][0]['binddn'] = "cn=admin,dc=example,dc=com";
 $config['ldapSlave'][0]['bindpw'] = "password";
+
+/* End of file ldap.php */
+/* Location: ./application/config/ldap.php */

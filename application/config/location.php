@@ -8,3 +8,6 @@
 $config['location']['baseDn'] = "ou=locations,o=ce,dc=example,dc=com";
 $config['location']['objectClass'] = "dueviLocation"; //ldap objectClass representing the location class
 $config['location']['refreshPeriod'] = ""; //seconds
+
+/* End of file location.php */
+/* Location: ./application/config/location.php */

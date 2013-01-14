@@ -8,3 +8,6 @@
 $config['person']['baseDn'] = "ou=users,o=ce,dc=example,dc=com";
 $config['person']['objectClass'] = "dueviPerson"; //ldap objectClass representing the person class
 $config['person']['refreshPeriod'] = ""; //seconds
+
+/* End of file person.php */
+/* Location: ./application/config/person.php */

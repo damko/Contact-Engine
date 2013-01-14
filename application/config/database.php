@@ -49,7 +49,7 @@ $active_group = 'default';
 $active_record = TRUE;
 
 $db['default']['hostname'] = 'localhost';
-$db['default']['username'] = 'mysql_user';
+$db['default']['username'] = 'mysql-user';
 $db['default']['password'] = 'password';
 $db['default']['database'] = 'contactengine';
 $db['default']['dbdriver'] = 'mysqli';

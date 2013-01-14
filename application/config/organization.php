@@ -8,3 +8,6 @@
 $config['organization']['baseDn'] = "ou=organizations,o=ce,dc=example,dc=com";
 $config['organization']['objectClass'] = "dueviOrganization"; //ldap objectClass representing the organization class
 $config['organization']['refreshPeriod'] = ""; //seconds
+
+/* End of file organization.php */
+/* Location: ./application/config/organization.php */
